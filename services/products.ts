@@ -10,64 +10,7 @@ const MOCK_CATEGORIES = [
   { id: "cat-5", name: "Accessories", slug: "accessories", image_url: null }
 ]
 
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: "prod-1",
-    title: "Gold Hoop Earrings",
-    slug: "gold-hoop-earrings",
-    description: "Classic 14k gold-plated hoops. Lightweight, hypoallergenic, and perfect for daily wear.",
-    price: 899,
-    compare_at_price: 1299,
-    stock: 25,
-    featured: true,
-    category_id: "cat-1",
-    categories: MOCK_CATEGORIES[0],
-    images: ["https://images.unsplash.com/photo-1630019852942-f89202989a59?w=600"],
-    created_at: "2026-05-26T00:00:00Z"
-  },
-  {
-    id: "prod-2",
-    title: "Pearl Pendant Necklace",
-    slug: "pearl-pendant-necklace",
-    description: "A stunning freshwater pearl suspended on a delicate sterling silver chain.",
-    price: 1499,
-    compare_at_price: 1999,
-    stock: 12,
-    featured: true,
-    category_id: "cat-2",
-    categories: MOCK_CATEGORIES[1],
-    images: ["https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600"],
-    created_at: "2026-05-26T00:00:00Z"
-  },
-  {
-    id: "prod-3",
-    title: "Minimalist Silver Bracelet",
-    slug: "minimalist-silver-bracelet",
-    description: "Sleek and polished sterling silver chain bracelet with a secure lobster clasp.",
-    price: 699,
-    compare_at_price: 999,
-    stock: 40,
-    featured: true,
-    category_id: "cat-3",
-    categories: MOCK_CATEGORIES[2],
-    images: ["https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600"],
-    created_at: "2026-05-26T00:00:00Z"
-  },
-  {
-    id: "prod-4",
-    title: "Rose Gold Stacking Ring",
-    slug: "rose-gold-stacking-ring",
-    description: "A gorgeous rose gold band featuring micro-pave crystals for subtle sparkle.",
-    price: 1199,
-    compare_at_price: 1599,
-    stock: 18,
-    featured: true,
-    category_id: "cat-4",
-    categories: MOCK_CATEGORIES[3],
-    images: ["https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600"],
-    created_at: "2026-05-26T00:00:00Z"
-  }
-]
+const MOCK_PRODUCTS: Product[] = []
 
 export async function getProducts(options?: {
   featured?: boolean
