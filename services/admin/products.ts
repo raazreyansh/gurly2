@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase/client"
 import { withSupabaseTimeout } from "@/lib/supabase/timeout"
-import { MOCK_PRODUCTS } from "@/services/mock-products"
 import type { Product } from "@/types/database"
 
 export async function getAdminProducts() {
@@ -12,12 +11,14 @@ export async function getAdminProducts() {
     const data = result?.data
     const error = result?.error
 
-    if (error || !data || data.length === 0) {
-      return MOCK_PRODUCTS
+    if (error) {
+      console.error("Error fetching admin products:", error)
+      return []
     }
     return data as Product[] | null
-  } catch {
-    return MOCK_PRODUCTS
+  } catch (err) {
+    console.error("Exception fetching admin products:", err)
+    return []
   }
 }
 
@@ -32,11 +33,11 @@ export async function getAdminProductById(id: string) {
     const error = result?.error
 
     if (error || !data) {
-      return MOCK_PRODUCTS.find((product) => product.id === id || product.slug === id) ?? null
+      return null
     }
     return data as Product | null
   } catch {
-    return MOCK_PRODUCTS.find((product) => product.id === id || product.slug === id) ?? null
+    return null
   }
 }
 
@@ -62,3 +63,4 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
 export async function deleteProduct(id: string) {
   return supabase.from("products").delete().eq("id", id)
 }
+

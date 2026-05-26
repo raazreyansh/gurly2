@@ -1,13 +1,6 @@
 import { supabase } from "@/lib/supabase/client"
 import { withSupabaseTimeout } from "@/lib/supabase/timeout"
 import { Product } from "@/types/database"
-import { MOCK_CATEGORIES, MOCK_PRODUCTS, filterMockProducts } from "@/services/mock-products"
-
-function shouldUseLocalBrowserCatalog() {
-  if (typeof window === "undefined") return false
-
-  return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
-}
 
 export async function getProducts(options?: {
   featured?: boolean
@@ -16,10 +9,6 @@ export async function getProducts(options?: {
   maxPrice?: number
   limit?: number
 }) {
-  if (shouldUseLocalBrowserCatalog()) {
-    return filterMockProducts(options)
-  }
-
   try {
     let query = supabase
       .from("products")
@@ -50,20 +39,18 @@ export async function getProducts(options?: {
     const data = result?.data
     const error = result?.error
 
-    if (error || !data || data.length === 0) {
-      return filterMockProducts(options)
+    if (error) {
+      console.error("Error fetching products:", error)
+      return []
     }
     return data as Product[] | null
-  } catch {
-    return filterMockProducts(options)
+  } catch (err) {
+    console.error("Exception fetching products:", err)
+    return []
   }
 }
 
 export async function getProductBySlug(slug: string) {
-  if (shouldUseLocalBrowserCatalog()) {
-    return MOCK_PRODUCTS.find(p => p.slug === slug) || null
-  }
-
   try {
     const result = await withSupabaseTimeout(supabase
       .from("products")
@@ -74,21 +61,17 @@ export async function getProductBySlug(slug: string) {
     const error = result?.error
 
     if (error || !data) {
-      return MOCK_PRODUCTS.find(p => p.slug === slug) || null
+      return null
     }
     return data as Product | null
   } catch {
-    return MOCK_PRODUCTS.find(p => p.slug === slug) || null
+    return null
   }
 }
 
 export async function searchProducts(term: string) {
   const query = term.trim().toLowerCase()
   if (!query) return []
-
-  if (shouldUseLocalBrowserCatalog()) {
-    return searchMockProducts(query)
-  }
 
   try {
     const result = await withSupabaseTimeout(supabase
@@ -101,24 +84,10 @@ export async function searchProducts(term: string) {
     if (!error && data && data.length > 0) {
       return data as Product[]
     }
+    return []
   } catch {
-    // Fall through to mock data for local development.
+    return []
   }
-
-  return searchMockProducts(query)
-}
-
-function searchMockProducts(query: string) {
-  return MOCK_PRODUCTS.filter((product) => {
-    const fields = [
-      product.title,
-      product.description ?? "",
-      product.categories?.name ?? "",
-      product.categories?.slug ?? "",
-    ].map((value) => value.toLowerCase())
-
-    return fields.some((value) => value.includes(query))
-  })
 }
 
 export async function getCategories() {
@@ -129,11 +98,11 @@ export async function getCategories() {
     const data = result?.data
     const error = result?.error
 
-    if (error || !data || data.length === 0) {
-      return MOCK_CATEGORIES
+    if (error) {
+      return []
     }
     return data
   } catch {
-    return MOCK_CATEGORIES
+    return []
   }
 }
