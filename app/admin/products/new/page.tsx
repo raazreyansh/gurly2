@@ -24,73 +24,84 @@ type ProductForm = z.infer<typeof productSchema>
 export default function NewProductPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [imageUrl, setImageUrl] = useState("")
+  const [imageUrls, setImageUrls] = useState<string[]>([])
   const [uploadMode, setUploadMode] = useState<"upload" | "url">("upload")
   const [uploading, setUploading] = useState(false)
   const [isDragActive, setIsDragActive] = useState(false)
+  const [urlInput, setUrlInput] = useState("")
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<ProductForm>({
     resolver: zodResolver(productSchema),
     defaultValues: { stock: 0, featured: false },
   })
 
-  const processFile = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file")
-      return
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be under 5MB")
+  const processFiles = async (files: FileList | File[]) => {
+    const list = Array.from(files)
+    if (imageUrls.length + list.length > 10) {
+      toast.error("You can upload a maximum of 10 images.")
       return
     }
 
     setUploading(true)
-    try {
-      const { supabase } = await import("@/lib/supabase/client")
-      // Check if Supabase URL is placeholder
-      const isPlaceholder = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder-project")
-
-      if (isPlaceholder) {
-        throw new Error("Placeholder Supabase connection")
+    let successCount = 0
+    
+    for (const file of list) {
+      const extension = file.name.split('.').pop()?.toLowerCase()
+      const allowedExtensions = ["jpg", "jpeg", "png", "webp", "gif", "svg", "heic"]
+      
+      if (!file.type.startsWith("image/") && !allowedExtensions.includes(extension || "")) {
+        toast.error(`File ${file.name} is not a valid image format.`)
+        continue
       }
 
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`
-      const filePath = `products/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(filePath, file)
-
-      if (uploadError) {
-        throw uploadError
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`File ${file.name} exceeds 10MB limit.`)
+        continue
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(filePath)
+      try {
+        const { supabase } = await import("@/lib/supabase/client")
+        const isPlaceholder = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder-project")
 
-      setImageUrl(publicUrl)
-      toast.success("Uploaded to Supabase Storage!")
-    } catch (err) {
-      console.log("Supabase storage upload failed or not configured, preparing local Base64 URL:", err)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImageUrl(reader.result as string)
-        toast.success("Image loaded successfully!")
+        if (isPlaceholder) {
+          throw new Error("Placeholder Supabase connection")
+        }
+
+        const fileName = `${Math.random().toString(36).substring(2, 15)}-${Date.now()}.${extension}`
+        const filePath = `products/${fileName}`
+
+        const { error: uploadError } = await supabase.storage
+          .from("product-images")
+          .upload(filePath, file)
+
+        if (uploadError) throw uploadError
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("product-images")
+          .getPublicUrl(filePath)
+
+        setImageUrls(prev => [...prev, publicUrl])
+        successCount++
+      } catch (err) {
+        console.log("Supabase storage upload failed, preparing local Base64 URL:", err)
+        // Fallback base64
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setImageUrls(prev => [...prev, reader.result as string])
+        }
+        reader.readAsDataURL(file)
+        successCount++
       }
-      reader.onerror = () => {
-        toast.error("Failed to read image file")
-      }
-      reader.readAsDataURL(file)
-    } finally {
-      setUploading(false)
     }
+
+    if (successCount > 0) {
+      toast.success(`Successfully loaded ${successCount} images!`)
+    }
+    setUploading(false)
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) processFile(file)
+    if (e.target.files) processFiles(e.target.files)
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -107,8 +118,18 @@ export default function NewProductPage() {
     e.preventDefault()
     e.stopPropagation()
     setIsDragActive(false)
-    const file = e.dataTransfer.files?.[0]
-    if (file) processFile(file)
+    if (e.dataTransfer.files) processFiles(e.dataTransfer.files)
+  }
+
+  const addUrlImage = () => {
+    if (!urlInput) return
+    if (!urlInput.startsWith("http://") && !urlInput.startsWith("https://")) {
+      toast.error("Please enter a valid HTTP/HTTPS URL")
+      return
+    }
+    setImageUrls(prev => [...prev, urlInput])
+    setUrlInput("")
+    toast.success("Image URL added!")
   }
 
   async function onSubmit(data: ProductForm) {
@@ -117,7 +138,7 @@ export default function NewProductPage() {
       const { supabase } = await import("@/lib/supabase/client")
       const { error } = await supabase.from("products").insert({
         ...data,
-        images: imageUrl ? [imageUrl] : [],
+        images: imageUrls,
       })
       if (error) throw error
       toast.success("Product created!")
@@ -245,87 +266,158 @@ export default function NewProductPage() {
 
               {uploadMode === "upload" ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  {!imageUrl ? (
-                    <div
-                      onDragEnter={handleDrag}
-                      onDragOver={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDrop={handleDrop}
-                      style={{
-                        border: isDragActive ? "2px dashed var(--rose)" : "2px dashed var(--border)",
-                        background: isDragActive ? "rgba(201,149,108,0.04)" : "rgba(253,246,238,0.3)",
-                        borderRadius: "8px",
-                        padding: "36px 20px",
-                        textAlign: "center",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                      }}
-                      className="quick-action-hover"
-                      onClick={() => document.getElementById("file-upload-input")?.click()}
-                    >
-                      <input
-                        type="file"
-                        id="file-upload-input"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        style={{ display: "none" }}
-                      />
-                      
-                      {uploading ? (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-                          <Loader2 size={32} className="animate-spin" style={{ color: "var(--rose)" }} />
-                          <p style={{ fontSize: "13px", color: "var(--muted)", fontWeight: "500" }}>Processing image...</p>
+                  <div
+                    onDragEnter={handleDrag}
+                    onDragOver={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDrop={handleDrop}
+                    style={{
+                      border: isDragActive ? "2px dashed var(--rose)" : "2px dashed var(--border)",
+                      background: isDragActive ? "rgba(201,149,108,0.04)" : "rgba(253,246,238,0.3)",
+                      borderRadius: "8px",
+                      padding: "36px 20px",
+                      textAlign: "center",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                    className="quick-action-hover"
+                    onClick={() => document.getElementById("file-upload-input")?.click()}
+                  >
+                    <input
+                      type="file"
+                      id="file-upload-input"
+                      accept="image/*,.jpeg,.jpg,.png,.webp,.svg"
+                      multiple
+                      onChange={handleFileChange}
+                      style={{ display: "none" }}
+                    />
+                    
+                    {uploading ? (
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                        <Loader2 size={32} className="animate-spin" style={{ color: "var(--rose)" }} />
+                        <p style={{ fontSize: "13px", color: "var(--muted)", fontWeight: "500" }}>Uploading premium images...</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div style={{
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "50%",
+                          background: "rgba(201,149,108,0.1)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "var(--rose)",
+                          marginBottom: "16px"
+                        }}>
+                          <Upload size={20} />
                         </div>
-                      ) : (
-                        <>
-                          <div style={{
-                            width: "48px",
-                            height: "48px",
-                            borderRadius: "50%",
-                            background: "rgba(201,149,108,0.1)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "var(--rose)",
-                            marginBottom: "16px"
-                          }}>
-                            <Upload size={20} />
-                          </div>
-                          <p style={{ fontSize: "14px", fontWeight: "600", color: "var(--charcoal)", marginBottom: "4px" }}>
-                            Drag & drop image here, or <span style={{ color: "var(--rose)" }}>browse files</span>
-                          </p>
-                          <p style={{ fontSize: "11px", color: "var(--muted)" }}>
-                            Supports PNG, JPG, or WEBP up to 5MB
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  ) : (
-                    <div style={{ position: "relative", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)", background: "var(--cream-dark)", height: "280px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <img
-                        src={imageUrl}
-                        alt="Product preview"
-                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                        <p style={{ fontSize: "14px", fontWeight: "600", color: "var(--charcoal)", marginBottom: "4px" }}>
+                          Drag & drop multiple images here, or <span style={{ color: "var(--rose)" }}>browse files</span>
+                        </p>
+                        <p style={{ fontSize: "11px", color: "var(--muted)" }}>
+                          Supports JPEG, JPG, PNG, WEBP, or SVG up to 10MB each
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <div style={{ position: "relative", flex: 1 }}>
+                      <input
+                        id="product-image-url"
+                        value={urlInput}
+                        onChange={(e) => setUrlInput(e.target.value)}
+                        className="input"
+                        placeholder="https://images.unsplash.com/... (image URL)"
+                        style={{ paddingLeft: "40px" }}
                       />
-                      <div style={{
-                        position: "absolute",
-                        top: "12px",
-                        right: "12px",
-                        display: "flex",
-                        gap: "8px"
-                      }}>
+                      <div style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+                        <ImageIcon size={16} />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addUrlImage}
+                      className="btn btn-primary"
+                      style={{ padding: "0 20px", borderRadius: "4px", fontSize: "12px", whiteSpace: "nowrap" }}
+                    >
+                      Add URL
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Multi-Image Gallery preview grid */}
+              {imageUrls.length > 0 && (
+                <div style={{ marginTop: "24px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                    <h3 style={{ fontSize: "12px", fontWeight: "700", color: "var(--charcoal)", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                      Gallery Preview ({imageUrls.length} of 10)
+                    </h3>
+                    <span style={{
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      padding: "4px 10px",
+                      borderRadius: "12px",
+                      background: imageUrls.length >= 5 ? "rgba(16,185,129,0.1)" : "rgba(245,158,11,0.1)",
+                      color: imageUrls.length >= 5 ? "#10B981" : "#F59E0B"
+                    }}>
+                      {imageUrls.length >= 5 ? "✓ Complete (At least 5 listed)" : `⚡ Upload ${5 - imageUrls.length} more for optimal luxury carousel`}
+                    </span>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }} className="md:grid-cols-5">
+                    {imageUrls.map((url, idx) => (
+                      <div
+                        key={url + idx}
+                        style={{
+                          position: "relative",
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: "1px solid var(--border)",
+                          background: "var(--cream-dark)",
+                          aspectRatio: "1/1",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                      >
+                        <img
+                          src={url}
+                          alt={`Preview ${idx + 1}`}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                        <div style={{
+                          position: "absolute",
+                          bottom: "6px",
+                          left: "6px",
+                          background: "rgba(15,23,42,0.75)",
+                          color: "white",
+                          fontSize: "9px",
+                          fontWeight: "700",
+                          padding: "2px 6px",
+                          borderRadius: "4px"
+                        }}>
+                          {idx === 0 ? "Cover" : `#${idx + 1}`}
+                        </div>
                         <button
                           type="button"
-                          onClick={() => setImageUrl("")}
+                          onClick={() => setImageUrls(prev => prev.filter((_, i) => i !== idx))}
                           style={{
+                            position: "absolute",
+                            top: "6px",
+                            right: "6px",
                             background: "rgba(255,255,255,0.9)",
                             border: "none",
-                            width: "36px",
-                            height: "36px",
+                            width: "24px",
+                            height: "24px",
                             borderRadius: "50%",
                             display: "flex",
                             alignItems: "center",
@@ -337,59 +429,11 @@ export default function NewProductPage() {
                           }}
                           title="Remove image"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={12} />
                         </button>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                  <div style={{ position: "relative" }}>
-                    <input
-                      id="product-image-url"
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      className="input"
-                      placeholder="https://images.unsplash.com/... (image URL)"
-                      style={{ paddingLeft: "40px" }}
-                    />
-                    <div style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", display: "flex", alignItems: "center" }}>
-                      <ImageIcon size={16} />
-                    </div>
+                    ))}
                   </div>
-                  {imageUrl && (
-                    <div style={{ position: "relative", marginTop: "4px", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)", background: "var(--cream-dark)", height: "280px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <img
-                        src={imageUrl}
-                        alt="URL Preview"
-                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setImageUrl("")}
-                        style={{
-                          position: "absolute",
-                          top: "12px",
-                          right: "12px",
-                          background: "rgba(255,255,255,0.9)",
-                          border: "none",
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "#EF4444",
-                          cursor: "pointer",
-                          boxShadow: "var(--shadow-sm)",
-                          transition: "all 0.2s"
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
