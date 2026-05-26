@@ -1,8 +1,7 @@
 import { supabase } from "@/lib/supabase/client"
 import { withSupabaseTimeout } from "@/lib/supabase/timeout"
-import { Product } from "@/types/database"
-
-const MOCK_PRODUCTS: Product[] = []
+import { MOCK_PRODUCTS } from "@/services/mock-products"
+import type { Product } from "@/types/database"
 
 export async function getAdminProducts() {
   try {

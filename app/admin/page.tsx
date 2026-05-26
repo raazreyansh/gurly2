@@ -1,8 +1,20 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { TrendingUp, ShoppingCart, Users, Package, ArrowUpRight, ArrowDownRight, Clock, Eye } from "lucide-react"
+import { TrendingUp, ShoppingCart, Users, Package, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { getDashboardMetrics, getAdminOrders } from "@/services/admin/analytics"
+
+type RecentOrder = {
+  id: string
+  total?: number | null
+  status?: string | null
+  created_at: string
+  email?: string | null
+  profiles?: {
+    full_name?: string | null
+    email?: string | null
+  } | null
+}
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
@@ -14,7 +26,7 @@ export default function AdminDashboard() {
     conversion: 2.8,
     aov: 0,
   })
-  const [recentOrders, setRecentOrders] = useState<any[]>([])
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
 
   useEffect(() => {
     async function loadData() {
@@ -27,7 +39,7 @@ export default function AdminDashboard() {
           setMetrics(metricsData)
         }
         if (ordersData) {
-          setRecentOrders(ordersData.slice(0, 5)) // Get the top 5 recent orders
+          setRecentOrders((ordersData as RecentOrder[]).slice(0, 5)) // Get the top 5 recent orders
         }
       } catch (err) {
         console.error("Failed to load dashboard data:", err)

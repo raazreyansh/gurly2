@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, useSyncExternalStore } from "react"
 import {
   LayoutDashboard, Package, ShoppingCart, Users, BarChart2,
   Tag, Settings, Boxes, FileText, Lock
@@ -20,19 +20,40 @@ const navItems = [
   { href: "/admin/settings", label: "Settings", Icon: Settings },
 ]
 
+const ADMIN_AUTH_KEY = "gurly_admin_auth"
+const ADMIN_AUTH_EVENT = "gurly_admin_auth_change"
+
+function subscribeAdminAuth(callback: () => void) {
+  window.addEventListener("storage", callback)
+  window.addEventListener(ADMIN_AUTH_EVENT, callback)
+
+  return () => {
+    window.removeEventListener("storage", callback)
+    window.removeEventListener(ADMIN_AUTH_EVENT, callback)
+  }
+}
+
+function getAdminAuthSnapshot() {
+  return localStorage.getItem(ADMIN_AUTH_KEY) === "authenticated"
+}
+
+function getAdminAuthServerSnapshot() {
+  return false
+}
+
+function notifyAdminAuthChanged() {
+  window.dispatchEvent(new Event(ADMIN_AUTH_EVENT))
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const isAuthenticated = useSyncExternalStore(
+    subscribeAdminAuth,
+    getAdminAuthSnapshot,
+    getAdminAuthServerSnapshot
+  )
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-
-  useEffect(() => {
-    // Check if previously logged in
-    const token = localStorage.getItem("gurly_admin_auth")
-    if (token === "authenticated") {
-      setIsAuthenticated(true)
-    }
-  }, [])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,8 +61,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const correctPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "gurlyadmin2026"
     
     if (password === correctPassword) {
-      localStorage.setItem("gurly_admin_auth", "authenticated")
-      setIsAuthenticated(true)
+      localStorage.setItem(ADMIN_AUTH_KEY, "authenticated")
+      notifyAdminAuthChanged()
       setError("")
     } else {
       setError("Incorrect administrator password. Please try again.")
@@ -49,8 +70,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("gurly_admin_auth")
-    setIsAuthenticated(false)
+    localStorage.removeItem(ADMIN_AUTH_KEY)
+    notifyAdminAuthChanged()
   }
 
   if (!isAuthenticated) {

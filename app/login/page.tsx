@@ -40,8 +40,9 @@ export default function LoginPage() {
 
       const { error } = await signInWithGoogle()
       if (error) throw error
-    } catch (err: any) {
-      console.log("Supabase Google Auth failed or sandbox env, simulating Google session:", err)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      console.log("Supabase Google Auth failed or sandbox env, simulating Google session:", message)
       const mockGoogleUser = {
         id: "google-sandbox-user",
         email: "priya.sharma@gmail.com",

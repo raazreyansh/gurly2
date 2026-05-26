@@ -1,16 +1,13 @@
 import { supabase } from "@/lib/supabase/client"
 import { withSupabaseTimeout } from "@/lib/supabase/timeout"
 import { Product } from "@/types/database"
+import { MOCK_CATEGORIES, MOCK_PRODUCTS, filterMockProducts } from "@/services/mock-products"
 
-const MOCK_CATEGORIES = [
-  { id: "cat-1", name: "Earrings", slug: "earrings", image_url: null },
-  { id: "cat-2", name: "Necklaces", slug: "necklaces", image_url: null },
-  { id: "cat-3", name: "Bracelets", slug: "bracelets", image_url: null },
-  { id: "cat-4", name: "Rings", slug: "rings", image_url: null },
-  { id: "cat-5", name: "Accessories", slug: "accessories", image_url: null }
-]
+function shouldUseLocalBrowserCatalog() {
+  if (typeof window === "undefined") return false
 
-const MOCK_PRODUCTS: Product[] = []
+  return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
+}
 
 export async function getProducts(options?: {
   featured?: boolean
@@ -19,6 +16,10 @@ export async function getProducts(options?: {
   maxPrice?: number
   limit?: number
 }) {
+  if (shouldUseLocalBrowserCatalog()) {
+    return filterMockProducts(options)
+  }
+
   try {
     let query = supabase
       .from("products")
@@ -50,27 +51,19 @@ export async function getProducts(options?: {
     const error = result?.error
 
     if (error || !data || data.length === 0) {
-      let list = MOCK_PRODUCTS
-      if (options?.featured) list = list.filter(p => p.featured)
-      if (options?.categorySlug) list = list.filter(p => p.categories?.slug === options.categorySlug)
-      if (typeof options?.minPrice === "number") list = list.filter(p => p.price >= options.minPrice!)
-      if (typeof options?.maxPrice === "number") list = list.filter(p => p.price <= options.maxPrice!)
-      if (options?.limit) list = list.slice(0, options.limit)
-      return list
+      return filterMockProducts(options)
     }
     return data as Product[] | null
   } catch {
-    let list = MOCK_PRODUCTS
-    if (options?.featured) list = list.filter(p => p.featured)
-    if (options?.categorySlug) list = list.filter(p => p.categories?.slug === options.categorySlug)
-    if (typeof options?.minPrice === "number") list = list.filter(p => p.price >= options.minPrice!)
-    if (typeof options?.maxPrice === "number") list = list.filter(p => p.price <= options.maxPrice!)
-    if (options?.limit) list = list.slice(0, options.limit)
-    return list
+    return filterMockProducts(options)
   }
 }
 
 export async function getProductBySlug(slug: string) {
+  if (shouldUseLocalBrowserCatalog()) {
+    return MOCK_PRODUCTS.find(p => p.slug === slug) || null
+  }
+
   try {
     const result = await withSupabaseTimeout(supabase
       .from("products")
@@ -93,6 +86,10 @@ export async function searchProducts(term: string) {
   const query = term.trim().toLowerCase()
   if (!query) return []
 
+  if (shouldUseLocalBrowserCatalog()) {
+    return searchMockProducts(query)
+  }
+
   try {
     const result = await withSupabaseTimeout(supabase
       .from("products")
@@ -108,6 +105,10 @@ export async function searchProducts(term: string) {
     // Fall through to mock data for local development.
   }
 
+  return searchMockProducts(query)
+}
+
+function searchMockProducts(query: string) {
   return MOCK_PRODUCTS.filter((product) => {
     const fields = [
       product.title,

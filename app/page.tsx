@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from "react"
 import {
-  ShoppingBag, Heart, Search, ArrowRight, Eye, Sparkles,
-  Award, ShieldCheck, Gift, Truck, Star, X, Check, ShoppingCart
+  ShoppingBag, Heart, ArrowRight, Eye, Sparkles,
+  Award, ShieldCheck, Gift, Truck, Star, X
 } from "lucide-react"
 import { getProducts } from "@/services/products"
 import { useCart } from "@/store/cart"
@@ -11,14 +11,27 @@ import { toast } from "sonner"
 import Link from "next/link"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
+import type { Product } from "@/types/database"
+
+type HomeProduct = Product & {
+  category?: string | null
+  mood?: string | null
+  rating?: string | number | null
+  story?: string | null
+}
+
+type WebAudioWindow = Window &
+  typeof globalThis & {
+    webkitAudioContext?: typeof AudioContext
+  }
 
 // Safe luxury audio chime helper using Web Audio API (Zero dependencies, guaranteed silent fallback)
 function playSoftChime(frequency = 880) {
   if (typeof window === "undefined") return
   try {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext
-    if (!AudioContext) return
-    const audioCtx = new AudioContext()
+    const AudioContextCtor = window.AudioContext || (window as WebAudioWindow).webkitAudioContext
+    if (!AudioContextCtor) return
+    const audioCtx = new AudioContextCtor()
     const osc = audioCtx.createOscillator()
     const gain = audioCtx.createGain()
     
@@ -34,7 +47,7 @@ function playSoftChime(frequency = 880) {
     
     osc.start()
     osc.stop(audioCtx.currentTime + 0.7)
-  } catch (e) {
+  } catch {
     // Silently bypass if audio permissions block auto-trigger
   }
 }
@@ -42,8 +55,7 @@ function playSoftChime(frequency = 880) {
 
 
 export default function LuxuryBoutiqueHome() {
-  const [mounted, setMounted] = useState(false)
-  const [products, setProducts] = useState<any[]>([])
+  const [products, setProducts] = useState<HomeProduct[]>([])
   const [selectedMood, setSelectedMood] = useState("✨ Elegant")
   const [hoveredAccessory, setHoveredAccessory] = useState<string | null>("earrings")
   const [parallax, setParallax] = useState({ x: 0, y: 0 })
@@ -55,6 +67,7 @@ export default function LuxuryBoutiqueHome() {
   const [flyingSparkles, setFlyingSparkles] = useState<{ id: number; x: number; y: number }[]>([])
   const [active360Product, setActive360Product] = useState<string | null>(null)
   const [rotationAngle, setRotationAngle] = useState(0)
+  const sparkleIdRef = useRef(0)
   
   // Checkout Form Details
   const [address, setAddress] = useState({ name: "", street: "", city: "", zip: "", card: "", expiry: "", cvv: "" })
@@ -64,7 +77,6 @@ export default function LuxuryBoutiqueHome() {
   const cartTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   useEffect(() => {
-    setMounted(true)
     async function loadLiveProducts() {
       try {
         const live = await getProducts()
@@ -100,13 +112,11 @@ export default function LuxuryBoutiqueHome() {
     }
   }, [active360Product])
 
-  if (!mounted) return null
-
   // Sparks fly dynamic animation trigger
   const triggerSparklesFly = (e: React.MouseEvent) => {
     playSoftChime(980)
     const newSparkle = {
-      id: Date.now(),
+      id: ++sparkleIdRef.current,
       x: e.clientX,
       y: e.clientY
     }
@@ -116,7 +126,7 @@ export default function LuxuryBoutiqueHome() {
     }, 1000)
   }
 
-  const handleAddToCart = (product: any, e: React.MouseEvent) => {
+  const handleAddToCart = (product: HomeProduct, e: React.MouseEvent) => {
     triggerSparklesFly(e)
     add({
       productId: product.id,
@@ -218,8 +228,8 @@ export default function LuxuryBoutiqueHome() {
               lineHeight: "1.1",
               marginBottom: "24px"
             }}>
-              Elegance <br />
-              <span style={{ fontStyle: "italic", fontWeight: "400", color: "var(--periwinkle-mid)" }}>Suspended</span>
+              Own Your <br />
+              <span style={{ fontStyle: "italic", fontWeight: "400", color: "var(--periwinkle-mid)" }}>Elegance Suspended</span>
             </h1>
             <p style={{
               fontSize: "15px",
@@ -232,7 +242,7 @@ export default function LuxuryBoutiqueHome() {
             </p>
 
             <div style={{ display: "flex", gap: "16px", marginBottom: "50px" }}>
-              <Link href="/shop" onClick={() => playSoftChime(900)}
+              <Link href="/shop" id="hero-shop-btn" onClick={() => playSoftChime(900)}
                 onMouseEnter={() => setCursorHovering(true)} onMouseLeave={() => setCursorHovering(false)}
                 className="btn btn-primary pulse-btn" style={{ borderRadius: "30px", gap: "10px" }}>
                 Shop Earrings <ArrowRight size={14} />
@@ -381,12 +391,13 @@ export default function LuxuryBoutiqueHome() {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px" }} className="lg:grid-cols-4">
             {[
-              { title: "Dream Earrings", img: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=600", desc: "Ice-blue white gold drops", tag: "Room 1" },
-              { title: "Luxury Necklaces", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600", desc: "Iridescent periwinkle bands", tag: "Room 2" },
-              { title: "Daily Glow Bracelets", img: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600", desc: "Sleek periwinkle silk bands", tag: "Room 3" },
-              { title: "Gift Studio", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600", desc: "Hand-wrapped special collections", tag: "Room 4" }
+              { id: "category-earrings", title: "Dream Earrings", img: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=600", desc: "Ice-blue white gold drops", tag: "Room 1" },
+              { id: "category-necklaces", title: "Luxury Necklaces", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600", desc: "Iridescent periwinkle bands", tag: "Room 2" },
+              { id: "category-bracelets", title: "Daily Glow Bracelets", img: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600", desc: "Sleek periwinkle silk bands", tag: "Room 3" },
+              { id: "category-accessories", title: "Gift Studio", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600", desc: "Hand-wrapped special collections", tag: "Room 4" }
             ].map((room, idx) => (
               <div
+                id={room.id}
                 key={room.title}
                 className="glass-card liquid-shine"
                 onMouseEnter={() => { setCursorHovering(true); playSoftChime(800 + idx * 80) }}
@@ -574,7 +585,7 @@ export default function LuxuryBoutiqueHome() {
                   </div>
 
                   <span style={{ fontSize: "10px", fontWeight: "700", color: "var(--rose-gold)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                    {product.category}
+                    {product.category ?? product.categories?.name ?? "Catalogue"}
                   </span>
                   <h3 style={{ fontSize: "17px", color: "var(--charcoal)", marginTop: "4px", fontWeight: "600" }}>{product.title}</h3>
                   <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px", flex: 1 }}>{product.description}</p>
@@ -667,7 +678,7 @@ export default function LuxuryBoutiqueHome() {
                 <Sparkles size={28} color="var(--rose-gold)" style={{ margin: "0 auto 12px" }} />
                 <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "18px", color: "var(--charcoal)" }}>Mood Collection Preparing</h3>
                 <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px", maxWidth: "340px", margin: "6px auto 16px" }}>
-                  No jewelry item matches the "{selectedMood}" mood in the catalogue currently. List a new one with this mood in the Admin Panel!
+                  No jewelry item matches the &ldquo;{selectedMood}&rdquo; mood in the catalogue currently. List a new one with this mood in the Admin Panel!
                 </p>
                 <Link href="/admin/products/new" className="btn btn-outline" style={{ borderRadius: "20px", fontSize: "11px" }}
                   onMouseEnter={() => setCursorHovering(true)} onMouseLeave={() => setCursorHovering(false)}>
@@ -737,7 +748,7 @@ export default function LuxuryBoutiqueHome() {
                 </Link>
               </div>
             ) : (
-              products.slice(0, 2).map((item, idx) => (
+              products.slice(0, 2).map((item) => (
                 <div
                   key={item.id}
                   onMouseEnter={() => setCursorHovering(true)}
@@ -827,7 +838,7 @@ export default function LuxuryBoutiqueHome() {
             <div className="lg:col-span-5" style={{ display: "flex", justifyContent: "center" }}>
               <div style={{ position: "relative", width: "100%", maxWidth: "360px", borderRadius: "180px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.7)" }}>
                 <img
-                  src="https://images.unsplash.com/photo-1595240321770-4e78dbf1b623?w=800&h=1000&fit=crop&crop=faces,edges,entropy"
+                  src="/images/models/hero_try_on.png"
                   alt="Try-On model showcase"
                   style={{ width: "100%", height: "460px", objectFit: "cover" }}
                 />
@@ -962,10 +973,10 @@ export default function LuxuryBoutiqueHome() {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }} className="lg:grid-cols-4">
             {[
-              { img: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&h=800&fit=crop&crop=faces,edges,entropy", review: "Absolutely in love with the periwinkle pearls! Drapes beautifully. 5/5 stars!", author: "@ritika.sharma" },
-              { img: "https://images.unsplash.com/photo-1583307842416-52e6919dbd76?w=800&h=800&fit=crop&crop=faces,edges,entropy", review: "The rose gold stacked band matches perfectly with any dress. Incredible packaging too!", author: "@sneha_verma" },
-              { img: "https://images.unsplash.com/photo-1582299778000-d6dc98dafa88?w=800&h=800&fit=crop&crop=faces,edges,entropy", review: "Skin friendly for real! I have very sensitive skin but had zero rashes. Highly recommended.", author: "@priya_das" },
-              { img: "https://images.unsplash.com/photo-1596431980838-89c0b7fb58d2?w=800&h=800&fit=crop&crop=faces,edges,entropy", review: "Delivered in just 2 days in a gorgeous silk pouch. Satyam & Gulshan crushed it!", author: "@ananya.g" }
+              { img: "/images/models/community_1.png", review: "Absolutely in love with the periwinkle pearls! Drapes beautifully. 5/5 stars!", author: "@ritika.sharma" },
+              { img: "/images/models/community_2.png", review: "The rose gold stacked band matches perfectly with any dress. Incredible packaging too!", author: "@sneha_verma" },
+              { img: "/images/models/community_3.png", review: "Skin friendly for real! I have very sensitive skin but had zero rashes. Highly recommended.", author: "@priya_das" },
+              { img: "/images/models/community_4.png", review: "Delivered in just 2 days in a gorgeous silk pouch. Satyam & Gulshan crushed it!", author: "@ananya.g" }
             ].map(col => (
               <div
                 key={col.author}
@@ -1014,7 +1025,7 @@ export default function LuxuryBoutiqueHome() {
             animation: "slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards"
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
-              <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "22px", color: "var(--charcoal)" }}>Your Glass Tray</h3>
+              <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "22px", color: "var(--charcoal)" }}>Your Glass Tray ({cartCount})</h3>
               <button
                 onClick={() => { playSoftChime(600); setCartOpen(false) }}
                 style={{ background: "none", border: "none", cursor: "pointer", color: "var(--charcoal)" }}
