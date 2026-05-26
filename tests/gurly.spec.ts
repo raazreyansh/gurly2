@@ -241,6 +241,12 @@ test.describe('Order Success Page', () => {
 })
 
 test.describe('Admin Pages', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('gurly_admin_auth', 'authenticated')
+    })
+  })
+
   test('admin dashboard loads', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
