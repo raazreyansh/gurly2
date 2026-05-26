@@ -25,11 +25,12 @@ export function Categories() {
         }}
           className="md:grid-cols-4"
         >
-          {CATEGORIES.map((cat) => (
+          {CATEGORIES.map((cat, index) => (
             <Link
               key={cat.slug}
               href={`/shop?category=${cat.slug}`}
               id={`category-${cat.slug}`}
+              className={`category-card animate-fade-up delay-${index + 1}`}
               style={{
                 position: "relative",
                 borderRadius: "4px",
