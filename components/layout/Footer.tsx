@@ -143,6 +143,7 @@ export function Footer() {
         }}>
           <p style={{ fontSize: "12px" }}>© 2025 GURLY. All rights reserved.</p>
           <div style={{ display: "flex", gap: "24px", fontSize: "12px" }}>
+            <Link href="/about" style={{ transition: "color 0.2s" }}>About Us</Link>
             <Link href="/privacy" style={{ transition: "color 0.2s" }}>Privacy Policy</Link>
             <Link href="/terms" style={{ transition: "color 0.2s" }}>Terms</Link>
             <Link href="/support" style={{ transition: "color 0.2s" }}>Support</Link>

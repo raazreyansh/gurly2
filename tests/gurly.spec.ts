@@ -342,6 +342,45 @@ test.describe('Admin Pages', () => {
     await page.goto(`${BASE}/admin/reports`)
     await expect(page.locator('h1')).toContainText('Reports')
   })
+
+  test('admin coupon creation route loads the coupon form', async ({ page }) => {
+    await page.goto(`${BASE}/admin/coupons/new`)
+    await expect(page.locator('h1')).toContainText('Coupons')
+    await expect(page.locator('#coupon-code')).toBeVisible()
+    await expect(page.locator('#create-coupon-btn')).toBeVisible()
+  })
+
+  test('admin reports export CSV files', async ({ page }) => {
+    await page.goto(`${BASE}/admin/reports`)
+    const downloadPromise = page.waitForEvent('download', { timeout: 5000 })
+    await page.getByRole('button', { name: 'Export CSV' }).first().click()
+    const download = await downloadPromise
+    expect(download.suggestedFilename()).toMatch(/report\\.csv$/)
+  })
+
+  test('admin settings save gives confirmation', async ({ page }) => {
+    await page.goto(`${BASE}/admin/settings`)
+    await page.fill('#store-name', 'GURLY QA')
+    await page.click('#save-settings-btn')
+    await expect(page.getByText('Settings saved')).toBeVisible()
+  })
+})
+
+test.describe('Customer route integrity', () => {
+  test('account notifications page loads from account menu', async ({ page }) => {
+    await page.goto(`${BASE}/account`)
+    await page.getByRole('link', { name: /Notifications/ }).click()
+    await expect(page).toHaveURL(/\/account\/notifications/)
+    await expect(page.locator('h1')).toContainText('Notifications')
+  })
+
+  test('footer legal and support pages load', async ({ page }) => {
+    for (const route of ['/privacy', '/terms', '/support']) {
+      const response = await page.goto(`${BASE}${route}`)
+      expect(response?.status()).toBe(200)
+      await expect(page.locator('main h1')).toBeVisible()
+    }
+  })
 })
 
 test.describe('Navigation flows', () => {

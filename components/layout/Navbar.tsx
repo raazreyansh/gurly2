@@ -12,6 +12,7 @@ const navItems = [
   { label: "Necklaces", href: "/shop?category=necklaces" },
   { label: "Bracelets", href: "/shop?category=bracelets" },
   { label: "Accessories", href: "/shop?category=accessories" },
+  { label: "About Us", href: "/about" },
 ]
 
 export function Navbar() {
@@ -30,6 +31,23 @@ export function Navbar() {
 
   return (
     <>
+      <div style={{
+        background: "var(--charcoal)",
+        color: "var(--cream)",
+        fontSize: "11px",
+        fontWeight: "600",
+        letterSpacing: "0.15em",
+        textTransform: "uppercase",
+        textAlign: "center",
+        padding: "8px 24px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "8px",
+        fontFamily: "var(--font-sans)",
+      }}>
+        <span>✦ LAUNCH SALE: Use code <strong style={{ color: "var(--rose-light)", textDecoration: "underline" }}>LAUNCH30</strong> for 30% OFF all items! ✦</span>
+      </div>
       <header
         style={{
           position: "sticky",
