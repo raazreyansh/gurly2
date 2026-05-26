@@ -293,6 +293,28 @@ test.describe('Admin Pages', () => {
     await expect(page.locator('#save-product-btn')).toBeVisible()
   })
 
+  test('admin can save product edits when Supabase products table is unavailable', async ({ page }) => {
+    await page.route('**/rest/v1/products*', async (route) => {
+      if (route.request().method() === 'PATCH') {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: "Could not find the table 'public.products' in the schema cache" }),
+        })
+        return
+      }
+      await route.continue()
+    })
+
+    await page.goto(`${BASE}/admin/products/prod-1/edit`)
+    await page.fill('#product-title', 'QA Updated Hoop Earrings')
+    await page.click('#save-product-btn')
+
+    await expect(page).toHaveURL(/\/admin\/products$/)
+    await expect(page.getByText('QA Updated Hoop Earrings')).toBeVisible()
+    await expect(page.getByText('gold-hoop-earrings')).toBeVisible()
+  })
+
   test('admin product image uploader exposes catalogue auto-adjust on new and edit forms', async ({ page }) => {
     for (const route of ['/admin/products/new', '/admin/products/prod-1/edit']) {
       await page.goto(`${BASE}${route}`)
@@ -322,6 +344,33 @@ test.describe('Admin Pages', () => {
     await expect(preview).toBeVisible()
     await expect(preview).toHaveAttribute('src', /^data:image\/jpeg/)
     await expect(page.getByText('Auto-adjusted to catalogue format')).toBeVisible()
+  })
+
+  test('admin can create a product when Supabase products table is unavailable', async ({ page }) => {
+    await page.route('**/rest/v1/products*', async (route) => {
+      if (route.request().method() === 'POST') {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: "Could not find the table 'public.products' in the schema cache" }),
+        })
+        return
+      }
+      await route.continue()
+    })
+
+    await page.goto(`${BASE}/admin/products/new`)
+    await page.fill('#product-title', 'QA Local Bracelet')
+    await page.fill('#product-description', 'Created locally when Supabase is unavailable.')
+    await page.fill('#product-price', '500')
+    await page.fill('#product-compare-price', '1199')
+    await page.fill('#product-stock', '10')
+    await page.check('#product-featured')
+    await page.click('#publish-product-btn')
+
+    await expect(page).toHaveURL(/\/admin\/products$/)
+    await expect(page.getByText('QA Local Bracelet')).toBeVisible()
+    await expect(page.getByText('qa-local-bracelet')).toBeVisible()
   })
 
   test('admin analytics page loads', async ({ page }) => {

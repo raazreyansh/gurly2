@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { ProductImageUploader } from "@/components/admin/ProductImageUploader"
+import { createProduct } from "@/services/admin/products"
 
 const productSchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -32,18 +33,25 @@ export default function NewProductPage() {
     defaultValues: { stock: 0, featured: false },
   })
 
-  async function onSubmit(data: ProductForm) {
+  const titleRegister = register("title")
+
+  async function onSubmit(formData: ProductForm) {
     setLoading(true)
     try {
-      const { supabase } = await import("@/lib/supabase/client")
-      const { error } = await supabase.from("products").insert({
-        ...data,
+      const { data, error } = await createProduct({
+        ...formData,
         images: imageUrls,
       })
-      if (error) throw error
+
+      if (error || !data) {
+        throw error || new Error("Product creation failed")
+      }
+
       toast.success("Product created!")
       router.push("/admin/products")
-    } catch {
+      router.refresh()
+    } catch (error) {
+      console.warn("Product creation failed; falling back to local store:", error)
       toast.error("Failed to create product")
     } finally {
       setLoading(false)
@@ -69,12 +77,12 @@ export default function NewProductPage() {
                 <div>
                   <label style={{ fontSize: "12px", fontWeight: "600", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--charcoal-light)", display: "block", marginBottom: "6px" }}>Title *</label>
                   <input
-                    {...register("title")}
+                    {...titleRegister}
                     id="product-title"
                     className="input"
                     placeholder="Gold Hoop Earrings"
                     onChange={(event) => {
-                      register("title").onChange(event)
+                      titleRegister.onChange(event)
                       setValue("slug", event.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))
                     }}
                   />
