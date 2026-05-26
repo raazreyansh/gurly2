@@ -103,19 +103,15 @@ test.describe('Cart Page', () => {
   })
 
   test('empty cart state renders', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.removeItem('gurly-cart'))
     await page.goto(`${BASE}/cart`)
-    // Either empty state or cart items
-    const hasEmpty = await page.locator('text=Your cart is empty').isVisible().catch(() => false)
-    const hasCartTitle = await page.locator('text=Shopping Bag').isVisible().catch(() => false)
-    expect(hasEmpty || hasCartTitle).toBeTruthy()
+    await expect(page.getByRole('heading', { name: 'Your cart is empty' })).toBeVisible()
   })
 
   test('cart shows Start Shopping link when empty', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.removeItem('gurly-cart'))
     await page.goto(`${BASE}/cart`)
-    const isEmpty = await page.locator('text=Your cart is empty').isVisible().catch(() => false)
-    if (isEmpty) {
-      await expect(page.locator('text=Start Shopping')).toBeVisible()
-    }
+    await expect(page.getByRole('link', { name: 'Start Shopping' })).toBeVisible()
   })
 })
 
@@ -123,16 +119,16 @@ test.describe('Checkout Page', () => {
   test('loads without errors', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
+    await page.addInitScript(() => window.localStorage.removeItem('gurly-cart'))
     await page.goto(`${BASE}/checkout`)
     await page.waitForLoadState('networkidle')
     expect(errors.filter(e => !e.includes('supabase'))).toHaveLength(0)
   })
 
-  test('renders checkout heading', async ({ page }) => {
+  test('renders empty checkout state without cart items', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.removeItem('gurly-cart'))
     await page.goto(`${BASE}/checkout`)
-    const hasCheckout = await page.locator('text=Checkout').isVisible().catch(() => false)
-    const hasEmpty = await page.locator('text=Your cart is empty').isVisible().catch(() => false)
-    expect(hasCheckout || hasEmpty).toBeTruthy()
+    await expect(page.getByRole('heading', { name: 'Your cart is empty' })).toBeVisible()
   })
 })
 
@@ -381,6 +377,14 @@ test.describe('Customer route integrity', () => {
       await expect(page.locator('main h1')).toBeVisible()
     }
   })
+
+  test('footer does not expose placeholder links', async ({ page }) => {
+    await page.goto(BASE)
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await expect(page.locator('footer a[href="#"]')).toHaveCount(0)
+    await expect(page.locator('footer a[href="/account/orders"]').first()).toBeVisible()
+    await expect(page.locator('footer a[href="/wishlist"]').first()).toBeVisible()
+  })
 })
 
 test.describe('Navigation flows', () => {
@@ -392,13 +396,15 @@ test.describe('Navigation flows', () => {
     await expect(page.locator('h1')).toBeVisible()
   })
 
-  test('can navigate home → cart → checkout', async ({ page }) => {
+  test('can add a product, open cart, and continue to checkout', async ({ page }) => {
+    await page.goto(BASE)
+    await page.evaluate(() => window.localStorage.removeItem('gurly-cart'))
+    await page.goto(`${BASE}/product/gold-hoop-earrings`)
+    await page.click('#add-to-cart-btn')
     await page.goto(`${BASE}/cart`)
-    const isEmpty = await page.locator('text=Your cart is empty').isVisible().catch(() => false)
-    if (!isEmpty) {
-      await page.click('#proceed-checkout-btn')
-      await expect(page).toHaveURL(/\/checkout/)
-    }
+    await expect(page.locator('#proceed-checkout-btn')).toBeVisible()
+    await page.click('#proceed-checkout-btn')
+    await expect(page).toHaveURL(/\/checkout/)
   })
 
   test('logo clicks back to home', async ({ page }) => {

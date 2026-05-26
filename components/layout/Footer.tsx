@@ -3,6 +3,29 @@
 import Link from "next/link"
 import { Globe, MessageCircle, Mail } from "lucide-react"
 
+const brandLinks = [
+  { href: "/about", label: "About GURLY", Icon: Globe },
+  { href: "/support", label: "Support", Icon: MessageCircle },
+  { href: "mailto:support@gurly.in", label: "Email support", Icon: Mail },
+]
+
+const shopLinks = [
+  { href: "/shop?category=new-arrivals", label: "New Arrivals" },
+  { href: "/shop?category=earrings", label: "Earrings" },
+  { href: "/shop?category=necklaces", label: "Necklaces" },
+  { href: "/shop?category=bracelets", label: "Bracelets" },
+  { href: "/shop?category=accessories", label: "Accessories" },
+  { href: "/shop", label: "Sale" },
+]
+
+const accountLinks = [
+  { href: "/account", label: "My Account" },
+  { href: "/account/orders", label: "Orders" },
+  { href: "/wishlist", label: "Wishlist" },
+  { href: "/support", label: "Returns" },
+  { href: "/account/orders", label: "Track Order" },
+]
+
 export function Footer() {
   return (
     <footer style={{
@@ -33,10 +56,11 @@ export function Footer() {
               Premium accessories curated for the modern woman. Own your spark.
             </p>
             <div style={{ display: "flex", gap: "16px", marginTop: "24px" }}>
-            {[Globe, MessageCircle, Mail].map((Icon, i) => (
+              {brandLinks.map(({ href, label, Icon }) => (
                 <a
-                  key={i}
-                  href="#"
+                  key={label}
+                  href={href}
+                  aria-label={label}
                   style={{
                     width: "36px",
                     height: "36px",
@@ -67,12 +91,12 @@ export function Footer() {
           <div>
             <h3 style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white)", marginBottom: "20px" }}>Shop</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {["New Arrivals", "Earrings", "Necklaces", "Bracelets", "Accessories", "Sale"].map((item) => (
-                <Link key={item} href="/shop" style={{ fontSize: "13px", transition: "color 0.2s" }}
+              {shopLinks.map(({ href, label }) => (
+                <Link key={label} href={href} style={{ fontSize: "13px", transition: "color 0.2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "var(--rose-light)")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
                 >
-                  {item}
+                  {label}
                 </Link>
               ))}
             </div>
@@ -82,12 +106,12 @@ export function Footer() {
           <div>
             <h3 style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white)", marginBottom: "20px" }}>Account</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {["My Account", "Orders", "Wishlist", "Returns", "Track Order"].map((item) => (
-                <Link key={item} href="/account" style={{ fontSize: "13px", transition: "color 0.2s" }}
+              {accountLinks.map(({ href, label }) => (
+                <Link key={label} href={href} style={{ fontSize: "13px", transition: "color 0.2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "var(--rose-light)")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
                 >
-                  {item}
+                  {label}
                 </Link>
               ))}
             </div>
