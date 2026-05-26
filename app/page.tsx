@@ -337,7 +337,7 @@ export default function LuxuryBoutiqueHome() {
               boxShadow: "0 30px 60px rgba(0,0,0,0.06)"
             }}>
               <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600"
+                src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600"
                 alt="Boutique Luxury Campaign Model"
                 style={{
                   width: "100%",
@@ -827,7 +827,7 @@ export default function LuxuryBoutiqueHome() {
             <div className="lg:col-span-5" style={{ display: "flex", justifyContent: "center" }}>
               <div style={{ position: "relative", width: "100%", maxWidth: "360px", borderRadius: "180px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.7)" }}>
                 <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600"
+                  src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600"
                   alt="Try-On model showcase"
                   style={{ width: "100%", height: "460px", objectFit: "cover" }}
                 />
@@ -962,10 +962,10 @@ export default function LuxuryBoutiqueHome() {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }} className="lg:grid-cols-4">
             {[
-              { img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600", review: "Absolutely in love with the periwinkle pearls! Drapes beautifully. 5/5 stars!", author: "@ritika.sharma" },
-              { img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600", review: "The rose gold stacked band matches perfectly with any dress. Incredible packaging too!", author: "@sneha_verma" },
-              { img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600", review: "Skin friendly for real! I have very sensitive skin but had zero rashes. Highly recommended.", author: "@priya_das" },
-              { img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600", review: "Delivered in just 2 days in a gorgeous silk pouch. Satyam & Gulshan crushed it!", author: "@ananya.g" }
+              { img: "https://images.unsplash.com/photo-1614283233556-f35b0c801ef1?w=600", review: "Absolutely in love with the periwinkle pearls! Drapes beautifully. 5/5 stars!", author: "@ritika.sharma" },
+              { img: "https://images.unsplash.com/photo-1602442787305-decbd65be507?w=600", review: "The rose gold stacked band matches perfectly with any dress. Incredible packaging too!", author: "@sneha_verma" },
+              { img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600", review: "Skin friendly for real! I have very sensitive skin but had zero rashes. Highly recommended.", author: "@priya_das" },
+              { img: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=600", review: "Delivered in just 2 days in a gorgeous silk pouch. Satyam & Gulshan crushed it!", author: "@ananya.g" }
             ].map(col => (
               <div
                 key={col.author}
