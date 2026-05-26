@@ -9,17 +9,55 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-      setLoading(false)
-    })
+    function checkAuth() {
+      // Check local storage fallback first
+      const localUser = localStorage.getItem("gurly_customer_user")
+      if (localUser) {
+        try {
+          setUser(JSON.parse(localUser))
+          setLoading(false)
+          return
+        } catch {}
+      }
+
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user) {
+          setUser(data.user)
+        } else {
+          setUser(null)
+        }
+        setLoading(false)
+      })
+    }
+
+    checkAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      if (session?.user) {
+        setUser(session.user)
+      } else {
+        // Fallback check
+        const localUser = localStorage.getItem("gurly_customer_user")
+        if (localUser) {
+          try {
+            setUser(JSON.parse(localUser))
+          } catch {
+            setUser(null)
+          }
+        } else {
+          setUser(null)
+        }
+      }
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    // Listen to local login updates
+    window.addEventListener("storage", checkAuth)
+
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener("storage", checkAuth)
+    }
   }, [])
 
   return { user, loading }

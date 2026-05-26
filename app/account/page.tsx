@@ -59,8 +59,10 @@ export default function AccountPage() {
 
             <button className="btn btn-outline" id="signout-btn" style={{ marginTop: "12px", color: "#EF4444", borderColor: "#EF4444" }}
               onClick={async () => {
+                localStorage.removeItem("gurly_customer_user")
                 const { supabase } = await import("@/lib/supabase/client")
                 await supabase.auth.signOut()
+                window.dispatchEvent(new Event("storage"))
                 window.location.href = "/"
               }}
             >

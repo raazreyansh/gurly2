@@ -53,6 +53,31 @@ export default function LoginPage() {
             <button type="submit" id="login-submit" disabled={loading} className="btn btn-primary" style={{ width: "100%", marginTop: "8px" }}>
               {loading ? "Signing in..." : "Sign In"}
             </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "16px 0 8px" }}>
+              <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+              <span style={{ fontSize: "11px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>or</span>
+              <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const mockUser = {
+                  id: "guest-user",
+                  email: "guest@gurly.com",
+                  user_metadata: { full_name: "Guest Customer" },
+                  created_at: new Date().toISOString()
+                }
+                localStorage.setItem("gurly_customer_user", JSON.stringify(mockUser))
+                toast.success("Logged in as Guest Customer!")
+                router.push("/account")
+                // Dispatch event so layout / navbar detects login
+                window.dispatchEvent(new Event("storage"))
+              }}
+              className="btn btn-outline"
+              style={{ width: "100%", borderColor: "var(--rose)", color: "var(--rose)", gap: "8px" }}
+            >
+              🔑 Instant Demo Login
+            </button>
           </form>
 
           <p style={{ textAlign: "center", fontSize: "13px", color: "var(--muted)", marginTop: "24px" }}>
