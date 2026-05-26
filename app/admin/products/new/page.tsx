@@ -29,11 +29,74 @@ export default function NewProductPage() {
   const [uploading, setUploading] = useState(false)
   const [isDragActive, setIsDragActive] = useState(false)
   const [urlInput, setUrlInput] = useState("")
+  const [autoAdjust, setAutoAdjust] = useState(true)
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<ProductForm>({
     resolver: zodResolver(productSchema),
     defaultValues: { stock: 0, featured: false },
   })
+
+  const adjustImage = (file: File): Promise<Blob | File> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement("canvas")
+          const size = Math.min(img.width, img.height)
+          canvas.width = 800
+          canvas.height = 800
+          
+          const ctx = canvas.getContext("2d")
+          if (!ctx) {
+            resolve(file)
+            return
+          }
+
+          // Center crop to 1:1 square
+          const sx = (img.width - size) / 2
+          const sy = (img.height - size) / 2
+          ctx.drawImage(img, sx, sy, size, size, 0, 0, 800, 800)
+
+          // Premium visual contrast and golden tone highlights
+          const imgData = ctx.getImageData(0, 0, 800, 800)
+          const data = imgData.data
+          for (let i = 0; i < data.length; i += 4) {
+            let r = data[i]
+            let g = data[i+1]
+            let b = data[i+2]
+
+            // Subtle contrast push
+            r = ((r - 128) * 1.05) + 128
+            g = ((g - 128) * 1.05) + 128
+            b = ((b - 128) * 1.05) + 128
+
+            // Premium luxury warm glow
+            r = r * 1.04
+            g = g * 1.01
+            b = b * 0.96
+
+            data[i] = Math.min(255, Math.max(0, r))
+            data[i+1] = Math.min(255, Math.max(0, g))
+            data[i+2] = Math.min(255, Math.max(0, b))
+          }
+          ctx.putImageData(imgData, 0, 0)
+
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const adjustedFile = new File([blob], file.name, { type: "image/jpeg" })
+              resolve(adjustedFile)
+            } else {
+              resolve(file)
+            }
+          }, "image/jpeg", 0.85)
+        }
+        img.src = event.target?.result as string
+      }
+      reader.onerror = () => resolve(file)
+      reader.readAsDataURL(file)
+    })
+  }
 
   const processFiles = async (files: FileList | File[]) => {
     const list = Array.from(files)
@@ -45,7 +108,7 @@ export default function NewProductPage() {
     setUploading(true)
     let successCount = 0
     
-    for (const file of list) {
+    for (let file of list) {
       const extension = file.name.split('.').pop()?.toLowerCase()
       const allowedExtensions = ["jpg", "jpeg", "png", "webp", "gif", "svg", "heic"]
       
@@ -57,6 +120,14 @@ export default function NewProductPage() {
       if (file.size > 10 * 1024 * 1024) {
         toast.error(`File ${file.name} exceeds 10MB limit.`)
         continue
+      }
+
+      if (autoAdjust) {
+        try {
+          file = await adjustImage(file) as File
+        } catch (e) {
+          console.log("Auto-adjust failed, keeping original:", e)
+        }
       }
 
       try {
@@ -229,8 +300,19 @@ export default function NewProductPage() {
 
             {/* Image */}
             <div style={{ background: "var(--white)", border: "1px solid var(--border)", borderRadius: "8px", padding: "24px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                <h2 style={{ fontSize: "15px", fontWeight: "600", fontFamily: "var(--font-serif)", color: "var(--charcoal)" }}>Product Image</h2>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                  <h2 style={{ fontSize: "15px", fontWeight: "600", fontFamily: "var(--font-serif)", color: "var(--charcoal)" }}>Product Image</h2>
+                  <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "11px", fontWeight: "600", color: "var(--rose)", background: "rgba(201,149,108,0.06)", padding: "4px 8px", borderRadius: "4px", textTransform: "uppercase", letterSpacing: "0.05em" }} title="Automatically crop files to standard square ratio and apply optimal luxury lighting glow">
+                    <input
+                      type="checkbox"
+                      checked={autoAdjust}
+                      onChange={(e) => setAutoAdjust(e.target.checked)}
+                      style={{ accentColor: "var(--rose)", width: "13px", height: "13px", cursor: "pointer" }}
+                    />
+                    ✨ Luxury Auto-Adjust
+                  </label>
+                </div>
                 <button
                   type="button"
                   onClick={() => setUploadMode(uploadMode === "upload" ? "url" : "upload")}

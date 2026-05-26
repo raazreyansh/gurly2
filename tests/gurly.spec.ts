@@ -287,6 +287,37 @@ test.describe('Admin Pages', () => {
     await expect(page.locator('#save-product-btn')).toBeVisible()
   })
 
+  test('admin product image uploader exposes catalogue auto-adjust on new and edit forms', async ({ page }) => {
+    for (const route of ['/admin/products/new', '/admin/products/prod-1/edit']) {
+      await page.goto(`${BASE}${route}`)
+      const uploader = page.getByTestId('product-image-uploader')
+      await expect(uploader).toBeVisible()
+      await expect(uploader.getByLabel('Auto-adjust catalogue images')).toBeChecked()
+      await expect(uploader.getByText('Crops to a 3:4 catalogue ratio')).toBeVisible()
+    }
+  })
+
+  test('admin product auto-adjust converts uploaded catalogue image previews to jpeg', async ({ page }) => {
+    await page.route('**/storage/v1/**', (route) => route.abort())
+    await page.goto(`${BASE}/admin/products/new`)
+
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAGUlEQVR4nGP8z8Dwn4GBgYGBiYGBgQEAJgAD+xsOML8AAAAASUVORK5CYII=',
+      'base64'
+    )
+
+    await page.setInputFiles('#product-image-files', {
+      name: 'catalogue.png',
+      mimeType: 'image/png',
+      buffer: png,
+    })
+
+    const preview = page.getByTestId('product-image-preview').first()
+    await expect(preview).toBeVisible()
+    await expect(preview).toHaveAttribute('src', /^data:image\/jpeg/)
+    await expect(page.getByText('Auto-adjusted to catalogue format')).toBeVisible()
+  })
+
   test('admin analytics page loads', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
