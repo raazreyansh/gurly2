@@ -25,6 +25,48 @@ const addressSchema = z.object({
 
 type AddressForm = z.infer<typeof addressSchema>
 
+type PaymentOrderResponse = {
+  id?: string
+  amount?: number
+  currency?: string
+}
+
+type PaymentVerificationResponse = {
+  success?: boolean
+}
+
+type RazorpayPaymentResponse = {
+  razorpay_order_id: string
+  razorpay_payment_id: string
+  razorpay_signature: string
+}
+
+type RazorpayOptions = {
+  key: string
+  amount: number
+  currency: string
+  name: string
+  description: string
+  order_id: string
+  handler: (response: RazorpayPaymentResponse) => void | Promise<void>
+  prefill: {
+    name: string
+    contact: string
+  }
+  theme: {
+    color: string
+  }
+  modal: {
+    ondismiss: () => void
+  }
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: RazorpayOptions) => { open: () => void }
+  }
+}
+
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, total, clear } = useCart()
@@ -85,26 +127,26 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: finalTotal }),
       })
-      const order = await res.json()
+      const order = (await res.json()) as PaymentOrderResponse
       
       if (!order.id) {
         throw new Error("Order creation failed")
       }
 
       const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY
-      const isRazorpayAvailable = typeof window !== "undefined" && (window as any).Razorpay
+      const Razorpay = typeof window !== "undefined" ? window.Razorpay : undefined
 
-      if (razorpayKey && isRazorpayAvailable && !order.id.startsWith("mock_order_")) {
+      if (razorpayKey && Razorpay && !order.id.startsWith("mock_order_")) {
         toast.dismiss(loadId)
         
         const options = {
           key: razorpayKey,
-          amount: order.amount,
-          currency: order.currency,
+          amount: order.amount ?? Math.round(finalTotal * 100),
+          currency: order.currency ?? "INR",
           name: "GURLY",
           description: "Luxury Jewelry Purchase",
           order_id: order.id,
-          handler: async function (response: any) {
+          handler: async function (response: RazorpayPaymentResponse) {
             const verifyLoad = toast.loading("Verifying payment transaction...")
             try {
               const verifyRes = await fetch("/api/payment/verify", {
@@ -116,7 +158,7 @@ export default function CheckoutPage() {
                   razorpay_signature: response.razorpay_signature,
                 }),
               })
-              const verifyData = await verifyRes.json()
+              const verifyData = (await verifyRes.json()) as PaymentVerificationResponse
               if (verifyData.success) {
                 toast.dismiss(verifyLoad)
                 toast.success("Payment successful!")
@@ -159,7 +201,7 @@ export default function CheckoutPage() {
           }
         }
 
-        const rzp = new (window as any).Razorpay(options)
+        const rzp = new Razorpay(options)
         rzp.open()
       } else {
         // Fallback Mock Payment Simulation

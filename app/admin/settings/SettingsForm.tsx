@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import type { FormEvent } from "react"
 
 type Settings = {
@@ -24,17 +24,6 @@ const fields: Array<{ id: keyof Settings; inputId: string; label: string }> = [
 export function SettingsForm() {
   const [settings, setSettings] = useState(defaultSettings)
   const [saved, setSaved] = useState(false)
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem("gurly-admin-settings")
-    if (!stored) return
-
-    try {
-      setSettings({ ...defaultSettings, ...JSON.parse(stored) })
-    } catch {
-      window.localStorage.removeItem("gurly-admin-settings")
-    }
-  }, [])
 
   function updateSetting(field: keyof Settings, value: string) {
     setSettings((current) => ({ ...current, [field]: value }))

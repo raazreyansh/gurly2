@@ -76,7 +76,7 @@ test.describe('Shop Page', () => {
   test('renders page title and structure', async ({ page }) => {
     await page.goto(`${BASE}/shop`)
     await expect(page.locator('h1')).toContainText(/All Products|Earrings|Shop/)
-    await expect(page.locator('text=items')).toBeVisible()
+    await expect(page.locator('main p').filter({ hasText: /^\d+ items$/ })).toBeVisible()
   })
 
   test('shop filters sidebar renders', async ({ page }) => {
