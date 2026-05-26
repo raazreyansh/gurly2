@@ -39,11 +39,11 @@ export function Hero() {
 
       <div className="container" style={{ position: "relative", zIndex: 1 }}>
         <div style={{ maxWidth: "680px" }}>
-          <span className="tag" style={{ marginBottom: "24px", display: "inline-block" }}>
+          <span className="tag animate-fade-up" style={{ marginBottom: "24px", display: "inline-block" }}>
             ✦ New Collection 2025
           </span>
 
-          <h1 style={{
+          <h1 className="animate-fade-up delay-1" style={{
             fontFamily: "var(--font-serif)",
             fontSize: "clamp(48px, 8vw, 88px)",
             fontWeight: "500",
@@ -60,7 +60,7 @@ export function Hero() {
             </span>
           </h1>
 
-          <p style={{
+          <p className="animate-fade-up delay-2" style={{
             fontSize: "17px",
             lineHeight: "1.7",
             color: "var(--charcoal-light)",
@@ -70,8 +70,8 @@ export function Hero() {
             Premium earrings, necklaces and accessories crafted for the woman who knows what she wants. Soft luxury, every day.
           </p>
 
-          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-            <Link href="/shop" className="btn btn-primary" id="hero-shop-btn" style={{ gap: "10px" }}>
+          <div className="animate-fade-up delay-3" style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+            <Link href="/shop" className="btn btn-primary pulse-btn" id="hero-shop-btn" style={{ gap: "10px" }}>
               Shop the Collection
               <ArrowRight size={16} />
             </Link>

@@ -355,7 +355,7 @@ test.describe('Admin Pages', () => {
     const downloadPromise = page.waitForEvent('download', { timeout: 5000 })
     await page.getByRole('button', { name: 'Export CSV' }).first().click()
     const download = await downloadPromise
-    expect(download.suggestedFilename()).toMatch(/report\\.csv$/)
+    expect(download.suggestedFilename()).toMatch(/report\.csv$/)
   })
 
   test('admin settings save gives confirmation', async ({ page }) => {
