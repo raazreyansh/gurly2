@@ -9,6 +9,8 @@ import { getProducts } from "@/services/products"
 import { useCart } from "@/store/cart"
 import { toast } from "sonner"
 import Link from "next/link"
+import { Navbar } from "@/components/layout/Navbar"
+import { Footer } from "@/components/layout/Footer"
 
 // Safe luxury audio chime helper using Web Audio API (Zero dependencies, guaranteed silent fallback)
 function playSoftChime(frequency = 880) {
@@ -37,61 +39,7 @@ function playSoftChime(frequency = 880) {
   }
 }
 
-// Curated luxurious default boutique items
-const BOUTIQUE_FALLBACK_PRODUCTS = [
-  {
-    id: "prod-1",
-    title: "Dreamer Periwinkle Hoops",
-    slug: "dreamer-periwinkle-hoops",
-    description: "Delicate liquid earrings dipped in 18k white gold and crowned with deep periwinkle crystals.",
-    price: 1899,
-    compare_at_price: 2499,
-    images: ["https://images.unsplash.com/photo-1630019852942-f89202989a59?w=800"],
-    mood: "Dreamy",
-    category: "Earrings",
-    rating: 5,
-    story: "Handcrafted to mirror droplets of dew reflecting the periwinkle sky of early morning dawn."
-  },
-  {
-    id: "prod-2",
-    title: "Aurora White Choker",
-    slug: "aurora-white-choker",
-    description: "Sleek sterling silver statement choker with iridescent light-capturing periwinkle pearls.",
-    price: 2999,
-    compare_at_price: 3899,
-    images: ["https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800"],
-    mood: "Elegant",
-    category: "Necklaces",
-    rating: 5,
-    story: "A statement piece created to cascade light directly onto the collarbones with every gesture."
-  },
-  {
-    id: "prod-3",
-    title: "Liquid Rose Gold Band",
-    slug: "liquid-rose-gold-band",
-    description: "Micro-pave crystal ring meticulously layered with liquid metallic rose gold plating.",
-    price: 1499,
-    compare_at_price: 1999,
-    images: ["https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800"],
-    mood: "Luxury",
-    category: "Rings",
-    rating: 4.8,
-    story: "A warm glowing embrace of rose gold light, crafted for layering with minimal grace."
-  },
-  {
-    id: "prod-4",
-    title: "Minimal Silk Threadlet",
-    slug: "minimal-silk-threadlet",
-    description: "Delicately twisted periwinkle silk thread bracelet with single rose gold floating bead.",
-    price: 999,
-    compare_at_price: 1299,
-    images: ["https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800"],
-    mood: "Minimal",
-    category: "Bracelets",
-    rating: 5,
-    story: "So weightless and subtle, designed to feel like a whisper of color resting on the wrist."
-  }
-]
+
 
 export default function LuxuryBoutiqueHome() {
   const [mounted, setMounted] = useState(false)
@@ -120,13 +68,11 @@ export default function LuxuryBoutiqueHome() {
     async function loadLiveProducts() {
       try {
         const live = await getProducts()
-        if (live && live.length > 0) {
+        if (live) {
           setProducts(live)
-        } else {
-          setProducts(BOUTIQUE_FALLBACK_PRODUCTS)
         }
       } catch {
-        setProducts(BOUTIQUE_FALLBACK_PRODUCTS)
+        setProducts([])
       }
     }
     loadLiveProducts()
@@ -231,99 +177,7 @@ export default function LuxuryBoutiqueHome() {
       </div>
 
       {/* ──────────────────── HEADER / FLOATING NAV ──────────────────── */}
-      <header className="glass-tray" style={{
-        position: "sticky",
-        top: "16px",
-        margin: "0 auto",
-        zIndex: 999,
-        height: "76px",
-        maxWidth: "96%",
-        borderRadius: "40px",
-        padding: "0 32px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        border: "1px solid rgba(255, 255, 255, 0.45)"
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "40px" }}>
-          {/* Logo */}
-          <Link href="/" onClick={() => playSoftChime(660)} style={{
-            fontFamily: "var(--font-serif)",
-            fontSize: "24px",
-            fontWeight: "700",
-            letterSpacing: "0.15em",
-            color: "var(--charcoal)",
-            textTransform: "uppercase"
-          }}>
-            GURLY
-          </Link>
-
-          {/* Links */}
-          <nav style={{ gap: "28px", display: "flex", alignItems: "center" }} className="hidden md:flex">
-            {["Earrings", "Collections", "New Drops", "About Us"].map(link => (
-              <Link key={link} href="/shop" className="mega-menu-link" style={{
-                fontSize: "11px",
-                fontWeight: "600",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "var(--charcoal-light)"
-              }}
-              onMouseEnter={() => { setCursorHovering(true); playSoftChime(1000) }}
-              onMouseLeave={() => setCursorHovering(false)}>
-                {link}
-              </Link>
-            ))}
-          </nav>
-        </div>
-
-        {/* Buttons / Cart Indicator */}
-        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-          <button style={{ background: "none", border: "none", color: "var(--charcoal)" }}
-            onMouseEnter={() => setCursorHovering(true)} onMouseLeave={() => setCursorHovering(false)}>
-            <Search size={18} />
-          </button>
-          
-          <button style={{ background: "none", border: "none", color: "var(--charcoal)" }}
-            onMouseEnter={() => setCursorHovering(true)} onMouseLeave={() => setCursorHovering(false)}>
-            <Heart size={18} />
-          </button>
-
-          <button
-            onClick={() => { playSoftChime(800); setCartOpen(true) }}
-            onMouseEnter={() => setCursorHovering(true)}
-            onMouseLeave={() => setCursorHovering(false)}
-            style={{
-              background: "rgba(15, 23, 42, 0.04)",
-              border: "none",
-              padding: "10px 18px",
-              borderRadius: "20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              color: "var(--charcoal)"
-            }}
-          >
-            <ShoppingBag size={18} color="var(--rose-gold)" />
-            <span style={{ fontSize: "12px", fontWeight: "600", letterSpacing: "0.05em" }}>CART</span>
-            {cartCount > 0 && (
-              <span style={{
-                background: "var(--rose-gold)",
-                color: "white",
-                fontSize: "10px",
-                width: "18px",
-                height: "18px",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "700"
-              }}>
-                {cartCount}
-              </span>
-            )}
-          </button>
-        </div>
-      </header>
+      <Navbar />
 
       {/* ──────────────────── HERO: FULLSCREEN IMMERSIVE HERO ──────────────────── */}
       <section style={{
@@ -607,130 +461,152 @@ export default function LuxuryBoutiqueHome() {
             padding: "20px 0 40px",
             scrollBehavior: "smooth"
           }}>
-            {products.map(product => (
-              <div
-                key={product.id}
-                className="glass-card"
-                onMouseEnter={() => setCursorHovering(true)}
-                onMouseLeave={() => setCursorHovering(false)}
-                style={{
-                  minWidth: "300px",
-                  borderRadius: "16px",
-                  padding: "20px",
-                  position: "relative",
-                  display: "flex",
-                  flexDirection: "column"
-                }}
-              >
-                {/* 360 View overlay logic */}
-                <div style={{
-                  position: "relative",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  background: "var(--ice-blue)",
-                  aspectRatio: "1/1",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: "20px"
-                }}>
-                  {active360Product === product.id ? (
-                    <div style={{
-                      transform: `rotate(${rotationAngle}deg)`,
-                      transition: "transform 0.12s linear"
-                    }}>
-                      <img src={product.images?.[0]} alt="360 view" style={{ width: "160px", height: "160px", objectFit: "contain" }} />
-                    </div>
-                  ) : (
-                    <img src={product.images?.[0]} alt={product.title} style={{ width: "180px", height: "180px", objectFit: "contain" }} />
-                  )}
+            {products.length === 0 ? (
+              <div style={{
+                background: "rgba(255, 255, 255, 0.45)",
+                border: "1px solid rgba(255, 255, 255, 0.5)",
+                borderRadius: "16px",
+                padding: "80px 40px",
+                textAlign: "center",
+                width: "100%",
+                boxShadow: "var(--shadow-luxury)"
+              }}>
+                <Sparkles size={36} color="var(--rose-gold)" style={{ margin: "0 auto 16px", animation: "spin 3s linear infinite" }} />
+                <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "22px", color: "var(--charcoal)" }}>Curating GURLY Accessories...</h3>
+                <p style={{ fontSize: "13px", color: "var(--muted)", marginTop: "8px", maxWidth: "460px", margin: "8px auto 24px", lineHeight: "1.6" }}>
+                  The digital gallery is currently updating live from our jewelry workshop. Visit the Admin Panel to list your premium accessories!
+                </p>
+                <Link href="/admin/products/new" className="btn btn-primary" style={{ borderRadius: "24px" }}
+                  onMouseEnter={() => setCursorHovering(true)} onMouseLeave={() => setCursorHovering(false)}>
+                  List New Product
+                </Link>
+              </div>
+            ) : (
+              products.map(product => (
+                <div
+                  key={product.id}
+                  className="glass-card"
+                  onMouseEnter={() => setCursorHovering(true)}
+                  onMouseLeave={() => setCursorHovering(false)}
+                  style={{
+                    minWidth: "300px",
+                    borderRadius: "16px",
+                    padding: "20px",
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column"
+                  }}
+                >
+                  {/* 360 View overlay logic */}
+                  <div style={{
+                    position: "relative",
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                    background: "var(--ice-blue)",
+                    aspectRatio: "1/1",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: "20px"
+                  }}>
+                    {active360Product === product.id ? (
+                      <div style={{
+                        transform: `rotate(${rotationAngle}deg)`,
+                        transition: "transform 0.12s linear"
+                      }}>
+                        <img src={product.images?.[0]} alt="360 view" style={{ width: "160px", height: "160px", objectFit: "contain" }} />
+                      </div>
+                    ) : (
+                      <img src={product.images?.[0]} alt={product.title} style={{ width: "180px", height: "180px", objectFit: "contain" }} />
+                    )}
 
-                  {/* Buttons tray */}
-                  <div style={{ position: "absolute", top: "12px", right: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <button
-                      onClick={() => {
-                        playSoftChime(1100)
-                        toast.success(`${product.title} added to your custom Wishlist!`)
-                      }}
-                      style={{
-                        width: "36px", height: "36px", borderRadius: "50%",
-                        background: "white", border: "none",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        boxShadow: "0 4px 10px rgba(0,0,0,0.06)", cursor: "pointer"
-                      }}
-                      className="hover-scale"
-                    >
-                      <Heart size={16} color="var(--rose-gold)" style={{ margin: "0 auto" }} />
-                    </button>
-                    
-                    <button
-                      onClick={() => {
-                        playSoftChime(950)
-                        setActive360Product(active360Product === product.id ? null : product.id)
-                      }}
-                      style={{
-                        width: "36px", height: "36px", borderRadius: "50%",
-                        background: active360Product === product.id ? "var(--charcoal)" : "white",
-                        border: "none",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        boxShadow: "0 4px 10px rgba(0,0,0,0.06)", cursor: "pointer"
-                      }}
-                      className="hover-scale"
-                    >
-                      <Eye size={16} color={active360Product === product.id ? "white" : "var(--muted)"} style={{ margin: "0 auto" }} />
-                    </button>
+                    {/* Buttons tray */}
+                    <div style={{ position: "absolute", top: "12px", right: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <button
+                        onClick={() => {
+                          playSoftChime(1100)
+                          toast.success(`${product.title} added to your custom Wishlist!`)
+                        }}
+                        style={{
+                          width: "36px", height: "36px", borderRadius: "50%",
+                          background: "white", border: "none",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          boxShadow: "0 4px 10px rgba(0,0,0,0.06)", cursor: "pointer"
+                        }}
+                        className="hover-scale"
+                      >
+                        <Heart size={16} color="var(--rose-gold)" style={{ margin: "0 auto" }} />
+                      </button>
+                      
+                      <button
+                        onClick={() => {
+                          playSoftChime(950)
+                          setActive360Product(active360Product === product.id ? null : product.id)
+                        }}
+                        style={{
+                          width: "36px", height: "36px", borderRadius: "50%",
+                          background: active360Product === product.id ? "var(--charcoal)" : "white",
+                          border: "none",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          boxShadow: "0 4px 10px rgba(0,0,0,0.06)", cursor: "pointer"
+                        }}
+                        className="hover-scale"
+                      >
+                        <Eye size={16} color={active360Product === product.id ? "white" : "var(--muted)"} style={{ margin: "0 auto" }} />
+                      </button>
+                    </div>
+
+                    {active360Product === product.id && (
+                      <span style={{
+                        position: "absolute",
+                        bottom: "12px",
+                        background: "rgba(15,23,42,0.85)",
+                        color: "white",
+                        fontSize: "9px",
+                        fontWeight: "700",
+                        padding: "4px 8px",
+                        borderRadius: "10px",
+                        letterSpacing: "0.08em"
+                      }}>
+                        ✦ 360° LIVE REFLECTION ACTIVE ✦
+                      </span>
+                    )}
                   </div>
 
-                  {active360Product === product.id && (
-                    <span style={{
-                      position: "absolute",
-                      bottom: "12px",
-                      background: "rgba(15,23,42,0.85)",
-                      color: "white",
-                      fontSize: "9px",
-                      fontWeight: "700",
-                      padding: "4px 8px",
-                      borderRadius: "10px",
-                      letterSpacing: "0.08em"
-                    }}>
-                      ✦ 360° LIVE REFLECTION ACTIVE ✦
-                    </span>
-                  )}
+                  <span style={{ fontSize: "10px", fontWeight: "700", color: "var(--rose-gold)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    {product.category}
+                  </span>
+                  <h3 style={{ fontSize: "17px", color: "var(--charcoal)", marginTop: "4px", fontWeight: "600" }}>{product.title}</h3>
+                  <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px", flex: 1 }}>{product.description}</p>
+                  
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px", borderTop: "1px solid rgba(0,0,0,0.04)", paddingTop: "16px" }}>
+                    <p style={{ fontSize: "16px", fontWeight: "700", color: "var(--charcoal)" }}>
+                      ₹{product.price.toLocaleString()}
+                    </p>
+                    <button
+                      onClick={(e) => handleAddToCart(product, e)}
+                      style={{
+                        background: "var(--charcoal)",
+                        color: "white",
+                        border: "none",
+                        padding: "8px 16px",
+                        borderRadius: "20px",
+                        fontSize: "11px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px"
+                      }}
+                      className="hover-scale"
+                    >
+                      <ShoppingBag size={12} />
+                      QUICK BUY
+                    </button>
+                  </div>
                 </div>
-
-                <span style={{ fontSize: "10px", fontWeight: "700", color: "var(--rose-gold)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  {product.category}
-                </span>
-                <h3 style={{ fontSize: "17px", color: "var(--charcoal)", marginTop: "4px", fontWeight: "600" }}>{product.title}</h3>
-                <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px", flex: 1 }}>{product.description}</p>
-                
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px", borderTop: "1px solid rgba(0,0,0,0.04)", paddingTop: "16px" }}>
-                  <p style={{ fontSize: "16px", fontWeight: "700", color: "var(--charcoal)" }}>
-                    ₹{product.price.toLocaleString()}
-                  </p>
-                  <button
-                    onClick={(e) => handleAddToCart(product, e)}
-                    style={{
-                      background: "var(--charcoal)",
-                      color: "white",
-                      border: "none",
-                      padding: "8px 16px",
-                      borderRadius: "20px",
-                      fontSize: "11px",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px"
-                    }}
-                    className="hover-scale"
-                  >
-                    <ShoppingBag size={12} />
-                    QUICK BUY
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -777,29 +653,51 @@ export default function LuxuryBoutiqueHome() {
           </div>
 
           {/* Dynamic mood filtered products display */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px" }} className="lg:grid-cols-4">
-            {filteredProducts.map(product => (
-              <div
-                key={product.id}
-                className="glass-card"
-                style={{ borderRadius: "12px", padding: "16px", position: "relative" }}
-              >
-                <div style={{ borderRadius: "8px", overflow: "hidden", background: "var(--warm-white)", aspectRatio: "1/1", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "14px" }}>
-                  <img src={product.images?.[0]} alt={product.title} style={{ width: "130px", height: "130px", objectFit: "contain" }} />
-                </div>
-                <h4 style={{ fontSize: "15px", fontWeight: "600", color: "var(--charcoal)" }}>{product.title}</h4>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px" }}>
-                  <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--charcoal)" }}>₹{product.price.toLocaleString()}</span>
-                  <button
-                    onClick={(e) => handleAddToCart(product, e)}
-                    style={{ background: "none", border: "none", color: "var(--rose-gold)", cursor: "pointer", display: "flex", alignItems: "center" }}
-                    className="hover-scale"
-                  >
-                    <PlusIcon size={18} />
-                  </button>
-                </div>
+          <div style={{ display: "grid", gridTemplateColumns: filteredProducts.length === 0 ? "1fr" : "repeat(2, 1fr)", gap: "24px" }} className={filteredProducts.length === 0 ? "" : "lg:grid-cols-4"}>
+            {filteredProducts.length === 0 ? (
+              <div style={{
+                background: "rgba(255, 255, 255, 0.45)",
+                border: "1px solid rgba(255, 255, 255, 0.5)",
+                borderRadius: "16px",
+                padding: "60px 40px",
+                textAlign: "center",
+                width: "100%",
+                boxShadow: "var(--shadow-luxury)"
+              }}>
+                <Sparkles size={28} color="var(--rose-gold)" style={{ margin: "0 auto 12px" }} />
+                <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "18px", color: "var(--charcoal)" }}>Mood Collection Preparing</h3>
+                <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px", maxWidth: "340px", margin: "6px auto 16px" }}>
+                  No jewelry item matches the "{selectedMood}" mood in the catalogue currently. List a new one with this mood in the Admin Panel!
+                </p>
+                <Link href="/admin/products/new" className="btn btn-outline" style={{ borderRadius: "20px", fontSize: "11px" }}
+                  onMouseEnter={() => setCursorHovering(true)} onMouseLeave={() => setCursorHovering(false)}>
+                  Configure Mood Piece
+                </Link>
               </div>
-            ))}
+            ) : (
+              filteredProducts.map(product => (
+                <div
+                  key={product.id}
+                  className="glass-card"
+                  style={{ borderRadius: "12px", padding: "16px", position: "relative" }}
+                >
+                  <div style={{ borderRadius: "8px", overflow: "hidden", background: "var(--warm-white)", aspectRatio: "1/1", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "14px" }}>
+                    <img src={product.images?.[0]} alt={product.title} style={{ width: "130px", height: "130px", objectFit: "contain" }} />
+                  </div>
+                  <h4 style={{ fontSize: "15px", fontWeight: "600", color: "var(--charcoal)" }}>{product.title}</h4>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px" }}>
+                    <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--charcoal)" }}>₹{product.price.toLocaleString()}</span>
+                    <button
+                      onClick={(e) => handleAddToCart(product, e)}
+                      style={{ background: "none", border: "none", color: "var(--rose-gold)", cursor: "pointer", display: "flex", alignItems: "center" }}
+                      className="hover-scale"
+                    >
+                      <PlusIcon size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -817,73 +715,95 @@ export default function LuxuryBoutiqueHome() {
             <div style={{ width: "40px", height: "2px", background: "var(--rose-gold)", margin: "16px auto" }} />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "32px" }} className="lg:grid-cols-2">
-            {products.slice(0, 2).map((item, idx) => (
-              <div
-                key={item.id}
-                onMouseEnter={() => setCursorHovering(true)}
-                onMouseLeave={() => setCursorHovering(false)}
-                style={{
-                  borderRadius: "20px",
-                  padding: "32px",
-                  display: "grid",
-                  gridTemplateColumns: "1fr",
-                  gap: "24px",
-                  alignItems: "center"
-                }}
-                className="md:grid-cols-12 glass-card"
-              >
-                <div className="md:col-span-5" style={{ background: "var(--white)", borderRadius: "12px", padding: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <img src={item.images?.[0]} alt={item.title} style={{ width: "100%", maxHeight: "180px", objectFit: "contain" }} />
-                </div>
-                
-                <div className="md:col-span-7">
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={12} fill="var(--rose-gold)" color="var(--rose-gold)" />
-                    ))}
-                    <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--muted)", marginLeft: "4px" }}>
-                      {item.rating || "5.0"} RATING
-                    </span>
+          <div style={{ display: "grid", gridTemplateColumns: products.length === 0 ? "1fr" : "1fr", gap: "32px" }} className={products.length === 0 ? "" : "lg:grid-cols-2"}>
+            {products.length === 0 ? (
+              <div style={{
+                background: "rgba(255, 255, 255, 0.45)",
+                border: "1px solid rgba(255, 255, 255, 0.5)",
+                borderRadius: "16px",
+                padding: "60px 40px",
+                textAlign: "center",
+                width: "100%",
+                boxShadow: "var(--shadow-luxury)"
+              }}>
+                <Award size={32} color="var(--rose-gold)" style={{ margin: "0 auto 12px" }} />
+                <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "18px", color: "var(--charcoal)" }}>Awaiting Bestseller Highlights</h3>
+                <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "6px", maxWidth: "340px", margin: "6px auto 16px", lineHeight: "1.6" }}>
+                  Bestsellers are updated dynamically once the Supabase catalog is populated. Go to the Admin Panel to mark your items!
+                </p>
+                <Link href="/admin/products" className="btn btn-outline" style={{ borderRadius: "20px", fontSize: "11px" }}
+                  onMouseEnter={() => setCursorHovering(true)} onMouseLeave={() => setCursorHovering(false)}>
+                  Manage Products
+                </Link>
+              </div>
+            ) : (
+              products.slice(0, 2).map((item, idx) => (
+                <div
+                  key={item.id}
+                  onMouseEnter={() => setCursorHovering(true)}
+                  onMouseLeave={() => setCursorHovering(false)}
+                  style={{
+                    borderRadius: "20px",
+                    padding: "32px",
+                    display: "grid",
+                    gridTemplateColumns: "1fr",
+                    gap: "24px",
+                    alignItems: "center"
+                  }}
+                  className="md:grid-cols-12 glass-card"
+                >
+                  <div className="md:col-span-5" style={{ background: "var(--white)", borderRadius: "12px", padding: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <img src={item.images?.[0]} alt={item.title} style={{ width: "100%", maxHeight: "180px", objectFit: "contain" }} />
                   </div>
                   
-                  <h3 style={{ fontSize: "20px", fontWeight: "600", color: "var(--charcoal)" }}>{item.title}</h3>
-                  <p style={{ fontSize: "14px", fontWeight: "700", color: "var(--rose-gold)", marginTop: "4px" }}>₹{item.price.toLocaleString()}</p>
-                  
-                  <blockquote style={{
-                    fontSize: "12px",
-                    fontStyle: "italic",
-                    color: "var(--charcoal-light)",
-                    borderLeft: "2px solid var(--periwinkle-mid)",
-                    paddingLeft: "12px",
-                    margin: "14px 0"
-                  }}>
-                    {item.story || "A classic handcrafted masterpiece designed to capture the warmth of metallic morning rays."}
-                  </blockquote>
+                  <div className="md:col-span-7">
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={12} fill="var(--rose-gold)" color="var(--rose-gold)" />
+                      ))}
+                      <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--muted)", marginLeft: "4px" }}>
+                        {item.rating || "5.0"} RATING
+                      </span>
+                    </div>
+                    
+                    <h3 style={{ fontSize: "20px", fontWeight: "600", color: "var(--charcoal)" }}>{item.title}</h3>
+                    <p style={{ fontSize: "14px", fontWeight: "700", color: "var(--rose-gold)", marginTop: "4px" }}>₹{item.price.toLocaleString()}</p>
+                    
+                    <blockquote style={{
+                      fontSize: "12px",
+                      fontStyle: "italic",
+                      color: "var(--charcoal-light)",
+                      borderLeft: "2px solid var(--periwinkle-mid)",
+                      paddingLeft: "12px",
+                      margin: "14px 0"
+                    }}>
+                      {item.story || "A classic handcrafted masterpiece designed to capture the warmth of metallic morning rays."}
+                    </blockquote>
 
-                  <button
-                    onClick={(e) => handleAddToCart(item, e)}
-                    style={{
-                      background: "var(--charcoal)",
-                      color: "white",
-                      border: "none",
-                      padding: "10px 20px",
-                      borderRadius: "24px",
-                      fontSize: "11px",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      marginTop: "16px"
-                    }}
-                  >
-                    <ShoppingBag size={12} />
-                    ADD TO TRAY
-                  </button>
+                    <button
+                      onClick={(e) => handleAddToCart(item, e)}
+                      style={{
+                        background: "var(--charcoal)",
+                        color: "white",
+                        border: "none",
+                        padding: "10px 20px",
+                        borderRadius: "24px",
+                        fontSize: "11px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        marginTop: "16px"
+                      }}
+                    >
+                      <ShoppingBag size={12} />
+                      ADD TO TRAY
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -1296,6 +1216,9 @@ export default function LuxuryBoutiqueHome() {
           </div>
         </div>
       )}
+
+      {/* ──────────────────── FOOTER SYSTEM ──────────────────── */}
+      <Footer />
 
       {/* ──────────────────── CUSTOM STYLES & INTERACTIVE TRAYS ──────────────────── */}
       <style>{`
