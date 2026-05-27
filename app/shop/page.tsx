@@ -15,7 +15,7 @@ interface SearchParams {
 export const dynamic = "force-dynamic"
 
 export const metadata = {
-  title: "Shop",
+  title: "Shop Catalog",
   description: "Browse all premium earrings, necklaces, bracelets and accessories from GURLY.",
 }
 
@@ -45,47 +45,47 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     : "All Accessories"
 
   return (
-    <div className="storefront-shell flex flex-col min-h-screen">
+    <div className="storefront-shell bg-[#0C0C0C] min-h-screen text-[#FEFDF0] flex flex-col font-sans">
       <Navbar />
       
-      <main className="flex-grow">
+      <main className="flex-grow pt-24">
         {/* Luxury Header */}
-        <div className="py-12 bg-gradient-to-b from-sky-light/30 to-transparent border-b border-white/40">
-          <div className="container">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Sparkles size={11} className="text-rose" fill="currentColor" />
-              <p className="store-label mb-0">Premium Discovery</p>
+        <div className="py-16 bg-[#0E0E0E] border-b border-[#FEFDF0]/10">
+          <div className="max-w-7xl mx-auto px-6 md:px-12">
+            <div className="flex items-center gap-1.5 mb-3">
+              <Sparkles size={11} className="text-[#FFE600] animate-pulse" />
+              <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#FFE600] uppercase mb-0">Premium Discovery</p>
             </div>
-            <h1 className="font-serif text-4xl font-medium text-charcoal">
+            <h1 className="font-serif text-4xl md:text-5xl font-light text-[#FEFDF0]">
               {categoryName}
             </h1>
-            <p className="text-muted text-xs mt-2">
+            <p className="text-[#A6A498] text-xs tracking-wider mt-3">
               Showing {(products?.length ?? 0)} premium piece{(products?.length ?? 0) !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
 
-        <div className="container py-12 px-4">
-          <div className="flex flex-col md:flex-row gap-10">
+        <div className="max-w-7xl mx-auto py-16 px-6 md:px-12">
+          <div className="flex flex-col lg:flex-row gap-12">
             {/* Immersive Glass Sidebar Filters */}
-            <aside className="w-full md:w-[240px] flex-shrink-0">
-              <div className="sticky-buy-panel p-6 bg-white/60 border border-white/70 rounded-3xl sticky top-[118px] space-y-8">
+            <aside className="w-full lg:w-[240px] flex-shrink-0">
+              <div className="sticky top-[120px] p-8 bg-[#141414] border border-[#FEFDF0]/5 rounded-none space-y-10">
                 
-                <div className="flex items-center gap-2 pb-4 border-b border-slate-100/50">
-                  <SlidersHorizontal size={14} className="text-charcoal" />
-                  <span className="text-xs font-bold tracking-wider uppercase text-charcoal">Filters</span>
+                <div className="flex items-center gap-2 pb-5 border-b border-[#FEFDF0]/5">
+                  <SlidersHorizontal size={14} className="text-[#FFE600]" />
+                  <span className="text-[10px] font-extrabold tracking-[0.2em] uppercase text-[#FEFDF0]">FILTERS</span>
                 </div>
 
                 {/* Categories */}
                 <div>
-                  <h3 className="text-[10px] font-extrabold tracking-widest uppercase text-muted mb-4">Category</h3>
-                  <div className="flex flex-col gap-2">
+                  <h3 className="text-[9px] font-extrabold tracking-[0.25em] uppercase text-[#FFE600] mb-5">CATEGORY</h3>
+                  <div className="flex flex-col gap-1.5">
                     <Link
                       href="/shop"
-                      className={`text-sm py-1.5 px-3 rounded-xl transition-all duration-200 ${
+                      className={`text-xs py-2 px-3 rounded-none transition-all duration-200 uppercase tracking-widest font-extrabold ${
                         !params.category
-                          ? "bg-rose-light/10 text-rose font-bold"
-                          : "text-charcoal-light hover:text-charcoal hover:bg-slate-100/50"
+                          ? "bg-[#FFE600]/10 text-[#FFE600] border-l-2 border-[#FFE600]"
+                          : "text-[#D4D2C5] hover:text-white hover:bg-white/5"
                       }`}
                     >
                       All Pieces
@@ -94,10 +94,10 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                       <Link
                         key={cat.id}
                         href={`/shop?category=${cat.slug}`}
-                        className={`text-sm py-1.5 px-3 rounded-xl transition-all duration-200 ${
+                        className={`text-xs py-2 px-3 rounded-none transition-all duration-200 uppercase tracking-widest font-extrabold ${
                           params.category === cat.slug
-                            ? "bg-rose-light/10 text-rose font-bold"
-                            : "text-charcoal-light hover:text-charcoal hover:bg-slate-100/50"
+                            ? "bg-[#FFE600]/10 text-[#FFE600] border-l-2 border-[#FFE600]"
+                            : "text-[#D4D2C5] hover:text-white hover:bg-white/5"
                         }`}
                       >
                         {cat.name}
@@ -108,8 +108,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
                 {/* Price Ranges */}
                 <div>
-                  <h3 className="text-[10px] font-extrabold tracking-widest uppercase text-muted mb-4">Price Range</h3>
-                  <div className="flex flex-col gap-2">
+                  <h3 className="text-[9px] font-extrabold tracking-[0.25em] uppercase text-[#FFE600] mb-5">PRICE RANGE</h3>
+                  <div className="flex flex-col gap-1.5">
                     {[
                       { label: "Under ₹500", maxPrice: 500 },
                       { label: "₹500 – ₹1,000", minPrice: 500, maxPrice: 1000 },
@@ -124,10 +124,10 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                         <Link
                           key={label}
                           href={priceHref({ minPrice: min, maxPrice: max })}
-                          className={`text-sm py-1.5 px-3 rounded-xl transition-all duration-200 ${
+                          className={`text-xs py-2 px-3 rounded-none transition-all duration-200 uppercase tracking-widest font-extrabold ${
                             isCurrentPrice
-                              ? "bg-rose-light/10 text-rose font-bold"
-                              : "text-charcoal-light hover:text-charcoal hover:bg-slate-100/50"
+                              ? "bg-[#FFE600]/10 text-[#FFE600] border-l-2 border-[#FFE600]"
+                              : "text-[#D4D2C5] hover:text-white hover:bg-white/5"
                           }`}
                         >
                           {label}
@@ -139,12 +139,12 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
                 {/* Reset Filters */}
                 {(params.category || params.minPrice || params.maxPrice) && (
-                  <div className="pt-4 border-t border-slate-100/50 text-center">
+                  <div className="pt-5 border-t border-[#FEFDF0]/5 text-center">
                     <Link 
                       href="/shop" 
-                      className="text-[10px] font-bold tracking-wider uppercase text-muted hover:text-rose transition-colors"
+                      className="text-[9px] font-extrabold tracking-widest uppercase text-[#FFE600] hover:text-white transition-colors"
                     >
-                      Reset All Filters
+                      RESET FILTERS
                     </Link>
                   </div>
                 )}
@@ -152,18 +152,18 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             </aside>
 
             {/* Product Display Panel */}
-            <div className="flex-1">
+            <div className="flex-grow">
               {products && products.length > 0 ? (
-                <div className="product-grid gap-y-10">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
                   {products.map((p) => (
                     <ProductCard key={p.id} product={p} />
                   ))}
                 </div>
               ) : (
-                <div className="newsletter-glass text-center py-20 rounded-3xl p-12">
-                  <p className="font-serif text-2xl text-charcoal mb-2">No luxury pieces found</p>
-                  <p className="text-muted text-sm mb-6">Try clearing price filter criteria or browsing other categories.</p>
-                  <Link href="/shop" className="store-button store-button-dark">
+                <div className="bg-[#141414] border border-[#FEFDF0]/5 text-center py-24 p-12">
+                  <p className="font-serif text-2xl text-[#FEFDF0] mb-3 font-light">No luxury pieces found</p>
+                  <p className="text-[#A6A498] text-xs mb-8 max-w-md mx-auto">Try clearing price filter criteria or browsing other jewelry categories.</p>
+                  <Link href="/shop" className="px-8 py-4 bg-[#FFE600] hover:bg-white text-black text-[10px] uppercase font-extrabold tracking-widest transition-colors duration-300">
                     Browse All Accessories
                   </Link>
                 </div>

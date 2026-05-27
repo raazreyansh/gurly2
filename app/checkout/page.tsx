@@ -10,7 +10,7 @@ import { Footer } from "@/components/layout/Footer"
 import Link from "next/link"
 import { validateCoupon } from "@/services/coupon"
 import { toast } from "sonner"
-import { MapPin, CreditCard, Tag, Lock, ArrowRight } from "lucide-react"
+import { MapPin, CreditCard, Tag, Lock, ArrowRight, ShieldCheck, Gift, Award } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 
@@ -125,7 +125,14 @@ export default function CheckoutPage() {
     const disc = coupon.type === "flat" ? coupon.value : (total() * coupon.value) / 100
     setDiscount(disc)
     setCouponMsg(`✓ ${coupon.type === "percent" ? coupon.value + "%" : "₹" + coupon.value} off applied!`)
-    toast.success("Coupon applied!")
+    toast.success("Coupon applied!", {
+      style: {
+        background: "#161616",
+        color: "#FEFDF0",
+        border: "1px solid #FFE600",
+        borderRadius: "0px"
+      }
+    })
   }
 
   async function handlePayment() {
@@ -214,7 +221,7 @@ export default function CheckoutPage() {
             contact: addressData.phone,
           },
           theme: {
-            color: "#C9956C",
+            color: "#FFE600",
           },
           modal: {
             ondismiss: function() {
@@ -264,124 +271,117 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <>
+      <div className="storefront-shell bg-[#0C0C0C] text-[#FEFDF0] flex flex-col min-h-screen font-sans">
         <Navbar />
-        <main style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ textAlign: "center" }}>
-            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "28px", marginBottom: "16px" }}>Your cart is empty</h1>
-            <Link href="/shop" className="btn btn-primary">Continue Shopping</Link>
+        <main className="flex-grow flex items-center justify-center py-32 px-6">
+          <div className="text-center max-w-md bg-[#141414] border border-[#FEFDF0]/5 p-16 rounded-none">
+            <h1 className="font-serif text-3xl font-light mb-6">Your Cart is Empty</h1>
+            <p className="text-xs text-[#A6A498] mb-10 leading-relaxed uppercase tracking-wider">Please add items to your cart before proceeding to checkout.</p>
+            <Link href="/shop" className="px-8 py-4 bg-[#FFE600] hover:bg-white text-black text-[10px] uppercase font-extrabold tracking-widest transition-colors duration-300 rounded-none inline-block">Explore Our Store</Link>
           </div>
         </main>
         <Footer />
-      </>
+      </div>
     )
   }
 
   if (authLoading) {
     return (
-      <>
+      <div className="storefront-shell bg-[#0C0C0C] text-[#FEFDF0] flex flex-col min-h-screen font-sans">
         <Navbar />
-        <main style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--cream)" }}>
-          <div style={{ textAlign: "center" }}>
-            <div className="animate-spin" style={{ width: "40px", height: "40px", border: "3px solid rgba(201,149,108,0.2)", borderTopColor: "var(--rose)", borderRadius: "50%", margin: "0 auto 20px" }} />
-            <p style={{ fontFamily: "var(--font-serif)", fontSize: "16px", color: "var(--charcoal)", letterSpacing: "0.05em" }}>Securing your checkout session...</p>
+        <main className="flex-grow flex items-center justify-center py-32 px-6">
+          <div className="text-center space-y-5">
+            <div className="w-10 h-10 border-2 border-[#FFE600]/20 border-t-[#FFE600] rounded-none animate-spin mx-auto" />
+            <p className="text-xs font-extrabold uppercase tracking-widest text-[#A6A498]">Securing your checkout session...</p>
           </div>
         </main>
         <Footer />
-      </>
+      </div>
     )
   }
 
   if (!user) {
     return (
-      <>
+      <div className="storefront-shell bg-[#0C0C0C] text-[#FEFDF0] flex flex-col min-h-screen font-sans">
         <Navbar />
-        <main style={{ minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(to bottom, #faf6f0, #ffffff)", padding: "40px 24px" }}>
-          <div className="newsletter-glass" style={{ maxWidth: "480px", width: "100%", padding: "48px 40px", textAlign: "center", borderRadius: "32px", border: "1px solid rgba(255,255,255,0.8)", boxShadow: "0 20px 40px rgba(0,0,0,0.03)" }}>
-            <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "rgba(201,149,108,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
-              <Lock size={24} color="var(--rose-dark)" />
+        <main className="flex-grow flex items-center justify-center py-32 px-6">
+          <div className="bg-[#141414] border border-[#FEFDF0]/5 max-w-lg w-full p-16 text-center rounded-none">
+            <div className="w-16 h-16 bg-[#FFE600]/10 rounded-none flex items-center justify-center mx-auto mb-8">
+              <Lock size={24} className="text-[#FFE600]" />
             </div>
             
-            <p className="store-label" style={{ marginBottom: "12px" }}>Authentication Required</p>
-            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "28px", fontWeight: "500", color: "var(--charcoal)", marginBottom: "16px", lineHeight: "1.3" }}>
-              Secure Checkout
-            </h1>
+            <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#FFE600] uppercase mb-3">Authentication Required</p>
+            <h1 className="font-serif text-3xl font-light mb-4">Secure Checkout</h1>
             
-            <p style={{ fontSize: "14px", color: "var(--muted)", lineHeight: "1.6", marginBottom: "32px" }}>
+            <p className="text-xs text-[#A6A498] leading-relaxed uppercase tracking-wider mb-10 max-w-xs mx-auto">
               To complete your premium jewelry purchase and track your order safely, please sign in or create a GURLY boutique account.
             </p>
             
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div className="flex flex-col gap-3">
               <Link 
                 href="/login?redirect=/checkout" 
-                className="store-button store-button-dark"
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", padding: "14px 28px", borderRadius: "100px", fontSize: "13px", fontWeight: "600", textDecoration: "none" }}
+                className="w-full py-4 bg-[#FFE600] hover:bg-white text-black text-[10px] uppercase font-extrabold tracking-widest transition-colors flex items-center justify-center gap-2 rounded-none"
               >
-                Sign In to Account <ArrowRight size={14} />
+                Sign In to Account <ArrowRight size={13} />
               </Link>
               
               <Link 
                 href="/register?redirect=/checkout" 
-                className="store-button"
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "14px 28px", borderRadius: "100px", fontSize: "13px", fontWeight: "600", border: "1.5px solid var(--border)", background: "transparent", color: "var(--charcoal)", textDecoration: "none" }}
+                className="w-full py-4 border border-[#FEFDF0]/20 hover:border-white text-[#FEFDF0] hover:text-white text-[10px] uppercase font-extrabold tracking-widest transition-colors flex items-center justify-center gap-2 rounded-none bg-transparent"
               >
                 Create New Account
               </Link>
             </div>
             
-            <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: "28px", letterSpacing: "0.04em" }}>
+            <p className="text-[9px] text-[#A6A498] mt-8 uppercase tracking-widest font-extrabold">
               🔒 256-bit Encryption Secured Session
             </p>
           </div>
         </main>
         <Footer />
-      </>
+      </div>
     )
   }
 
   return (
-    <>
+    <div className="storefront-shell bg-[#0C0C0C] text-[#FEFDF0] flex flex-col min-h-screen font-sans">
       <Navbar />
-      <main>
-        <div style={{ background: "var(--white)", borderBottom: "1px solid var(--border)", padding: "32px 0" }}>
-          <div className="container">
-            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "32px", fontWeight: "500" }}>Checkout</h1>
-            {/* Steps */}
-            <div style={{ display: "flex", gap: "8px", marginTop: "16px", alignItems: "center" }}>
-              {[
-                { id: "address", label: "Delivery Address", Icon: MapPin },
-                { id: "payment", label: "Payment", Icon: CreditCard },
-              ].map(({ id, label, Icon }, i) => (
-                <div key={id} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  {i > 0 && <div style={{ width: "40px", height: "1px", background: "var(--border)" }} />}
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div style={{
-                      width: "28px", height: "28px", borderRadius: "50%",
-                      background: step === id ? "var(--charcoal)" : "var(--cream-dark)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                    }}>
-                      <Icon size={13} color={step === id ? "white" : "var(--muted)"} />
-                    </div>
-                    <span style={{ fontSize: "12px", fontWeight: step === id ? "600" : "400", color: step === id ? "var(--charcoal)" : "var(--muted)" }}>
-                      {label}
-                    </span>
-                  </div>
-                </div>
-              ))}
+      
+      <main className="flex-grow pt-24">
+        {/* Step Tracker Header */}
+        <div className="py-16 bg-[#0E0E0E] border-b border-[#FEFDF0]/10">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 text-left flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div>
+              <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#FFE600] uppercase mb-2">SECURE PURCHASE</p>
+              <h1 className="font-serif text-4xl md:text-5xl font-light text-[#FEFDF0]">Checkout</h1>
+            </div>
+            
+            {/* Steps indicator */}
+            <div className="flex items-center gap-4 text-[9px] font-extrabold tracking-widest uppercase">
+              <div className="flex items-center gap-2">
+                <span className={`w-6 h-6 flex items-center justify-center border ${step === "address" ? "bg-[#FFE600] text-black border-[#FFE600]" : "border-[#FEFDF0]/20 text-[#A6A498]"}`}>1</span>
+                <span className={step === "address" ? "text-[#FEFDF0]" : "text-[#A6A498]"}>Shipping</span>
+              </div>
+              <div className="w-8 h-px bg-[#FEFDF0]/10" />
+              <div className="flex items-center gap-2">
+                <span className={`w-6 h-6 flex items-center justify-center border ${step === "payment" ? "bg-[#FFE600] text-black border-[#FFE600]" : "border-[#FEFDF0]/20 text-[#A6A498]"}`}>2</span>
+                <span className={step === "payment" ? "text-[#FEFDF0]" : "text-[#A6A498]"}>Payment</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="container" style={{ padding: "40px 24px 80px" }}>
-          <div style={{ display: "grid", gap: "32px" }} className="lg:grid-cols-2">
-            {/* Left: Form */}
-            <div>
+        <div className="max-w-7xl mx-auto py-16 px-6 md:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+            
+            {/* Left: Form panel */}
+            <div className="lg:col-span-7 bg-[#141414] border border-[#FEFDF0]/5 p-8 md:p-10 rounded-none text-left">
               {step === "address" ? (
                 <form onSubmit={handleSubmit((data) => { setAddressData(data); setStep("payment"); })}>
-                  <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "22px", marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
-                    <MapPin size={18} color="var(--rose)" /> Delivery Address
+                  <h2 className="font-serif text-2xl font-light mb-8 flex items-center gap-3">
+                    <MapPin size={18} className="text-[#FFE600]" /> Shipping Details
                   </h2>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                  <div className="grid grid-cols-2 gap-4">
                     {[
                       { name: "name", placeholder: "Full Name", cols: 2 },
                       { name: "phone", placeholder: "Phone Number", cols: 1 },
@@ -391,110 +391,126 @@ export default function CheckoutPage() {
                       { name: "city", placeholder: "City", cols: 1 },
                       { name: "state", placeholder: "State", cols: 1 },
                     ].map(({ name, placeholder, cols }) => (
-                      <div key={name} style={{ gridColumn: `span ${cols}` }}>
+                      <div key={name} style={{ gridColumn: `span ${cols}` }} className="space-y-1.5">
                         <input
                           id={`checkout-${name}`}
                           {...register(name as keyof AddressForm)}
-                          placeholder={placeholder}
-                          className="input"
+                          placeholder={placeholder.toUpperCase()}
+                          className="w-full bg-[#0C0C0C] border border-[#FEFDF0]/10 text-xs font-extrabold uppercase tracking-widest px-4 py-3.5 text-[#FEFDF0] outline-none focus:border-[#FFE600] rounded-none placeholder-[#444]"
                         />
                         {errors[name as keyof AddressForm] && (
-                          <p style={{ fontSize: "11px", color: "var(--rose)", marginTop: "4px" }}>
+                          <p className="text-[10px] font-extrabold tracking-wide text-red-500 uppercase">
                             {errors[name as keyof AddressForm]?.message}
                           </p>
                         )}
                       </div>
                     ))}
                   </div>
-                  <button type="submit" className="btn btn-primary" id="checkout-continue-btn" style={{ marginTop: "24px", width: "100%" }}>
+                  <button type="submit" className="w-full py-4 bg-[#FFE600] hover:bg-white text-black text-[10px] uppercase font-extrabold tracking-[0.2em] transition-colors rounded-none mt-8" id="checkout-continue-btn">
                     Continue to Payment
                   </button>
                 </form>
               ) : (
-                <div>
-                  <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "22px", marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
-                    <CreditCard size={18} color="var(--rose)" /> Payment
+                <div className="space-y-6">
+                  <h2 className="font-serif text-2xl font-light mb-6 flex items-center gap-3">
+                    <CreditCard size={18} className="text-[#FFE600]" /> Secure Payment
                   </h2>
-                  <div style={{ background: "var(--cream-dark)", borderRadius: "4px", padding: "24px", marginBottom: "20px", fontSize: "13px", color: "var(--charcoal-light)", lineHeight: "1.7" }}>
-                    <p>Secure checkout redirects to Razorpay&apos;s payment gateway.</p>
-                    <p style={{ marginTop: "8px" }}>Supported: UPI, Credit/Debit Card, Net Banking, Wallets</p>
+                  <div className="bg-[#0C0C0C] border border-[#FFE600]/15 p-6 space-y-2 text-xs font-extrabold uppercase tracking-widest text-[#A6A498] leading-relaxed">
+                    <p className="text-[#FEFDF0]">Secure checkout redirects to Razorpay&apos;s luxury payment gateway.</p>
+                    <p className="text-[#FFE600] text-[10px] mt-2">Supported: UPI, Credit/Debit Card, Net Banking, Wallets</p>
                   </div>
-                  <button className="btn btn-primary" id="pay-now-btn" onClick={handlePayment} disabled={processing} style={{ width: "100%", fontSize: "14px" }}>
-                    {processing ? "Processing Checkout..." : `Pay ₹${finalTotal.toLocaleString("en-IN")} Securely`}
+                  <button className="w-full py-4 bg-[#FFE600] hover:bg-white text-black text-[10px] uppercase font-extrabold tracking-[0.2em] transition-colors rounded-none mt-6" id="pay-now-btn" onClick={handlePayment} disabled={processing}>
+                    {processing ? "PROCESSING CHECKOUT..." : `Pay ₹${finalTotal.toLocaleString("en-IN")} Securely`}
                   </button>
-                  <button onClick={() => setStep("address")} disabled={processing} style={{ marginTop: "12px", background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "var(--muted)", width: "100%", textAlign: "center", letterSpacing: "0.06em" }}>
-                    ← Back to Address
+                  <button onClick={() => setStep("address")} disabled={processing} className="w-full py-2 text-center text-[9px] uppercase tracking-widest font-extrabold text-[#A6A498] hover:text-[#FFE600] transition-colors bg-transparent border-none outline-none mt-4">
+                    ← Back to Address Info
                   </button>
                 </div>
               )}
             </div>
 
             {/* Right: Order Summary */}
-            <div>
-              <div style={{ background: "var(--white)", border: "1px solid var(--border)", padding: "28px", borderRadius: "4px", position: "sticky", top: "calc(var(--nav-h) + 20px)" }}>
-                <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "20px", marginBottom: "20px" }}>Order Summary</h2>
+            <div className="lg:col-span-5">
+              <div className="bg-[#141414] border border-[#FEFDF0]/5 p-8 rounded-none space-y-6 text-left">
+                <h2 className="font-serif text-2xl font-light text-[#FEFDF0] mb-6">Order Summary</h2>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
+                <div className="space-y-4 max-h-[220px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#0C0C0C]">
                   {items.map((item) => (
-                    <div key={item.productId} style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                      <img src={item.image} alt={item.title} style={{ width: "56px", height: "72px", objectFit: "cover", borderRadius: "2px" }} />
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: "13px", fontWeight: "500" }}>{item.title}</p>
-                        <p style={{ fontSize: "12px", color: "var(--muted)" }}>Qty: {item.quantity}</p>
+                    <div key={item.productId} className="flex gap-4 items-center">
+                      <img src={item.image} alt={item.title} className="w-12 h-16 object-cover border border-[#FEFDF0]/5" />
+                      <div className="flex-grow min-w-0">
+                        <p className="text-xs uppercase tracking-wider font-extrabold text-[#FEFDF0] truncate">{item.title}</p>
+                        <p className="text-[10px] text-[#A6A498] mt-0.5">QTY: {item.quantity}</p>
                       </div>
-                      <p className="price" style={{ fontSize: "13px" }}>₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
+                      <p className="font-mono text-xs text-[#FFE600]">₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
                     </div>
                   ))}
                 </div>
 
-                {/* Coupon */}
-                <div style={{ borderTop: "1px solid var(--border)", paddingTop: "20px", marginBottom: "20px" }}>
-                  <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
-                    <div style={{ flex: 1, position: "relative" }}>
-                      <Tag size={14} color="var(--muted)" style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)" }} />
+                {/* Coupon Apply */}
+                <div className="border-t border-[#FEFDF0]/10 pt-6">
+                  <div className="flex gap-2">
+                    <div className="flex-grow relative">
+                      <Tag size={13} className="text-[#444] absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         id="coupon-input"
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                         placeholder="COUPON CODE"
-                        className="input"
-                        style={{ paddingLeft: "36px", fontSize: "12px", letterSpacing: "0.08em" }}
+                        className="w-full bg-[#0C0C0C] border border-[#FEFDF0]/10 text-xs font-extrabold uppercase tracking-widest pl-10 pr-4 py-3 text-[#FEFDF0] outline-none focus:border-[#FFE600] rounded-none placeholder-[#444]"
                       />
                     </div>
-                    <button onClick={applyCoupon} className="btn btn-outline" id="apply-coupon-btn" style={{ padding: "10px 16px", fontSize: "11px" }}>
+                    <button onClick={applyCoupon} className="px-6 bg-[#FEFDF0]/5 border border-[#FEFDF0]/10 hover:border-[#FFE600] hover:text-[#FFE600] text-[10px] uppercase font-extrabold tracking-widest transition-colors rounded-none" id="apply-coupon-btn">
                       Apply
                     </button>
                   </div>
                   {couponMsg && (
-                    <p style={{ fontSize: "12px", color: couponMsg.startsWith("✓") ? "#2E7D32" : "var(--rose)" }}>
+                    <p className={`text-[10px] font-extrabold tracking-widest uppercase mt-3 ${couponMsg.startsWith("✓") ? "text-[#58B47E]" : "text-red-500"}`}>
                       {couponMsg}
                     </p>
                   )}
                 </div>
 
                 {/* Totals */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "14px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", color: "var(--charcoal-light)" }}>
-                    <span>Subtotal</span><span>₹{total().toLocaleString("en-IN")}</span>
+                <div className="border-t border-[#FEFDF0]/10 pt-6 space-y-3.5 text-xs text-[#A6A498] uppercase tracking-widest font-extrabold">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span><span className="text-[#FEFDF0] font-mono">₹{total().toLocaleString("en-IN")}</span>
                   </div>
                   {discount > 0 && (
-                    <div style={{ display: "flex", justifyContent: "space-between", color: "#2E7D32" }}>
-                      <span>Coupon Discount</span><span>-₹{discount.toLocaleString("en-IN")}</span>
+                    <div className="flex justify-between text-[#58B47E]">
+                      <span>Coupon Discount</span><span className="font-mono">-₹{discount.toLocaleString("en-IN")}</span>
                     </div>
                   )}
-                  <div style={{ display: "flex", justifyContent: "space-between", color: "var(--charcoal-light)" }}>
-                    <span>Shipping</span><span style={{ color: shipping === 0 ? "#2E7D32" : "inherit" }}>{shipping === 0 ? "Free" : `₹${shipping}`}</span>
+                  <div className="flex justify-between">
+                    <span>Shipping</span><span className={shipping === 0 ? "text-[#58B47E]" : "text-[#FEFDF0]"}>{shipping === 0 ? "FREE" : `₹${shipping}`}</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "700", fontSize: "16px", borderTop: "1px solid var(--border)", paddingTop: "12px", marginTop: "4px" }}>
-                    <span>Total</span><span>₹{finalTotal.toLocaleString("en-IN")}</span>
+                  <div className="flex justify-between text-[#FEFDF0] text-sm pt-4 border-t border-[#FEFDF0]/5 mt-4">
+                    <span>Total</span><strong className="text-[#FFE600] font-mono font-light text-base">₹{finalTotal.toLocaleString("en-IN")}</strong>
+                  </div>
+                </div>
+
+                {/* Secure Seal */}
+                <div className="border-t border-[#FEFDF0]/10 pt-6 text-[9px] font-extrabold tracking-widest uppercase text-[#A6A498] space-y-2.5">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck size={14} className="text-[#FFE600]" />
+                    <span>Secure 256-bit SSL Session</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Gift size={14} className="text-[#FFE600]" />
+                    <span>Luxury wrapping included</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Award size={14} className="text-[#FFE600]" />
+                    <span>Hypoallergenic metal warranty</span>
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </main>
       <Footer />
-    </>
+    </div>
   )
 }

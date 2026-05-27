@@ -88,10 +88,10 @@ export function ProductDetailClient({ product, related }: Props) {
       toast.success(`${quantity} x ${product.title} added to bag`, {
         icon: "✨",
         style: {
-          background: "rgba(255, 255, 255, 0.9)",
-          color: "var(--charcoal)",
-          backdropFilter: "blur(20px)",
-          border: "1px solid rgba(244, 63, 94, 0.2)",
+          background: "#161616",
+          color: "#FEFDF0",
+          border: "1px solid #FFE600",
+          borderRadius: "0px"
         }
       })
       setIsAdding(false)
@@ -102,78 +102,108 @@ export function ProductDetailClient({ product, related }: Props) {
     const nextState = !isFavorite
     setIsFavorite(nextState)
     if (nextState) {
-      toast.success("Added to wishlist", { icon: "💖" })
+      toast.success("Added to wishlist", {
+        icon: "💖",
+        style: {
+          background: "#161616",
+          color: "#FEFDF0",
+          border: "1px solid #FFE600",
+          borderRadius: "0px"
+        }
+      })
     } else {
-      toast.info("Removed from wishlist")
+      toast.info("Removed from wishlist", {
+        style: {
+          background: "#161616",
+          color: "#FEFDF0",
+          border: "1px solid rgba(254, 253, 240, 0.1)",
+          borderRadius: "0px"
+        }
+      })
     }
   }
 
   return (
-    <div className="product-detail-shell">
-      <div className="product-breadcrumb">
-        <Link href="/">Home</Link>
+    <div className="product-detail-shell bg-[#0C0C0C] text-[#FEFDF0] min-h-screen pt-28 font-sans max-w-7xl mx-auto px-6 md:px-12">
+      {/* Breadcrumb */}
+      <div className="product-breadcrumb flex items-center gap-2.5 text-xs text-[#A6A498] uppercase tracking-wider mb-10">
+        <Link href="/" className="hover:text-white transition-colors">Home</Link>
         <span>/</span>
-        <Link href="/shop">Shop</Link>
+        <Link href="/shop" className="hover:text-white transition-colors">Shop</Link>
         <span>/</span>
-        <span className="breadcrumb-active">{product.title}</span>
+        <span className="text-[#FFE600] font-extrabold">{product.title}</span>
       </div>
 
-      <section className="product-detail-layout">
-        <div data-testid="product-gallery" className="luxury-product-gallery">
-          <div className="product-thumb-column">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        {/* Left Product Gallery */}
+        <div data-testid="product-gallery" className="lg:col-span-7 flex flex-col md:flex-row gap-5">
+          <div className="flex md:flex-col gap-3 order-2 md:order-1">
             {images.map((image, index) => (
               <button
                 key={`${image}-${index}`}
                 type="button"
-                className={activeImage === index ? "active" : ""}
+                className={`w-16 h-20 border transition-all ${
+                  activeImage === index 
+                    ? "border-[#FFE600] opacity-100" 
+                    : "border-[#FEFDF0]/10 opacity-60 hover:opacity-100"
+                }`}
                 onClick={() => setActiveImage(index)}
                 aria-label={`View product image ${index + 1}`}
               >
-                <img src={image} alt="" loading="lazy" />
+                <img src={image} alt="" className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
-          <div className="product-main-image-wrap">
+          <div className="flex-grow order-1 md:order-2 bg-[#141414] border border-[#FEFDF0]/5 relative aspect-[3/4]">
             <motion.div 
-              className="product-main-image" 
-              initial={{ opacity: 0.7, scale: 0.98 }} 
-              animate={{ opacity: 1, scale: 1 }} 
-              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className="w-full h-full" 
+              initial={{ opacity: 0.7 }} 
+              animate={{ opacity: 1 }} 
+              transition={{ duration: 0.3 }}
               key={currentImage}
             >
-              <img src={currentImage} alt={product.title} loading="eager" className="detail-zoom-img" />
-              {discount > 0 && <span className="detail-sale-badge">{discount}% OFF</span>}
+              <img src={currentImage} alt={product.title} loading="eager" className="w-full h-full object-cover" />
+              {discount > 0 && (
+                <span className="absolute top-4 left-4 bg-black text-[#FFE600] border border-[#FFE600]/30 text-[10px] font-extrabold px-3 py-1 tracking-widest uppercase">
+                  {discount}% OFF
+                </span>
+              )}
             </motion.div>
           </div>
         </div>
 
-        <aside data-testid="sticky-buy-panel" className="sticky-buy-panel">
-          <p className="store-label">{product.categories?.name ?? "Girls Accessories"}</p>
-          <h1>{product.title}</h1>
-          
-          <div className="detail-rating">
-            <div className="stars-wrap">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star key={star} size={13} fill="currentColor" />
-              ))}
+        {/* Right Sticky Buy Panel */}
+        <aside data-testid="sticky-buy-panel" className="lg:col-span-5 space-y-8 text-left">
+          <div>
+            <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#FFE600] uppercase mb-2">{product.categories?.name ?? "Girls Accessories"}</p>
+            <h1 className="font-serif text-3xl md:text-4xl font-light text-[#FEFDF0] leading-tight">{product.title}</h1>
+            
+            <div className="flex items-center gap-2 mt-4 text-[#FFE600] text-xs font-extrabold">
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star key={star} size={11} fill="currentColor" stroke="none" />
+                ))}
+              </div>
+              <span className="text-[#A6A498] ml-1.5 font-light">4.9 rating (128 reviews)</span>
             </div>
-            <span>4.9 rating (128 reviews)</span>
           </div>
 
-          <div className="detail-price-row">
-            <strong className="detail-current-price">₹{product.price.toLocaleString("en-IN")}</strong>
-            {product.compare_at_price && <span className="detail-compare-price">₹{product.compare_at_price.toLocaleString("en-IN")}</span>}
+          <div className="py-4 border-y border-[#FEFDF0]/10 flex items-baseline gap-3">
+            <strong className="text-3xl font-light text-[#FEFDF0]">₹{product.price.toLocaleString("en-IN")}</strong>
+            {product.compare_at_price && (
+              <span className="text-slate-400 line-through text-sm">₹{product.compare_at_price.toLocaleString("en-IN")}</span>
+            )}
           </div>
 
           {/* Visual Finish Swatches */}
-          <div style={{ marginTop: "20px" }}>
-            <span style={{ fontSize: "11px", fontWeight: "800", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--muted)" }}>
-              Finish: <strong style={{ color: "#111111" }}>{selectedFinish}</strong>
+          <div className="space-y-3">
+            <span className="text-[10px] font-extrabold tracking-widest text-[#A6A498] uppercase">
+              FINISH: <strong className="text-[#FEFDF0] font-extrabold">{selectedFinish}</strong>
             </span>
-            <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+            <div className="flex gap-3">
               {[
-                { name: "Champagne Gold", color: "#e3d2be", border: "#c9956c" },
-                { name: "Sleek Silver", color: "#e2e8f0", border: "#94a3b8" },
+                { name: "Champagne Gold", color: "#e3d2be", border: "#FFE600" },
+                { name: "Sleek Silver", color: "#e2e8f0", border: "#FFF" },
                 { name: "Soft Rose Gold", color: "#fbcfe8", border: "#f43f5e" }
               ].map((finish) => (
                 <button
@@ -181,139 +211,144 @@ export function ProductDetailClient({ product, related }: Props) {
                   type="button"
                   onClick={() => {
                     setSelectedFinish(finish.name)
-                    toast.success(`Selected finish: ${finish.name}`, { icon: "✨" })
+                    toast.success(`Selected finish: ${finish.name}`, {
+                      style: {
+                        background: "#161616",
+                        color: "#FEFDF0",
+                        border: "1px solid #FFE600",
+                        borderRadius: "0px"
+                      }
+                    })
                   }}
-                  style={{
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "50%",
-                    background: finish.color,
-                    border: selectedFinish === finish.name ? `2.5px solid ${finish.border}` : "1.5px solid rgba(15,23,42,0.1)",
-                    outline: "none",
-                    cursor: "pointer",
-                    boxShadow: selectedFinish === finish.name ? "0 4px 10px rgba(0,0,0,0.12)" : "none",
-                    transform: selectedFinish === finish.name ? "scale(1.15)" : "scale(1)",
-                    transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-                  }}
+                  className={`w-7 h-7 rounded-none border transition-all ${
+                    selectedFinish === finish.name 
+                      ? "border-[#FFE600] scale-110 shadow-lg" 
+                      : "border-transparent opacity-75 hover:opacity-100"
+                  }`}
+                  style={{ background: finish.color }}
                   title={finish.name}
                 />
               ))}
             </div>
           </div>
 
-          {/* Premium Urgency Delivery Calculator Countdown */}
-          <div style={{
-            background: "rgba(201, 149, 108, 0.08)",
-            border: "1px solid rgba(201, 149, 108, 0.15)",
-            borderRadius: "16px",
-            padding: "12px 16px",
-            marginTop: "20px",
-            fontSize: "12px",
-            color: "var(--charcoal)",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}>
-            <span style={{ fontSize: "16px" }}>🚚</span>
-            <div>
-              <p style={{ margin: 0, fontWeight: "600" }}>
-                Order within{" "}
-                <span style={{ fontFamily: "monospace", color: "#e11d48", fontWeight: "700" }}>
+          {/* Delivery Urgency Countdown */}
+          <div className="bg-[#141414] border border-[#FFE600]/20 p-5 flex items-start gap-4">
+            <span className="text-xl">🚚</span>
+            <div className="space-y-1">
+              <p className="text-xs font-extrabold text-[#FEFDF0]">
+                Dispatch within{" "}
+                <span className="font-mono text-[#FFE600] font-extrabold text-sm">
                   {String(countdown.hours).padStart(2, "0")}h : {String(countdown.minutes).padStart(2, "0")}m : {String(countdown.seconds).padStart(2, "0")}s
-                </span>{" "}
-                to dispatch today!
+                </span>
               </p>
-              <p style={{ margin: 0, fontSize: "11px", color: "var(--muted)" }}>
-                Expected delivery by <strong>Friday, May 30th</strong>. Free shipping on this order!
+              <p className="text-[11px] text-[#A6A498] leading-relaxed">
+                Expected delivery by <strong>Friday, May 30th</strong>. Free shipping applied!
               </p>
             </div>
           </div>
 
-          {product.description && <p className="detail-description">{product.description}</p>}
+          {product.description && (
+            <p className="text-sm text-[#D4D2C5] leading-relaxed">{product.description}</p>
+          )}
 
-          {/* Luxury Urgency Indicators */}
-          <div className="detail-stock-row">
+          {/* Stock Indicators */}
+          <div className="flex items-center justify-between text-xs pb-3 border-b border-[#FEFDF0]/10">
             {product.stock > 0 ? (
               product.stock <= 5 ? (
-                <span className="urgency-pill animate-pulse">
-                  <span className="urgency-dot bg-rose" /> Only {product.stock} left in stock — selling fast!
+                <span className="text-[#EF4444] font-extrabold uppercase tracking-widest animate-pulse flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-[#EF4444]" /> ONLY {product.stock} LEFT IN STOCK
                 </span>
               ) : (
-                <span className="urgency-pill stock-available">
-                  <span className="urgency-dot bg-emerald" /> {product.stock} in stock
+                <span className="text-[#58B47E] font-extrabold uppercase tracking-widest flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-[#58B47E]" /> {product.stock} IN STOCK
                 </span>
               )
             ) : (
-              <span className="urgency-pill stock-unavailable">
-                <span className="urgency-dot bg-muted" /> Sold out
+              <span className="text-gray-400 font-extrabold uppercase tracking-widest flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-gray-500" /> OUT OF STOCK
               </span>
             )}
-            <span className="premium-label">Gift-ready dispatch</span>
+            <span className="text-[#FFE600] text-[10px] font-extrabold tracking-widest uppercase">GIFT BOX READY</span>
           </div>
 
-          <div style={{ display: "flex", gap: "16px", alignItems: "center", marginTop: "24px" }}>
-            <div className="quantity-control" aria-label="Quantity">
-              <button type="button" id="qty-minus" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>-</button>
-              <span>{quantity}</span>
-              <button type="button" id="qty-plus" onClick={() => setQuantity((value) => value + 1)}>+</button>
+          <div className="flex gap-4 items-center">
+            {/* Quantity */}
+            <div className="flex items-center border border-[#FEFDF0]/20 h-14 bg-[#141414] font-extrabold">
+              <button type="button" className="px-4 py-2 hover:text-[#FFE600]" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>-</button>
+              <span className="px-4 text-xs font-mono">{quantity}</span>
+              <button type="button" className="px-4 py-2 hover:text-[#FFE600]" onClick={() => setQuantity((value) => value + 1)}>+</button>
             </div>
 
-            <div className="detail-actions" style={{ flex: 1 }}>
+            {/* Actions */}
+            <div className="flex-1 flex gap-2.5">
               <button
                 id="add-to-cart-btn"
                 type="button"
-                className={`store-button store-button-dark flex items-center justify-center gap-2 ${isAdding ? "adding" : ""}`}
+                className="flex-1 py-4 bg-[#FFE600] hover:bg-white text-black text-[10px] uppercase font-extrabold tracking-[0.2em] transition-colors flex items-center justify-center gap-2"
                 onClick={addToCart}
                 disabled={product.stock <= 0 || isAdding}
-                style={{ flex: 1 }}
               >
                 {isAdding ? (
-                  <>
-                    <span className="shimmer-spinner"></span> ADDING...
-                  </>
+                  "ADDING..."
                 ) : (
                   <>
-                    <ShoppingBag size={16} /> ADD TO BAG
+                    <ShoppingBag size={14} /> ADD TO BAG
                   </>
                 )}
               </button>
               <button
                 id="wishlist-btn"
                 type="button"
-                className={`wishlist-icon-btn ${isFavorite ? "active" : ""}`}
+                className={`w-14 h-14 border border-[#FEFDF0]/10 hover:border-[#FFE600] flex items-center justify-center transition-all ${
+                  isFavorite ? "text-red-500 bg-[#FFE600]/5" : "text-[#FEFDF0] hover:text-[#FFE600]"
+                }`}
                 onClick={toggleFavorite}
                 aria-label="Add to wishlist"
               >
-                <Heart size={18} fill={isFavorite ? "var(--rose)" : "none"} stroke={isFavorite ? "var(--rose)" : "currentColor"} />
+                <Heart size={16} fill={isFavorite ? "#EF4444" : "none"} stroke={isFavorite ? "#EF4444" : "currentColor"} />
               </button>
               <button
                 type="button"
-                className="share-button"
+                className="w-14 h-14 border border-[#FEFDF0]/10 hover:border-[#FFE600] text-[#FEFDF0] hover:text-[#FFE600] flex items-center justify-center transition-all"
                 aria-label="Copy product link"
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href)
-                  toast.success("Product link copied", { icon: "🔗" })
+                  toast.success("Product link copied", {
+                    style: {
+                      background: "#161616",
+                      color: "#FEFDF0",
+                      border: "1px solid #FFE600",
+                      borderRadius: "0px"
+                    }
+                  })
                 }}
               >
-                <Share2 size={16} />
+                <Share2 size={15} />
               </button>
             </div>
           </div>
 
-          <div className="detail-trust-row">
-            <span><Truck size={15} /> Free shipping over ₹999</span>
-            <span><ShieldCheck size={15} /> Skin-friendly hypoallergenic finish</span>
+          <div className="flex items-center gap-6 text-[10px] font-extrabold tracking-widest text-[#A6A498] uppercase">
+            <span className="flex items-center gap-1.5"><Truck size={13} className="text-[#FFE600]" /> FREE DISPATCH</span>
+            <span className="flex items-center gap-1.5"><ShieldCheck size={13} className="text-[#FFE600]" /> HYPOALLERGENIC</span>
           </div>
 
-          <div className="product-accordions">
+          {/* Accordions */}
+          <div className="border-t border-[#FEFDF0]/10 pt-4">
             {accordions.map((item) => {
               const open = openAccordion === item.title
               return (
-                <div key={item.title} className="product-accordion">
-                  <button type="button" onClick={() => setOpenAccordion(open ? "" : item.title)} aria-expanded={open}>
+                <div key={item.title} className="border-b border-[#FEFDF0]/10 py-4">
+                  <button 
+                    type="button" 
+                    onClick={() => setOpenAccordion(open ? "" : item.title)} 
+                    aria-expanded={open}
+                    className="w-full flex items-center justify-between text-xs font-extrabold tracking-widest uppercase text-[#FEFDF0] hover:text-[#FFE600] transition-colors text-left"
+                  >
                     {item.title}
                     <motion.span animate={{ rotate: open ? 180 : 0 }}>
-                      <ChevronDown size={17} />
+                      <ChevronDown size={14} />
                     </motion.span>
                   </button>
                   <AnimatePresence initial={false}>
@@ -322,10 +357,10 @@ export function ProductDetailClient({ product, related }: Props) {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
                         style={{ overflow: "hidden" }}
                       >
-                        <p>{item.body}</p>
+                        <p className="text-xs text-[#D4D2C5] leading-relaxed mt-3">{item.body}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -336,60 +371,45 @@ export function ProductDetailClient({ product, related }: Props) {
         </aside>
       </section>
 
+      {/* Recommendations */}
       {related.length > 0 && (
-        <section className="store-section product-recommendations" aria-labelledby="recommendations-heading">
-          <div className="section-heading-row">
+        <section className="py-24 border-t border-[#FEFDF0]/10 mt-20 text-left" aria-labelledby="recommendations-heading">
+          <div className="flex items-end justify-between mb-12">
             <div>
-              <p className="store-label">Styled together</p>
-              <h2 id="recommendations-heading">Complete the Spark</h2>
+              <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#FFE600] uppercase mb-2">Styled together</p>
+              <h2 id="recommendations-heading" className="font-serif text-3xl font-light text-[#FEFDF0]">Complete the Spark</h2>
             </div>
-            <Link href="/shop" className="text-link">Shop all</Link>
+            <Link href="/shop" className="text-xs font-extrabold tracking-widest uppercase text-[#FFE600] hover:text-white border-b border-[#FFE600]/30 hover:border-white transition-colors pb-0.5">Shop all</Link>
           </div>
-          <div className="bestseller-carousel">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {related.slice(0, 4).map((item) => (
               <ProductCard key={item.id} product={item} />
             ))}
           </div>
         </section>
       )}
+
       {/* Premium Floating Quick Shop Bar for Mobile */}
       <AnimatePresence>
         {showStickyBar && (
           <motion.div
-            initial={{ y: 100, opacity: 0 }}
+            initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 260, damping: 28 }}
-            className="md:hidden"
-            style={{
-              position: "fixed",
-              bottom: "16px",
-              left: "16px",
-              right: "16px",
-              zIndex: 99,
-              background: "rgba(255, 255, 255, 0.95)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(15, 23, 42, 0.08)",
-              borderRadius: "24px",
-              padding: "12px 18px",
-              boxShadow: "0 16px 40px rgba(15, 23, 42, 0.1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "12px",
-            }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 26 }}
+            className="md:hidden fixed bottom-4 left-4 right-4 z-50 bg-[#161616] border border-[#FFE600]/30 p-3 flex items-center justify-between gap-4"
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div className="flex items-center gap-3">
               <img
                 src={images[0]}
                 alt=""
-                style={{ width: "42px", height: "42px", borderRadius: "12px", objectFit: "cover" }}
+                className="w-10 h-10 object-cover"
               />
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontSize: "12px", fontWeight: "700", color: "#111111", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+              <div className="flex flex-col text-left">
+                <span className="text-xs font-extrabold text-[#FEFDF0] truncate max-w-[140px] uppercase tracking-wider">
                   {product.title}
                 </span>
-                <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--charcoal)" }}>
+                <span className="text-[11px] font-mono text-[#FFE600]">
                   ₹{product.price.toLocaleString("en-IN")}
                 </span>
               </div>
@@ -399,22 +419,7 @@ export function ProductDetailClient({ product, related }: Props) {
               type="button"
               onClick={addToCart}
               disabled={product.stock <= 0 || isAdding}
-              style={{
-                background: "#07111f",
-                color: "white",
-                border: "none",
-                borderRadius: "100px",
-                padding: "10px 20px",
-                fontSize: "11px",
-                fontWeight: "800",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(7, 17, 31, 0.2)",
-              }}
+              className="py-2.5 px-5 bg-[#FFE600] text-black text-[9px] font-extrabold tracking-[0.15em] uppercase rounded-none transition-colors"
             >
               {isAdding ? "Adding..." : product.stock > 0 ? "Add to Bag" : "Sold Out"}
             </button>
