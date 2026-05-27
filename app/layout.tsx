@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { Playfair_Display, Inter } from "next/font/google"
 import "./globals.css"
 import { Providers } from "@/components/providers"
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/next"
 
 const serif = Playfair_Display({
   subsets: ["latin"],
