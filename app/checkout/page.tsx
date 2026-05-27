@@ -10,8 +10,9 @@ import { Footer } from "@/components/layout/Footer"
 import Link from "next/link"
 import { validateCoupon } from "@/services/coupon"
 import { toast } from "sonner"
-import { MapPin, CreditCard, Tag } from "lucide-react"
+import { MapPin, CreditCard, Tag, Lock, ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/useAuth"
 
 const addressSchema = z.object({
   name: z.string().min(2, "Name required"),
@@ -70,6 +71,7 @@ declare global {
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, total, clear } = useCart()
+  const { user, loading: authLoading } = useAuth()
   const [couponCode, setCouponCode] = useState("")
   const [discount, setDiscount] = useState(0)
   const [couponMsg, setCouponMsg] = useState("")
@@ -254,6 +256,68 @@ export default function CheckoutPage() {
           <div style={{ textAlign: "center" }}>
             <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "28px", marginBottom: "16px" }}>Your cart is empty</h1>
             <Link href="/shop" className="btn btn-primary">Continue Shopping</Link>
+          </div>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  if (authLoading) {
+    return (
+      <>
+        <Navbar />
+        <main style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--cream)" }}>
+          <div style={{ textAlign: "center" }}>
+            <div className="animate-spin" style={{ width: "40px", height: "40px", border: "3px solid rgba(201,149,108,0.2)", borderTopColor: "var(--rose)", borderRadius: "50%", margin: "0 auto 20px" }} />
+            <p style={{ fontFamily: "var(--font-serif)", fontSize: "16px", color: "var(--charcoal)", letterSpacing: "0.05em" }}>Securing your checkout session...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  if (!user) {
+    return (
+      <>
+        <Navbar />
+        <main style={{ minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(to bottom, #faf6f0, #ffffff)", padding: "40px 24px" }}>
+          <div className="newsletter-glass" style={{ maxWidth: "480px", width: "100%", padding: "48px 40px", textAlign: "center", borderRadius: "32px", border: "1px solid rgba(255,255,255,0.8)", boxShadow: "0 20px 40px rgba(0,0,0,0.03)" }}>
+            <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "rgba(201,149,108,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+              <Lock size={24} color="var(--rose-dark)" />
+            </div>
+            
+            <p className="store-label" style={{ marginBottom: "12px" }}>Authentication Required</p>
+            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "28px", fontWeight: "500", color: "var(--charcoal)", marginBottom: "16px", lineHeight: "1.3" }}>
+              Secure Checkout
+            </h1>
+            
+            <p style={{ fontSize: "14px", color: "var(--muted)", lineHeight: "1.6", marginBottom: "32px" }}>
+              To complete your premium jewelry purchase and track your order safely, please sign in or create a GURLY boutique account.
+            </p>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <Link 
+                href="/login?redirect=/checkout" 
+                className="store-button store-button-dark"
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", padding: "14px 28px", borderRadius: "100px", fontSize: "13px", fontWeight: "600", textDecoration: "none" }}
+              >
+                Sign In to Account <ArrowRight size={14} />
+              </Link>
+              
+              <Link 
+                href="/register?redirect=/checkout" 
+                className="store-button"
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "14px 28px", borderRadius: "100px", fontSize: "13px", fontWeight: "600", border: "1.5px solid var(--border)", background: "transparent", color: "var(--charcoal)", textDecoration: "none" }}
+              >
+                Create New Account
+              </Link>
+            </div>
+            
+            <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: "28px", letterSpacing: "0.04em" }}>
+              🔒 256-bit Encryption Secured Session
+            </p>
           </div>
         </main>
         <Footer />
