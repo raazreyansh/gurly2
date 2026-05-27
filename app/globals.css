@@ -46,8 +46,8 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: var(--warm-white);
-  color: var(--charcoal);
+  background: #ffffff;
+  color: #0a0a0a;
   line-height: 1.6;
   overflow-x: hidden;
 }
@@ -320,11 +320,8 @@ a {
 
 .storefront-shell {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 15% 10%, rgba(186, 230, 253, 0.72), transparent 28rem),
-    radial-gradient(circle at 78% 0%, rgba(224, 231, 255, 0.78), transparent 30rem),
-    linear-gradient(180deg, #eff9ff 0%, #fbfdff 44%, #fffaf7 100%);
-  color: var(--charcoal);
+  background: #ffffff;
+  color: #0a0a0a;
   overflow-x: hidden;
 }
 

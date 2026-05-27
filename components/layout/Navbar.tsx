@@ -1,25 +1,16 @@
 "use client"
 
 import Link from "next/link"
-import { Gift, Heart, Home, Menu, Search, ShoppingBag, Sparkles, User, X } from "lucide-react"
+import { Search, ShoppingBag, X, Menu } from "lucide-react"
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useCart } from "@/store/cart"
 import { CartDrawer } from "@/components/cart/CartDrawer"
 
-const navItems = [
+const navLinks = [
   { label: "Shop", href: "/shop" },
   { label: "Earrings", href: "/shop?category=earrings" },
   { label: "Collections", href: "/shop?category=bracelets" },
-  { label: "Gift Sets", href: "/shop?category=new-arrivals" },
-  { label: "About", href: "/about" },
-]
-
-const mobileItems = [
-  { label: "Home", href: "/", Icon: Home },
-  { label: "Shop", href: "/shop", Icon: Sparkles },
-  { label: "Gifts", href: "/shop?category=new-arrivals", Icon: Gift },
-  { label: "Wishlist", href: "/wishlist", Icon: Heart },
 ]
 
 export function Navbar() {
@@ -32,155 +23,137 @@ export function Navbar() {
   const cartCount = count()
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 30)
-    handler()
+    const handler = () => setScrolled(window.scrollY > 20)
     window.addEventListener("scroll", handler)
     return () => window.removeEventListener("scroll", handler)
   }, [])
 
-  function submitSearch(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  function submitSearch(e: React.FormEvent) {
+    e.preventDefault()
     const q = searchQ.trim()
     if (q) window.location.href = `/search?q=${encodeURIComponent(q)}`
   }
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        scrolled 
-          ? "bg-[#041C12] border-b border-[#DFBA73]/15 py-4 shadow-xl" 
-          : "bg-transparent border-b border-[#F7F4EB]/5 py-6"
-      }`}>
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
-          <Link href="/" className="font-serif text-2xl font-normal tracking-[0.15em] text-[#F7F4EB] hover:text-[#DFBA73] transition-colors" aria-label="GURLY home">
-            GURLY<span className="text-[#DFBA73]">.</span>
+      <header
+        className={`fixed top-0 left-0 right-0 z-40 bg-white transition-all duration-200 ${
+          scrolled ? "border-b border-[#E8E8E8]" : "border-b border-transparent"
+        }`}
+      >
+        <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-14 flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="font-sans text-sm font-black tracking-[0.18em] uppercase text-black" aria-label="GURLY home">
+            GURLY
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-[9px] font-extrabold uppercase tracking-[0.25em]" aria-label="Primary navigation">
-            {navItems.map((item) => (
-              <Link key={item.href} href={item.href} className="text-[#C8C5B9] hover:text-[#DFBA73] transition-colors">
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-8" aria-label="Primary navigation">
+            {navLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-[11px] font-bold uppercase tracking-[0.14em] text-black/60 hover:text-black transition-colors"
+              >
                 {item.label}
               </Link>
             ))}
           </nav>
 
-          <div className="flex items-center gap-3 text-[#F7F4EB]">
+          {/* Actions */}
+          <div className="flex items-center gap-1">
             <button
               id="nav-search-btn"
               type="button"
               aria-label="Search"
-              onClick={() => setSearchOpen((value) => !value)}
-              className="w-10 h-10 hover:text-[#DFBA73] flex items-center justify-center transition-colors"
+              onClick={() => setSearchOpen((v) => !v)}
+              className="w-9 h-9 flex items-center justify-center text-black/60 hover:text-black transition-colors"
             >
-              <Search size={16} />
+              <Search size={15} />
             </button>
-            <Link href="/wishlist" id="nav-wishlist-link" aria-label="Wishlist" className="w-10 h-10 hover:text-[#DFBA73] hidden sm:flex items-center justify-center transition-colors">
-              <Heart size={16} />
-            </Link>
             <button
               id="nav-cart-link"
               type="button"
               aria-label="Cart"
-              className="w-10 h-10 hover:text-[#DFBA73] flex items-center justify-center transition-colors relative"
+              className="w-9 h-9 flex items-center justify-center text-black/60 hover:text-black transition-colors relative"
               onClick={() => setCartOpen(true)}
             >
-              <ShoppingBag size={16} />
+              <ShoppingBag size={15} />
               <AnimatePresence>
                 {cartCount > 0 && (
                   <motion.span
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.5, opacity: 0 }}
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-[#DFBA73] text-[#041C12] text-[8px] font-extrabold flex items-center justify-center rounded-none"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-black text-white text-[8px] font-black flex items-center justify-center rounded-full"
                   >
                     {cartCount}
                   </motion.span>
                 )}
               </AnimatePresence>
             </button>
-            <Link href="/account" id="nav-account-link" aria-label="Account" className="w-10 h-10 hover:text-[#DFBA73] hidden sm:flex items-center justify-center transition-colors">
-              <User size={16} />
-            </Link>
             <button
               type="button"
-              className="w-10 h-10 hover:text-[#DFBA73] flex md:hidden items-center justify-center transition-colors"
+              className="w-9 h-9 flex items-center justify-center text-black/60 hover:text-black transition-colors md:hidden"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
-              onClick={() => setMenuOpen((value) => !value)}
+              onClick={() => setMenuOpen((v) => !v)}
             >
-              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+              {menuOpen ? <X size={16} /> : <Menu size={16} />}
             </button>
           </div>
         </div>
 
-        {/* Search Panel */}
+        {/* Search Bar */}
         <AnimatePresence>
           {searchOpen && (
-            <motion.div 
-              className="w-full bg-[#03170F] border-b border-[#DFBA73]/30 shadow-2xl py-4 overflow-hidden"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="overflow-hidden border-t border-[#E8E8E8]"
             >
-              <form onSubmit={submitSearch} className="max-w-3xl mx-auto px-6 flex items-center gap-3">
-                <Search size={15} className="text-[#DFBA73]" />
+              <form onSubmit={submitSearch} className="max-w-[1400px] mx-auto px-6 md:px-10 h-11 flex items-center gap-3">
+                <Search size={13} className="text-black/30 shrink-0" />
                 <input
                   id="nav-search-input"
                   autoFocus
                   value={searchQ}
-                  onChange={(event) => setSearchQ(event.target.value)}
-                  placeholder="SEARCH JEWELRY, BRACELETS, Sovereign Collections..."
-                  className="w-full bg-transparent text-[10px] font-extrabold uppercase tracking-widest text-[#F7F4EB] outline-none placeholder-[#263D34]"
+                  onChange={(e) => setSearchQ(e.target.value)}
+                  placeholder="Search products…"
+                  className="flex-1 text-xs text-black outline-none bg-transparent placeholder-black/30 font-medium"
                 />
-                <button type="submit" className="text-[9px] font-extrabold tracking-widest uppercase text-[#DFBA73] hover:text-white transition-colors">SEARCH</button>
+                <button type="submit" className="text-[10px] font-black uppercase tracking-widest text-black/50 hover:text-black transition-colors shrink-0">Go</button>
               </form>
             </motion.div>
           )}
         </AnimatePresence>
       </header>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div 
-            className="md:hidden fixed top-[73px] left-0 right-0 bottom-0 bg-[#041C12]/98 border-t border-[#DFBA73]/15 flex flex-col p-6 z-30" 
-            data-testid="mobile-menu"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="md:hidden fixed inset-0 z-30 bg-white pt-14 flex flex-col"
           >
-            <div className="flex flex-col gap-6 text-xs font-extrabold uppercase tracking-[0.25em] pt-8">
-              {[...navItems, { label: "Wishlist", href: "/wishlist" }, { label: "Account", href: "/account" }].map((item) => (
-                <Link key={`${item.label}-${item.href}`} href={item.href} onClick={() => setMenuOpen(false)} className="text-[#F7F4EB] hover:text-[#DFBA73] border-b border-[#F7F4EB]/5 pb-3">
+            <nav className="flex flex-col px-6 pt-8 gap-6">
+              {[...navLinks, { label: "Wishlist", href: "/wishlist" }, { label: "Account", href: "/account" }].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-2xl font-black uppercase tracking-tight text-black border-b border-[#E8E8E8] pb-4"
+                >
                   {item.label}
                 </Link>
               ))}
-            </div>
+            </nav>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Mobile Bottom Navigation Shortcuts */}
-      <div className="mobile-bottom-nav md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#03170F]/95 border-t border-[#DFBA73]/15 h-16 flex items-center justify-around text-[#F7F4EB]" aria-label="Mobile shortcuts">
-        {mobileItems.map(({ label, href, Icon }) => (
-          <Link key={href} href={href} className="flex flex-col items-center gap-1 hover:text-[#DFBA73] transition-colors">
-            <Icon size={16} />
-            <span className="text-[8px] font-extrabold uppercase tracking-wider">{label}</span>
-          </Link>
-        ))}
-        <button type="button" onClick={() => setCartOpen(true)} className="flex flex-col items-center gap-1 hover:text-[#DFBA73] transition-colors relative">
-          <div className="relative">
-            <ShoppingBag size={16} />
-            {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 w-3.5 h-3.5 bg-[#DFBA73] text-[#041C12] text-[7px] flex items-center justify-center font-extrabold">
-                {cartCount}
-              </span>
-            )}
-          </div>
-          <span className="text-[8px] font-extrabold uppercase tracking-wider">Cart</span>
-        </button>
-      </div>
 
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
