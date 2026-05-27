@@ -139,6 +139,12 @@ export default function CheckoutPage() {
       if (razorpayKey && Razorpay && !order.id.startsWith("mock_order_")) {
         toast.dismiss(loadId)
         
+        if (razorpayKey.startsWith("rzp_test_")) {
+          toast.info("Test Mode Info: Real banking apps cannot scan test QR codes. To test UPI successfully, choose 'UPI ID/VPA' and enter 'success@razorpay'.", {
+            duration: 8000
+          })
+        }
+        
         const options = {
           key: razorpayKey,
           amount: order.amount ?? Math.round(finalTotal * 100),
