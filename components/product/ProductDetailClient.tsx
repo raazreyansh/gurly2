@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown, Heart, Share2, ShieldCheck, ShoppingBag, Star, Truck } from "lucide-react"
@@ -36,6 +36,20 @@ export function ProductDetailClient({ product, related }: Props) {
   const [isAdding, setIsAdding] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
   const { add } = useCart()
+
+  const [showStickyBar, setShowStickyBar] = useState(false)
+
+  useEffect(() => {
+    function handleScroll() {
+      if (window.scrollY > 400) {
+        setShowStickyBar(true)
+      } else {
+        setShowStickyBar(false)
+      }
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
   
   const images = product.images?.length ? product.images : ["https://images.unsplash.com/photo-1630019852942-f89202989a59?w=1000"]
   const currentImage = images[activeImage] ?? images[0]
@@ -258,6 +272,75 @@ export function ProductDetailClient({ product, related }: Props) {
           </div>
         </section>
       )}
+      {/* Premium Floating Quick Shop Bar for Mobile */}
+      <AnimatePresence>
+        {showStickyBar && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 28 }}
+            className="md:hidden"
+            style={{
+              position: "fixed",
+              bottom: "16px",
+              left: "16px",
+              right: "16px",
+              zIndex: 99,
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(15, 23, 42, 0.08)",
+              borderRadius: "24px",
+              padding: "12px 18px",
+              boxShadow: "0 16px 40px rgba(15, 23, 42, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <img
+                src={images[0]}
+                alt=""
+                style={{ width: "42px", height: "42px", borderRadius: "12px", objectFit: "cover" }}
+              />
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontSize: "12px", fontWeight: "700", color: "#111111", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                  {product.title}
+                </span>
+                <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--charcoal)" }}>
+                  ₹{product.price.toLocaleString("en-IN")}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={addToCart}
+              disabled={product.stock <= 0 || isAdding}
+              style={{
+                background: "#07111f",
+                color: "white",
+                border: "none",
+                borderRadius: "100px",
+                padding: "10px 20px",
+                fontSize: "11px",
+                fontWeight: "800",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(7, 17, 31, 0.2)",
+              }}
+            >
+              {isAdding ? "Adding..." : product.stock > 0 ? "Add to Bag" : "Sold Out"}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

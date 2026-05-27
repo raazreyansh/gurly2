@@ -21,11 +21,13 @@ export async function FeaturedProducts() {
 
         {products && products.length > 0 ? (
           <div className="product-grid">
-            {products.map((p) => (
-              <div key={p.id}>
-                {/* ProductCard imported lazily to avoid circular dep */}
-                <a href={`/product/${p.slug ?? p.id}`} className="card" style={{ display: "block" }}>
-                  <div style={{ aspectRatio: "3/4", overflow: "hidden", background: "var(--cream-dark)" }}>
+            {products.map((p) => {
+              const productPath = p.slug ? `/product/${p.slug}` : (p.id ? `/product/${p.id}` : "/shop")
+              return (
+                <div key={p.id}>
+                  {/* ProductCard imported lazily to avoid circular dep */}
+                  <a href={productPath} className="card" style={{ display: "block" }}>
+                    <div style={{ aspectRatio: "4/5", overflow: "hidden", background: "var(--cream-dark)" }}>
                     <img
                       src={p.images?.[0] ?? "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=600"}
                       alt={p.title}
@@ -40,8 +42,9 @@ export async function FeaturedProducts() {
                     )}
                   </div>
                 </a>
-              </div>
-            ))}
+                </div>
+              )
+            })}
           </div>
         ) : (
           <div style={{ textAlign: "center", padding: "60px", color: "var(--muted)" }}>

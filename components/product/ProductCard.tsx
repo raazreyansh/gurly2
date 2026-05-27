@@ -76,13 +76,15 @@ export function ProductCard({ product, priority = false, loading = false }: Prop
     }
   }
 
+  const productPath = product.slug ? `/product/${product.slug}` : (product.id ? `/product/${product.id}` : "/shop")
+
   return (
     <motion.article
       className="luxury-product-card"
       whileHover={{ y: -8 }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
     >
-      <Link href={`/product/${product.slug ?? product.id}`} aria-label={`View ${product.title}`}>
+      <Link href={productPath} aria-label={`View ${product.title}`}>
         <div className="luxury-product-media">
           <img className="product-primary-image" src={image} alt={product.title} loading={priority ? "eager" : "lazy"} />
           <img className="product-secondary-image" src={secondImage} alt="" loading="lazy" />
@@ -140,9 +142,16 @@ export function ProductCard({ product, priority = false, loading = false }: Prop
             <span>4.9</span>
           </div>
 
-          <div className="product-price-row">
-            <strong className="current-price">₹{product.price.toLocaleString("en-IN")}</strong>
-            {product.compare_at_price && <span className="compare-price">₹{product.compare_at_price.toLocaleString("en-IN")}</span>}
+          <div className="product-price-row flex items-baseline gap-2 mt-2">
+            <strong className="current-price text-[#111111] font-bold">₹{product.price.toLocaleString("en-IN")}</strong>
+            {product.compare_at_price && (
+              <>
+                <span className="compare-price text-slate-400 line-through">₹{product.compare_at_price.toLocaleString("en-IN")}</span>
+                <span className="text-[10px] tracking-wider text-rose-800 bg-rose-100/60 font-bold px-1.5 py-0.5 rounded ml-1" style={{ letterSpacing: "0.04em" }}>
+                  {discount}% OFF
+                </span>
+              </>
+            )}
           </div>
           
           <p className={product.stock > 0 ? "stock-good" : "stock-out"}>

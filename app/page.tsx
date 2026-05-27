@@ -132,6 +132,11 @@ export default function HomePage() {
   const particlesRef = useRef<HTMLDivElement>(null)
   const reduceMotion = useReducedMotion()
 
+  const customerCount = 10000
+  const piecesCount = 500
+  const ratingCount = 4.9
+  const showCounters = Boolean(customerCount && piecesCount && ratingCount)
+
   useEffect(() => {
     let mounted = true
     getProducts({ limit: 8 })
@@ -227,20 +232,22 @@ export default function HomePage() {
               </Link>
             </motion.div>
             
-            <motion.div className="hero-counters" aria-label="Store highlights" variants={childVariants}>
-              <div className="counter-pill">
-                <strong><CountUp end={10000} suffix="+" /></strong>
-                <span>Customers</span>
-              </div>
-              <div className="counter-pill">
-                <strong><CountUp end={500} suffix="+" /></strong>
-                <span>Pieces</span>
-              </div>
-              <div className="counter-pill">
-                <strong><DecimalCountUp end={4.9} /></strong>
-                <span>Rating ★</span>
-              </div>
-            </motion.div>
+            {showCounters && (
+              <motion.div className="hero-counters" aria-label="Store highlights" variants={childVariants}>
+                <div className="counter-pill">
+                  <strong><CountUp end={customerCount} suffix="+" /></strong>
+                  <span>Customers</span>
+                </div>
+                <div className="counter-pill">
+                  <strong><CountUp end={piecesCount} suffix="+" /></strong>
+                  <span>Pieces</span>
+                </div>
+                <div className="counter-pill">
+                  <strong><DecimalCountUp end={ratingCount} /></strong>
+                  <span>Rating ★</span>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
 
           <motion.div
