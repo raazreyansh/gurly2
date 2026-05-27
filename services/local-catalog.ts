@@ -82,7 +82,10 @@ export function readLocalProducts() {
 
   try {
     const raw = window.localStorage.getItem(LOCAL_PRODUCTS_KEY)
-    if (!raw) return []
+    if (!raw) {
+      writeLocalProducts(MOCK_PRODUCTS)
+      return MOCK_PRODUCTS
+    }
 
     const parsed = JSON.parse(raw)
     return Array.isArray(parsed) ? (parsed as Product[]) : []
@@ -127,7 +130,7 @@ export function saveLocalProduct(draft: ProductDraft) {
   return product
 }
 
-export function mergeProducts(primary: Product[], fallback: Product[] = MOCK_PRODUCTS) {
+export function mergeProducts(primary: Product[], fallback: Product[] = []) {
   const seen = new Set<string>()
   const merged: Product[] = []
 

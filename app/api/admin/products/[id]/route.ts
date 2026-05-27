@@ -79,3 +79,25 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     return NextResponse.json({ error: "Failed to update product." }, { status: 500 })
   }
 }
+
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params
+
+  if (!supabaseAdmin) {
+    console.error("Supabase admin client unavailable in delete route; falling back to server catalogue.")
+  } else {
+    const { error } = await supabaseAdmin.from("products").delete().eq("id", id)
+    if (error) {
+      console.error("Supabase delete failed:", error)
+    }
+  }
+
+  try {
+    const { deleteServerProduct } = await import("@/services/server-catalog")
+    await deleteServerProduct(id)
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Failed to delete product in server fallback catalogue:", error)
+    return NextResponse.json({ error: "Failed to delete product." }, { status: 500 })
+  }
+}

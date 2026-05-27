@@ -10,6 +10,7 @@ import Link from "next/link"
 import type { Product } from "@/types/database"
 import { ProductImageUploader } from "@/components/admin/ProductImageUploader"
 import { saveLocalProduct } from "@/services/local-catalog"
+import { Trash2 } from "lucide-react"
 
 const productSchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -40,6 +41,35 @@ export function EditProductForm({ product }: { product: Product }) {
       featured: product.featured,
     },
   })
+
+  async function onDelete() {
+    if (!window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) return
+
+    setLoading(true)
+    try {
+      const { readLocalProducts, writeLocalProducts } = await import("@/services/local-catalog")
+      const existing = readLocalProducts()
+      const next = existing.filter((item) => item.id !== product.id)
+      writeLocalProducts(next)
+
+      const response = await fetch(`/api/admin/products/${product.id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete product from server catalogue")
+      }
+
+      toast.success("Product deleted successfully")
+      router.push("/admin/products")
+      router.refresh()
+    } catch (error) {
+      console.error("Deletion error:", error)
+      toast.error("Could not complete product deletion")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   async function onSubmit(data: ProductForm) {
     setLoading(true)
@@ -149,11 +179,24 @@ export function EditProductForm({ product }: { product: Product }) {
 
         <ProductImageUploader value={imageUrls} onChange={setImageUrls} />
 
-        <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
-          <Link href="/admin/products" className="btn btn-outline">Cancel</Link>
-          <button type="submit" id="save-product-btn" disabled={loading} className="btn btn-primary">
-            {loading ? "Saving..." : "Save Changes"}
+        <div style={{ display: "flex", gap: "12px", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+          <button
+            type="button"
+            id="delete-product-btn"
+            disabled={loading}
+            onClick={onDelete}
+            className="btn btn-rose"
+            style={{ display: "flex", alignItems: "center", gap: "8px", background: "#fee2e2", color: "#ef4444", border: "1.5px solid #fecaca" }}
+          >
+            <Trash2 size={15} /> Delete Product
           </button>
+          
+          <div style={{ display: "flex", gap: "12px" }}>
+            <Link href="/admin/products" className="btn btn-outline">Cancel</Link>
+            <button type="submit" id="save-product-btn" disabled={loading} className="btn btn-primary">
+              {loading ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
         </div>
       </div>
     </form>

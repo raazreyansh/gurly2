@@ -3,6 +3,7 @@ import path from "node:path"
 import type { Product } from "@/types/database"
 import {
   MOCK_CATEGORIES,
+  MOCK_PRODUCTS,
   type ProductDraft,
   slugifyProductTitle,
 } from "@/services/local-catalog"
@@ -27,20 +28,27 @@ function isProduct(value: unknown): value is Product {
   )
 }
 
-export async function readServerProducts() {
+export async function readServerProducts(): Promise<Product[]> {
   try {
     const raw = await readFile(SERVER_PRODUCTS_PATH, "utf8")
     const parsed = JSON.parse(raw)
     return Array.isArray(parsed) ? parsed.filter(isProduct) : []
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code
-    if (code === "ENOENT") return []
+    if (code === "ENOENT") {
+      try {
+        await writeServerProducts(MOCK_PRODUCTS)
+        return MOCK_PRODUCTS
+      } catch {
+        return MOCK_PRODUCTS
+      }
+    }
     console.error("Failed to read server fallback products:", error)
     return []
   }
 }
 
-async function writeServerProducts(products: Product[]) {
+export async function writeServerProducts(products: Product[]) {
   await mkdir(path.dirname(SERVER_PRODUCTS_PATH), { recursive: true })
   await writeFile(SERVER_PRODUCTS_PATH, JSON.stringify(products, null, 2), "utf8")
 }
@@ -48,6 +56,16 @@ async function writeServerProducts(products: Product[]) {
 export async function findServerProduct(idOrSlug: string) {
   const products = await readServerProducts()
   return products.find((product) => product.id === idOrSlug || product.slug === idOrSlug) ?? null
+}
+
+export async function deleteServerProduct(id: string) {
+  try {
+    const products = await readServerProducts()
+    const next = products.filter((item) => item.id !== id)
+    await writeServerProducts(next)
+  } catch (error) {
+    console.error("Failed to delete server product:", error)
+  }
 }
 
 export async function saveServerProduct(draft: ProductDraft, existingProduct?: Product | null) {

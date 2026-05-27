@@ -12,15 +12,19 @@ import { logUnexpectedSupabaseError } from "@/services/supabase-errors"
 import { Product } from "@/types/database"
 
 function browserCatalogProducts() {
-  return mergeProducts(readLocalProducts(), MOCK_PRODUCTS)
+  return readLocalProducts()
 }
 
-async function serverCatalogProducts(fallback: Product[] = MOCK_PRODUCTS) {
+async function serverCatalogProducts(fallback: Product[] = []) {
   if (typeof window !== "undefined") return fallback
 
   try {
     const { readServerProducts } = await import("@/services/server-catalog")
-    return mergeProducts(await readServerProducts(), fallback)
+    const serverProducts = await readServerProducts()
+    if (serverProducts.length > 0) {
+      return serverProducts
+    }
+    return fallback
   } catch (error) {
     logUnexpectedSupabaseError("Exception reading server fallback products:", error)
     return fallback
@@ -70,15 +74,15 @@ export async function getProducts(options?: {
 
     if (error) {
       logUnexpectedSupabaseError("Error fetching products:", error)
-      return filterCatalogProducts(await serverCatalogProducts(MOCK_PRODUCTS), options)
+      return filterCatalogProducts(await serverCatalogProducts([]), options)
     }
     if (!data || data.length === 0) {
-      return filterCatalogProducts(await serverCatalogProducts(MOCK_PRODUCTS), options)
+      return filterCatalogProducts(await serverCatalogProducts([]), options)
     }
-    return filterCatalogProducts(await serverCatalogProducts(data as Product[]), options)
+    return filterCatalogProducts(data as Product[], options)
   } catch (err) {
     logUnexpectedSupabaseError("Exception fetching products:", err)
-    return filterCatalogProducts(await serverCatalogProducts(MOCK_PRODUCTS), options)
+    return filterCatalogProducts(await serverCatalogProducts([]), options)
   }
 }
 

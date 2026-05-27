@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { Edit, Eye, Package, Plus } from "lucide-react"
+import { Edit, Eye, Package, Plus, Trash2 } from "lucide-react"
 import type { Product } from "@/types/database"
 import { LOCAL_PRODUCTS_EVENT, mergeProducts, readLocalProducts } from "@/services/local-catalog"
 
@@ -113,6 +113,36 @@ export function AdminProductsClient({ initialProducts }: Props) {
                       }}>
                         <Edit size={13} />
                       </a>
+                      <button
+                        onClick={async () => {
+                          if (!window.confirm(`Are you sure you want to delete "${product.title}"?`)) return
+                          
+                          try {
+                            const { writeLocalProducts } = await import("@/services/local-catalog")
+                            const nextLocal = localProducts.filter((item) => item.id !== product.id)
+                            writeLocalProducts(nextLocal)
+                            
+                            const response = await fetch(`/api/admin/products/${product.id}`, {
+                              method: "DELETE",
+                            })
+                            
+                            if (response.ok) {
+                              window.location.reload()
+                            } else {
+                              alert("Failed to delete product from database.")
+                            }
+                          } catch (error) {
+                            console.error("Deletion error:", error)
+                            alert("Error deleting product.")
+                          }
+                        }}
+                        style={{
+                          width: "32px", height: "32px", border: "1px solid #fee2e2", borderRadius: "4px",
+                          display: "flex", alignItems: "center", justifyContent: "center", color: "#ef4444", background: "#fee2e2", transition: "all 0.2s", cursor: "pointer",
+                        }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </td>
                 </tr>

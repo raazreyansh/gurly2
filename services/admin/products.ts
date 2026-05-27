@@ -1,20 +1,23 @@
 import { supabase } from "@/lib/supabase/client"
 import { withSupabaseTimeout } from "@/lib/supabase/timeout"
-import { MOCK_PRODUCTS, readLocalProducts, saveLocalProduct } from "@/services/local-catalog"
+import { readLocalProducts, saveLocalProduct } from "@/services/local-catalog"
 import { logUnexpectedSupabaseError } from "@/services/supabase-errors"
 import type { Product } from "@/types/database"
 
 function findFallbackProduct(id: string) {
-  return [...readLocalProducts(), ...MOCK_PRODUCTS].find((product) => product.id === id || product.slug === id) ?? null
+  return readLocalProducts().find((product) => product.id === id || product.slug === id) ?? null
 }
 
-async function serverFallbackProducts(fallback: Product[] = MOCK_PRODUCTS) {
+async function serverFallbackProducts(fallback: Product[] = []) {
   if (typeof window !== "undefined") return fallback
 
   try {
     const { readServerProducts } = await import("@/services/server-catalog")
-    const { mergeProducts } = await import("@/services/local-catalog")
-    return mergeProducts(await readServerProducts(), fallback)
+    const serverProducts = await readServerProducts()
+    if (serverProducts.length > 0) {
+      return serverProducts
+    }
+    return fallback
   } catch (error) {
     logUnexpectedSupabaseError("Exception reading server fallback admin products:", error)
     return fallback
@@ -62,12 +65,12 @@ export async function getAdminProducts() {
 
     if (error) {
       logUnexpectedSupabaseError("Error fetching admin products:", error)
-      return serverFallbackProducts(MOCK_PRODUCTS)
+      return serverFallbackProducts([])
     }
-    return data?.length ? serverFallbackProducts(data as Product[]) : serverFallbackProducts(MOCK_PRODUCTS)
+    return data?.length ? (data as Product[]) : serverFallbackProducts([])
   } catch (err) {
     logUnexpectedSupabaseError("Exception fetching admin products:", err)
-    return serverFallbackProducts(MOCK_PRODUCTS)
+    return serverFallbackProducts([])
   }
 }
 
@@ -118,5 +121,28 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
 }
 
 export async function deleteProduct(id: string) {
-  return supabase.from("products").delete().eq("id", id)
+  // 1. Delete from Supabase Database
+  const result = await supabase.from("products").delete().eq("id", id)
+
+  // 2. Delete from browser Local Storage
+  if (typeof window !== "undefined") {
+    try {
+      const { readLocalProducts, writeLocalProducts } = await import("@/services/local-catalog")
+      const existing = readLocalProducts()
+      const next = existing.filter((item) => item.id !== id)
+      writeLocalProducts(next)
+    } catch (e) {
+      console.error("Local catalog deletion failed:", e)
+    }
+  }
+
+  // 3. Delete from server-side fallback files
+  try {
+    const { deleteServerProduct } = await import("@/services/server-catalog")
+    await deleteServerProduct(id)
+  } catch (e) {
+    // Fail silently in browser context where filesystem is inaccessible
+  }
+
+  return result
 }
