@@ -12,6 +12,8 @@ interface SearchParams {
   sort?: string
 }
 
+export const dynamic = "force-dynamic"
+
 export const metadata = {
   title: "Shop",
   description: "Browse all premium earrings, necklaces, bracelets and accessories from GURLY.",

@@ -38,10 +38,6 @@ export async function getProducts(options?: {
   maxPrice?: number
   limit?: number
 }) {
-  if (typeof window !== "undefined") {
-    return filterCatalogProducts(browserCatalogProducts(), options)
-  }
-
   try {
     let query = supabase
       .from("products")
@@ -72,21 +68,36 @@ export async function getProducts(options?: {
     const data = result?.data
     const error = result?.error
 
-    if (error) {
-      logUnexpectedSupabaseError("Error fetching products:", error)
-      return filterCatalogProducts(await serverCatalogProducts([]), options)
+    if (!error && data && data.length > 0) {
+      return filterCatalogProducts(data as Product[], options)
     }
-    if (!data || data.length === 0) {
-      return filterCatalogProducts(await serverCatalogProducts([]), options)
-    }
-    return filterCatalogProducts(data as Product[], options)
   } catch (err) {
-    logUnexpectedSupabaseError("Exception fetching products:", err)
-    return filterCatalogProducts(await serverCatalogProducts([]), options)
+    logUnexpectedSupabaseError("Exception fetching products from Supabase:", err)
   }
+
+  if (typeof window !== "undefined") {
+    return filterCatalogProducts(browserCatalogProducts(), options)
+  }
+
+  return filterCatalogProducts(await serverCatalogProducts([]), options)
 }
 
 export async function getProductBySlug(slug: string) {
+  try {
+    const result = await withSupabaseTimeout(supabase
+      .from("products")
+      .select("*, categories(name, slug)")
+      .or(`slug.eq.${slug},id.eq.${slug}`)
+      .maybeSingle())
+    const data = result?.data
+
+    if (data) {
+      return data as Product
+    }
+  } catch (err) {
+    logUnexpectedSupabaseError("Exception fetching single product from Supabase:", err)
+  }
+
   if (typeof window !== "undefined") {
     return browserCatalogProducts().find((product) => product.slug === slug || product.id === slug) ?? null
   }
@@ -99,31 +110,12 @@ export async function getProductBySlug(slug: string) {
     logUnexpectedSupabaseError("Exception reading server fallback product:", error)
   }
 
-  try {
-    const result = await withSupabaseTimeout(supabase
-      .from("products")
-      .select("*, categories(name, slug)")
-      .eq("slug", slug)
-      .single())
-    const data = result?.data
-    const error = result?.error
-
-    if (error || !data) {
-      return MOCK_PRODUCTS.find((product) => product.slug === slug || product.id === slug) ?? null
-    }
-    return data as Product | null
-  } catch {
-    return MOCK_PRODUCTS.find((product) => product.slug === slug || product.id === slug) ?? null
-  }
+  return MOCK_PRODUCTS.find((product) => product.slug === slug || product.id === slug) ?? null
 }
 
 export async function searchProducts(term: string) {
   const query = term.trim().toLowerCase()
   if (!query) return []
-
-  if (typeof window !== "undefined") {
-    return searchCatalogProducts(browserCatalogProducts(), query)
-  }
 
   try {
     const result = await withSupabaseTimeout(supabase
@@ -131,15 +123,27 @@ export async function searchProducts(term: string) {
       .select("*, categories(name, slug)")
       .ilike("title", `%${query}%`))
     const data = result?.data
-    const error = result?.error
 
-    if (!error && data && data.length > 0) {
-      return searchCatalogProducts(await serverCatalogProducts(data as Product[]), query)
+    if (data && data.length > 0) {
+      return data as Product[]
     }
-    return searchCatalogProducts(await serverCatalogProducts(MOCK_PRODUCTS), query)
-  } catch {
-    return searchCatalogProducts(await serverCatalogProducts(MOCK_PRODUCTS), query)
+  } catch (err) {
+    logUnexpectedSupabaseError("Exception searching products in Supabase:", err)
   }
+
+  if (typeof window !== "undefined") {
+    return searchCatalogProducts(browserCatalogProducts(), query)
+  }
+
+  try {
+    const { readServerProducts } = await import("@/services/server-catalog")
+    const serverProducts = await readServerProducts()
+    if (serverProducts.length > 0) {
+      return searchCatalogProducts(serverProducts, query)
+    }
+  } catch {}
+
+  return searchCatalogProducts(MOCK_PRODUCTS, query)
 }
 
 export async function getCategories() {

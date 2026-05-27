@@ -83,8 +83,8 @@ export function readLocalProducts() {
   try {
     const raw = window.localStorage.getItem(LOCAL_PRODUCTS_KEY)
     if (!raw) {
-      writeLocalProducts(MOCK_PRODUCTS)
-      return MOCK_PRODUCTS
+      writeLocalProducts([])
+      return []
     }
 
     const parsed = JSON.parse(raw)
