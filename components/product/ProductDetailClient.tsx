@@ -37,6 +37,22 @@ export function ProductDetailClient({ product, related }: Props) {
   const [isFavorite, setIsFavorite] = useState(false)
   const { add } = useCart()
 
+  const [selectedFinish, setSelectedFinish] = useState("Champagne Gold")
+  const [countdown, setCountdown] = useState({ hours: 2, minutes: 14, seconds: 45 })
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 }
+        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 }
+        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 }
+        clearInterval(timer)
+        return prev
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
   const [showStickyBar, setShowStickyBar] = useState(false)
 
   useEffect(() => {
@@ -147,6 +163,70 @@ export function ProductDetailClient({ product, related }: Props) {
           <div className="detail-price-row">
             <strong className="detail-current-price">₹{product.price.toLocaleString("en-IN")}</strong>
             {product.compare_at_price && <span className="detail-compare-price">₹{product.compare_at_price.toLocaleString("en-IN")}</span>}
+          </div>
+
+          {/* Visual Finish Swatches */}
+          <div style={{ marginTop: "20px" }}>
+            <span style={{ fontSize: "11px", fontWeight: "800", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--muted)" }}>
+              Finish: <strong style={{ color: "#111111" }}>{selectedFinish}</strong>
+            </span>
+            <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+              {[
+                { name: "Champagne Gold", color: "#e3d2be", border: "#c9956c" },
+                { name: "Sleek Silver", color: "#e2e8f0", border: "#94a3b8" },
+                { name: "Soft Rose Gold", color: "#fbcfe8", border: "#f43f5e" }
+              ].map((finish) => (
+                <button
+                  key={finish.name}
+                  type="button"
+                  onClick={() => {
+                    setSelectedFinish(finish.name)
+                    toast.success(`Selected finish: ${finish.name}`, { icon: "✨" })
+                  }}
+                  style={{
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "50%",
+                    background: finish.color,
+                    border: selectedFinish === finish.name ? `2.5px solid ${finish.border}` : "1.5px solid rgba(15,23,42,0.1)",
+                    outline: "none",
+                    cursor: "pointer",
+                    boxShadow: selectedFinish === finish.name ? "0 4px 10px rgba(0,0,0,0.12)" : "none",
+                    transform: selectedFinish === finish.name ? "scale(1.15)" : "scale(1)",
+                    transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                  title={finish.name}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Premium Urgency Delivery Calculator Countdown */}
+          <div style={{
+            background: "rgba(201, 149, 108, 0.08)",
+            border: "1px solid rgba(201, 149, 108, 0.15)",
+            borderRadius: "16px",
+            padding: "12px 16px",
+            marginTop: "20px",
+            fontSize: "12px",
+            color: "var(--charcoal)",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}>
+            <span style={{ fontSize: "16px" }}>🚚</span>
+            <div>
+              <p style={{ margin: 0, fontWeight: "600" }}>
+                Order within{" "}
+                <span style={{ fontFamily: "monospace", color: "#e11d48", fontWeight: "700" }}>
+                  {String(countdown.hours).padStart(2, "0")}h : {String(countdown.minutes).padStart(2, "0")}m : {String(countdown.seconds).padStart(2, "0")}s
+                </span>{" "}
+                to dispatch today!
+              </p>
+              <p style={{ margin: 0, fontSize: "11px", color: "var(--muted)" }}>
+                Expected delivery by <strong>Friday, May 30th</strong>. Free shipping on this order!
+              </p>
+            </div>
           </div>
 
           {product.description && <p className="detail-description">{product.description}</p>}

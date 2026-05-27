@@ -29,7 +29,7 @@ export function EditProductForm({ product }: { product: Product }) {
   const [loading, setLoading] = useState(false)
   const [imageUrls, setImageUrls] = useState<string[]>(product.images || [])
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ProductForm>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<ProductForm>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       title: product.title,
@@ -41,6 +41,8 @@ export function EditProductForm({ product }: { product: Product }) {
       featured: product.featured,
     },
   })
+
+  const titleRegister = register("title")
 
   async function onDelete() {
     if (!window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) return
@@ -124,7 +126,15 @@ export function EditProductForm({ product }: { product: Product }) {
           <div style={{ display: "grid", gap: "16px" }}>
             <div>
               <label style={{ fontSize: "12px", fontWeight: "600", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--charcoal-light)", display: "block", marginBottom: "6px" }}>Title *</label>
-              <input {...register("title")} id="product-title" className="input" />
+              <input
+                {...titleRegister}
+                id="product-title"
+                className="input"
+                onChange={(event) => {
+                  titleRegister.onChange(event)
+                  setValue("slug", event.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))
+                }}
+              />
               {errors.title && <p style={{ fontSize: "11px", color: "var(--rose)", marginTop: "4px" }}>{errors.title.message}</p>}
             </div>
 
