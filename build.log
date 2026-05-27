@@ -1,0 +1,69 @@
+﻿
+> gurly2@0.1.0 build
+> next build
+
+▲ Next.js 16.2.6 (Turbopack)
+- Environments: .env.local, .env
+- Experiments (use with caution):
+  · optimizePackageImports
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.8s
+  Running TypeScript ...
+  Finished TypeScript in 8.2s ...
+  Collecting page data using 11 workers ...
+Supabase admin client initialized for URL: https://zhjdwimlgttmfvvxuxei.supabase.co
+Supabase admin client initialized for URL: https://zhjdwimlgttmfvvxuxei.supabase.co
+  Generating static pages using 11 workers (0/36) ...
+  Generating static pages using 11 workers (9/36) 
+  Generating static pages using 11 workers (18/36) 
+  Generating static pages using 11 workers (27/36) 
+✓ Generating static pages using 11 workers (36/36) in 2.3s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /about
+├ ○ /account
+├ ○ /account/notifications
+├ ○ /account/orders
+├ ○ /admin
+├ ○ /admin/analytics
+├ ○ /admin/coupons
+├ ○ /admin/coupons/new
+├ ○ /admin/customers
+├ ○ /admin/inventory
+├ ○ /admin/orders
+├ ○ /admin/products
+├ ƒ /admin/products/[id]/edit
+├ ○ /admin/products/new
+├ ○ /admin/reports
+├ ○ /admin/settings
+├ ƒ /api/admin/products
+├ ƒ /api/admin/products/[id]
+├ ƒ /api/newsletter
+├ ƒ /api/payment/create
+├ ƒ /api/payment/verify
+├ ƒ /api/webhook/payment
+├ ○ /cart
+├ ○ /checkout
+├ ○ /login
+├ ○ /order/success
+├ ○ /privacy
+├ ƒ /product/[slug]
+├ ○ /register
+├ ○ /robots.txt
+├ ƒ /search
+├ ƒ /shop
+├ ○ /sitemap.xml
+├ ○ /support
+├ ○ /terms
+└ ○ /wishlist
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

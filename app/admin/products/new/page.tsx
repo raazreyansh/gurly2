@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { ProductImageUploader } from "@/components/admin/ProductImageUploader"
-import { createProduct } from "@/services/admin/products"
+import { saveLocalProduct } from "@/services/local-catalog"
 
 const productSchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -37,22 +37,40 @@ export default function NewProductPage() {
 
   async function onSubmit(formData: ProductForm) {
     setLoading(true)
+
     try {
-      const { data, error } = await createProduct({
-        ...formData,
-        images: imageUrls,
+      const response = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, images: imageUrls }),
       })
 
-      if (error || !data) {
-        throw error || new Error("Product creation failed")
+      const result = await response.json()
+
+      if (!response.ok || !result?.data) {
+        throw new Error(result?.error || result?.supabaseError || "Product publish failed")
       }
 
-      toast.success("Product created!")
+      if (result?.fallback) {
+        console.warn("Product published to fallback server catalogue; Supabase error:", result.supabaseError)
+        toast.warning(
+          result.supabaseError
+            ? `Saved to fallback catalogue. Supabase error: ${result.supabaseError}`
+            : "Product saved to fallback server catalogue. Supabase publish failed."
+        )
+      } else {
+        toast.success("Product created!")
+      }
+
       router.push("/admin/products")
       router.refresh()
     } catch (error) {
-      console.warn("Product creation failed; falling back to local store:", error)
-      toast.error("Failed to create product")
+      console.warn("Product publish failed; saving locally instead:", error)
+      saveLocalProduct({ ...formData, images: imageUrls })
+      toast.success("Product saved locally")
+      toast.warning("Product was not published to Supabase.")
+      router.push("/admin/products")
+      router.refresh()
     } finally {
       setLoading(false)
     }

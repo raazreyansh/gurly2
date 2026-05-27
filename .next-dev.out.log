@@ -1,0 +1,12 @@
+
+> gurly2@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Environments: .env.local, .env
+✓ Ready in 1183ms
+- Experiments (use with caution):
+  · optimizePackageImports
+
+ GET / 200 in 7.5s (next.js: 1032ms, proxy.ts: 2.3s, application-code: 4.2s)

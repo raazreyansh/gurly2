@@ -8,8 +8,8 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import type { Product } from "@/types/database"
-import { updateProduct } from "@/services/admin/products"
 import { ProductImageUploader } from "@/components/admin/ProductImageUploader"
+import { saveLocalProduct } from "@/services/local-catalog"
 
 const productSchema = z.object({
   title: z.string().min(2, "Title required"),
@@ -43,19 +43,44 @@ export function EditProductForm({ product }: { product: Product }) {
 
   async function onSubmit(data: ProductForm) {
     setLoading(true)
-    try {
-      const { error } = await updateProduct(product.id, {
-        ...data,
-        description: data.description || null,
-        compare_at_price: data.compare_at_price ?? null,
-        images: imageUrls,
-      })
+    const payload = {
+      ...data,
+      description: data.description || null,
+      compare_at_price: data.compare_at_price ?? null,
+      images: imageUrls,
+    }
 
-      if (error) throw error
-      toast.success("Product updated")
+    try {
+      const response = await fetch(`/api/admin/products/${product.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      const result = await response.json()
+
+      if (!response.ok || !result?.data) {
+        throw new Error(result?.error || result?.supabaseError || "Product update failed")
+      }
+
+      if (result?.fallback) {
+        console.warn("Product updated to fallback server catalogue; Supabase error:", result.supabaseError)
+        toast.warning(
+          result.supabaseError
+            ? `Saved to fallback catalogue. Supabase error: ${result.supabaseError}`
+            : "Product saved to fallback server catalogue. Supabase update failed."
+        )
+      } else {
+        toast.success("Product updated")
+      }
       router.push("/admin/products")
-    } catch {
-      toast.error("Failed to update product")
+      router.refresh()
+    } catch (error) {
+      console.warn("Product update failed; saving locally instead:", error)
+      saveLocalProduct({ id: product.id, ...payload })
+      toast.success("Product saved locally")
+      toast.warning("Product was not published to Supabase.")
+      router.push("/admin/products")
+      router.refresh()
     } finally {
       setLoading(false)
     }

@@ -1,164 +1,156 @@
 "use client"
 
 import Link from "next/link"
+import { motion } from "framer-motion"
 import { Heart, ShoppingBag, Star } from "lucide-react"
-import { Product } from "@/types/database"
-import { useCart } from "@/store/cart"
+import { useState } from "react"
 import { toast } from "sonner"
+import { useCart } from "@/store/cart"
+import type { Product } from "@/types/database"
 
 interface Props {
-  product: Product
+  product?: Product
+  priority?: boolean
+  loading?: boolean
 }
 
-export function ProductCard({ product }: Props) {
+export function ProductCard({ product, priority = false, loading = false }: Props) {
   const { add } = useCart()
-  const image = product.images?.[0] ?? "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=600"
-  const image2 = product.images?.[1] ?? image
-  const discount = product.compare_at_price
-    ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
-    : null
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
 
-  function handleAddToCart(e: React.MouseEvent) {
-    e.preventDefault()
-    add({
-      productId: product.id,
-      title: product.title,
-      price: product.price,
-      quantity: 1,
-      image,
-    })
-    toast.success(`${product.title} added to cart`)
+  if (loading || !product) {
+    return (
+      <div className="luxury-product-card loading-skeleton-card" style={{ minHeight: "420px", display: "flex", flexDirection: "column", gap: "12px", padding: "16px" }}>
+        <div style={{ aspectRatio: "3/4", width: "100%", background: "linear-gradient(90deg, #eef9ff 25%, #e0f2fe 50%, #eef9ff 75%)", backgroundSize: "200% 100%", animation: "shimmer 1.5s infinite", borderRadius: "16px" }} />
+        <div style={{ height: "12px", width: "30%", background: "#e0f2fe", borderRadius: "4px" }} />
+        <div style={{ height: "20px", width: "80%", background: "#e0f2fe", borderRadius: "4px" }} />
+        <div style={{ height: "14px", width: "50%", background: "#e0f2fe", borderRadius: "4px" }} />
+      </div>
+    )
+  }
+
+  const image = product.images?.[0] ?? "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=700"
+  const secondImage = product.images?.[1] ?? image
+  const category = product.categories?.name ?? "Girls Accessories"
+  const discount = product.compare_at_price
+    ? Math.max(0, Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100))
+    : 0
+
+  function quickAdd(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault()
+    event.stopPropagation()
+    if (!product) return
+    setIsAdding(true)
+    
+    setTimeout(() => {
+      add({
+        productId: product.id,
+        title: product.title,
+        price: product.price,
+        quantity: 1,
+        image,
+      })
+      toast.success(`${product.title} added to cart`, {
+        icon: "✨",
+        style: {
+          background: "rgba(255, 255, 255, 0.9)",
+          color: "var(--charcoal)",
+          backdropFilter: "blur(20px)",
+          border: "1px solid rgba(244, 63, 94, 0.2)",
+        }
+      })
+      setIsAdding(false)
+    }, 600)
+  }
+
+  function toggleFavorite(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault()
+    event.stopPropagation()
+    const nextState = !isFavorite
+    setIsFavorite(nextState)
+    if (nextState) {
+      toast.success("Added to wishlist", { icon: "💖" })
+    } else {
+      toast.info("Removed from wishlist")
+    }
   }
 
   return (
-    <Link href={`/product/${product.slug ?? product.id}`} className="card" style={{ display: "block" }}>
-      {/* Image */}
-      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "3/4", background: "var(--cream-dark)" }}>
-        <img
-          src={image}
-          alt={product.title}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            transition: "all 0.5s ease",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.src = image2; e.currentTarget.style.transform = "scale(1.05)" }}
-          onMouseLeave={(e) => { e.currentTarget.src = image; e.currentTarget.style.transform = "scale(1)" }}
-        />
+    <motion.article
+      className="luxury-product-card"
+      whileHover={{ y: -8 }}
+      transition={{ type: "spring", stiffness: 260, damping: 22 }}
+    >
+      <Link href={`/product/${product.slug ?? product.id}`} aria-label={`View ${product.title}`}>
+        <div className="luxury-product-media">
+          <img className="product-primary-image" src={image} alt={product.title} loading={priority ? "eager" : "lazy"} />
+          <img className="product-secondary-image" src={secondImage} alt="" loading="lazy" />
 
-        {/* Badges */}
-        <div style={{ position: "absolute", top: "12px", left: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
-          {product.featured && (
-            <span style={{
-              background: "var(--charcoal)",
-              color: "var(--white)",
-              fontSize: "10px",
-              fontWeight: "600",
-              letterSpacing: "0.08em",
-              padding: "3px 8px",
-              borderRadius: "2px",
-              textTransform: "uppercase",
-            }}>
-              Featured
-            </span>
-          )}
-          {discount && (
-            <span style={{
-              background: "var(--rose)",
-              color: "var(--white)",
-              fontSize: "10px",
-              fontWeight: "600",
-              padding: "3px 8px",
-              borderRadius: "2px",
-            }}>
-              -{discount}%
-            </span>
-          )}
-        </div>
+          {/* Luxury overlays & Badges */}
+          <div className="product-card-badges">
+            {product.featured && <span className="badge-featured">Featured</span>}
+            {discount > 0 && <span className="badge-sale">Sale {discount}%</span>}
+          </div>
 
-        {/* Action Buttons (hover) */}
-        <div style={{
-          position: "absolute",
-          bottom: "12px",
-          right: "12px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-          opacity: 0,
-          transition: "opacity 0.3s ease",
-        }}
-          className="product-actions"
-        >
+          {/* Premium wishlist absolute toggle */}
           <button
-            id={`wishlist-${product.id}`}
+            type="button"
+            className={`wishlist-heart-btn ${isFavorite ? "active" : ""}`}
             aria-label="Add to wishlist"
-            onClick={(e) => { e.preventDefault(); toast.success("Added to wishlist") }}
-            style={{
-              width: "36px",
-              height: "36px",
-              background: "var(--white)",
-              border: "none",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "var(--shadow-sm)",
-              cursor: "pointer",
-            }}
+            onClick={toggleFavorite}
           >
-            <Heart size={14} color="var(--charcoal)" />
+            <Heart size={16} fill={isFavorite ? "var(--rose)" : "none"} stroke={isFavorite ? "var(--rose)" : "currentColor"} />
           </button>
-          <button
-            id={`cart-${product.id}`}
-            aria-label="Add to cart"
-            onClick={handleAddToCart}
-            style={{
-              width: "36px",
-              height: "36px",
-              background: "var(--rose)",
-              border: "none",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "var(--shadow-rose)",
-              cursor: "pointer",
-            }}
-          >
-            <ShoppingBag size={14} color="var(--white)" />
-          </button>
-        </div>
-      </div>
 
-      {/* Info */}
-      <div style={{ padding: "16px" }}>
-        <p style={{ fontSize: "11px", color: "var(--muted)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "4px" }}>
-          {(product as Product & { categories?: { name: string } }).categories?.name ?? "Jewellery"}
-        </p>
-        <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "15px", fontWeight: "400", marginBottom: "10px", color: "var(--charcoal)" }}>
-          {product.title}
-        </h3>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span className="price">₹{product.price.toLocaleString("en-IN")}</span>
-          {product.compare_at_price && (
-            <span className="price-compare">₹{product.compare_at_price.toLocaleString("en-IN")}</span>
-          )}
-          {discount && <span className="price-discount">{discount}% off</span>}
+          {/* Quick Add dynamically reveals on hover with slide-up */}
+          <div className="quick-add-container">
+            <button
+              id={`cart-${product.id}`}
+              type="button"
+              className={`premium-quick-add-btn ${isAdding ? "adding" : ""}`}
+              onClick={quickAdd}
+              disabled={product.stock <= 0 || isAdding}
+            >
+              {isAdding ? (
+                <span className="flex items-center gap-2 justify-center">
+                  <span className="shimmer-spinner"></span> ADDING...
+                </span>
+              ) : product.stock > 0 ? (
+                <span className="flex items-center gap-2 justify-center">
+                  <ShoppingBag size={14} /> QUICK ADD
+                </span>
+              ) : (
+                "OUT OF STOCK"
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Stars */}
-        <div style={{ display: "flex", gap: "2px", marginTop: "8px" }}>
-          {[1,2,3,4,5].map((s) => (
-            <Star key={s} size={10} fill={s <= 4 ? "var(--rose)" : "none"} color={s <= 4 ? "var(--rose)" : "var(--border)"} />
-          ))}
-          <span style={{ fontSize: "11px", color: "var(--muted)", marginLeft: "4px" }}>(24)</span>
-        </div>
-      </div>
+        <div className="luxury-product-info">
+          <p className="card-category-label">{category}</p>
+          <h3>{product.title}</h3>
+          
+          <div className="product-rating-row" aria-label="Rated 4.9 out of 5">
+            <div className="stars-wrap">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star key={star} size={11} fill="currentColor" />
+              ))}
+            </div>
+            <span>4.9</span>
+          </div>
 
-      <style>{`
-        .card:hover .product-actions { opacity: 1 !important; }
-      `}</style>
-    </Link>
+          <div className="product-price-row">
+            <strong className="current-price">₹{product.price.toLocaleString("en-IN")}</strong>
+            {product.compare_at_price && <span className="compare-price">₹{product.compare_at_price.toLocaleString("en-IN")}</span>}
+          </div>
+          
+          <p className={product.stock > 0 ? "stock-good" : "stock-out"}>
+            {product.stock > 0 ? `${product.stock} in stock` : "Sold out"}
+          </p>
+        </div>
+      </Link>
+    </motion.article>
   )
 }
+

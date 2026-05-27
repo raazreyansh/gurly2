@@ -56,7 +56,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
 ]
 
-type ProductDraft = {
+export type ProductDraft = {
   id?: string
   title: string
   slug?: string | null

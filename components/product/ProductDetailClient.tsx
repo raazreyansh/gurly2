@@ -1,250 +1,262 @@
 "use client"
 
 import { useState } from "react"
-import { useCart } from "@/store/cart"
-import { Product } from "@/types/database"
-import { toast } from "sonner"
-import { ShoppingBag, Heart, Share2, Star, ChevronLeft, ChevronRight, Truck, RefreshCw, Shield } from "lucide-react"
 import Link from "next/link"
+import { motion, AnimatePresence } from "framer-motion"
+import { ChevronDown, Heart, Share2, ShieldCheck, ShoppingBag, Star, Truck } from "lucide-react"
+import { toast } from "sonner"
+import { ProductCard } from "@/components/product/ProductCard"
+import { useCart } from "@/store/cart"
+import type { Product } from "@/types/database"
 
 interface Props {
   product: Product
   related: Product[]
 }
 
+const accordions = [
+  {
+    title: "Materials and care",
+    body: "Premium plated finish, skin-friendly polish, and smooth edges. Store separately in the GURLY pouch and wipe gently after wear.",
+  },
+  {
+    title: "Shipping and returns",
+    body: "Fast dispatch, free shipping over ₹999, and a 7-day return window for unused accessories in original packaging.",
+  },
+  {
+    title: "Gift packaging",
+    body: "Every order arrives in a soft luxury wrap with gift-ready presentation for birthdays, bridesmaids, and everyday surprises.",
+  },
+]
+
 export function ProductDetailClient({ product, related }: Props) {
   const [activeImage, setActiveImage] = useState(0)
-  const [qty, setQty] = useState(1)
+  const [quantity, setQuantity] = useState(1)
+  const [openAccordion, setOpenAccordion] = useState("Materials and care")
+  const [isAdding, setIsAdding] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(false)
   const { add } = useCart()
-
-  const images = product.images?.length ? product.images : [
-    "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=800"
-  ]
-
+  
+  const images = product.images?.length ? product.images : ["https://images.unsplash.com/photo-1630019852942-f89202989a59?w=1000"]
+  const currentImage = images[activeImage] ?? images[0]
   const discount = product.compare_at_price
     ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
-    : null
+    : 0
 
-  function handleAddToCart() {
-    for (let i = 0; i < qty; i++) {
-      add({
-        productId: product.id,
-        title: product.title,
-        price: product.price,
-        quantity: 1,
-        image: images[0],
+  function addToCart() {
+    setIsAdding(true)
+    setTimeout(() => {
+      for (let index = 0; index < quantity; index += 1) {
+        add({
+          productId: product.id,
+          title: product.title,
+          price: product.price,
+          quantity: 1,
+          image: images[0] ?? "",
+        })
+      }
+      toast.success(`${quantity} x ${product.title} added to bag`, {
+        icon: "✨",
+        style: {
+          background: "rgba(255, 255, 255, 0.9)",
+          color: "var(--charcoal)",
+          backdropFilter: "blur(20px)",
+          border: "1px solid rgba(244, 63, 94, 0.2)",
+        }
       })
+      setIsAdding(false)
+    }, 600)
+  }
+
+  function toggleFavorite() {
+    const nextState = !isFavorite
+    setIsFavorite(nextState)
+    if (nextState) {
+      toast.success("Added to wishlist", { icon: "💖" })
+    } else {
+      toast.info("Removed from wishlist")
     }
-    toast.success(`${qty}× ${product.title} added to cart`)
   }
 
   return (
-    <div className="container" style={{ padding: "48px 24px 80px" }}>
-      {/* Breadcrumb */}
-      <nav style={{ fontSize: "12px", color: "var(--muted)", marginBottom: "32px", display: "flex", gap: "8px", alignItems: "center" }}>
+    <div className="product-detail-shell">
+      <div className="product-breadcrumb">
         <Link href="/">Home</Link>
         <span>/</span>
         <Link href="/shop">Shop</Link>
         <span>/</span>
-        <span style={{ color: "var(--charcoal)" }}>{product.title}</span>
-      </nav>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "48px" }} className="lg:grid-cols-2">
-        {/* Image Gallery */}
-        <div style={{ display: "flex", gap: "12px" }}>
-          {/* Thumbnails */}
-          {images.length > 1 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {images.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveImage(i)}
-                  style={{
-                    width: "72px",
-                    height: "90px",
-                    border: `2px solid ${activeImage === i ? "var(--rose)" : "var(--border)"}`,
-                    borderRadius: "2px",
-                    overflow: "hidden",
-                    cursor: "pointer",
-                    padding: 0,
-                    background: "none",
-                    transition: "border-color 0.2s",
-                  }}
-                >
-                  <img src={img} alt={`View ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Main Image */}
-          <div style={{ flex: 1, position: "relative", aspectRatio: "4/5", overflow: "hidden", borderRadius: "4px", background: "var(--cream-dark)" }}>
-            <img
-              src={images[activeImage]}
-              alt={product.title}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={() => setActiveImage((prev) => (prev - 1 + images.length) % images.length)}
-                  style={{
-                    position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)",
-                    width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.9)",
-                    border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                  }}
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <button
-                  onClick={() => setActiveImage((prev) => (prev + 1) % images.length)}
-                  style={{
-                    position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
-                    width: "36px", height: "36px", borderRadius: "50%", background: "rgba(255,255,255,0.9)",
-                    border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                  }}
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </>
-            )}
-            {discount && (
-              <div style={{ position: "absolute", top: "16px", left: "16px" }}>
-                <span style={{ background: "var(--rose)", color: "var(--white)", padding: "4px 10px", fontSize: "12px", fontWeight: "600", borderRadius: "2px" }}>
-                  -{discount}% OFF
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Product Info */}
-        <div>
-          <p style={{ fontSize: "11px", color: "var(--muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
-            {(product as Product & { categories?: { name: string } }).categories?.name ?? "Jewellery"}
-          </p>
-          <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(24px, 4vw, 36px)", fontWeight: "400", lineHeight: "1.2", marginBottom: "16px" }}>
-            {product.title}
-          </h1>
-
-          {/* Rating */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
-            <div style={{ display: "flex", gap: "2px" }}>
-              {[1,2,3,4,5].map((s) => (
-                <Star key={s} size={14} fill={s <= 4 ? "var(--rose)" : "none"} color={s <= 4 ? "var(--rose)" : "var(--border)"} />
-              ))}
-            </div>
-            <span style={{ fontSize: "13px", color: "var(--muted)" }}>4.8 (24 reviews)</span>
-          </div>
-
-          {/* Price */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "28px" }}>
-            <span style={{ fontFamily: "var(--font-serif)", fontSize: "28px", fontWeight: "500", color: "var(--charcoal)" }}>
-              ₹{product.price.toLocaleString("en-IN")}
-            </span>
-            {product.compare_at_price && (
-              <span className="price-compare" style={{ fontSize: "18px" }}>₹{product.compare_at_price.toLocaleString("en-IN")}</span>
-            )}
-            {discount && <span className="price-discount">{discount}% off</span>}
-          </div>
-
-          {/* Description */}
-          {product.description && (
-            <p style={{ fontSize: "15px", lineHeight: "1.8", color: "var(--charcoal-light)", marginBottom: "32px", borderTop: "1px solid var(--border)", paddingTop: "24px" }}>
-              {product.description}
-            </p>
-          )}
-
-          {/* Quantity */}
-          <div style={{ marginBottom: "24px" }}>
-            <p style={{ fontSize: "12px", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "12px" }}>Quantity</p>
-            <div style={{ display: "flex", alignItems: "center", border: "1.5px solid var(--border)", borderRadius: "2px", width: "fit-content" }}>
-              <button
-                id="qty-minus"
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
-                style={{ width: "44px", height: "44px", background: "none", border: "none", cursor: "pointer", fontSize: "18px", color: "var(--charcoal)" }}
-              >
-                −
-              </button>
-              <span style={{ width: "44px", textAlign: "center", fontSize: "15px", fontWeight: "500" }}>{qty}</span>
-              <button
-                id="qty-plus"
-                onClick={() => setQty((q) => q + 1)}
-                style={{ width: "44px", height: "44px", background: "none", border: "none", cursor: "pointer", fontSize: "18px", color: "var(--charcoal)" }}
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div style={{ display: "flex", gap: "12px", marginBottom: "32px", flexWrap: "wrap" }}>
-            <button
-              id="add-to-cart-btn"
-              onClick={handleAddToCart}
-              className="btn btn-primary"
-              style={{ flex: 1, minWidth: "200px", gap: "10px" }}
-            >
-              <ShoppingBag size={16} />
-              Add to Bag
-            </button>
-            <button
-              id="wishlist-btn"
-              onClick={() => toast.success("Added to wishlist")}
-              className="btn btn-outline"
-              style={{ gap: "8px" }}
-            >
-              <Heart size={15} /> Wishlist
-            </button>
-            <button
-              onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!") }}
-              style={{ width: "44px", height: "44px", border: "1.5px solid var(--border)", borderRadius: "2px", background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--charcoal-light)" }}
-            >
-              <Share2 size={14} />
-            </button>
-          </div>
-
-          {/* Trust Badges */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", borderTop: "1px solid var(--border)", paddingTop: "24px" }}>
-            {[
-              { Icon: Truck, text: "Free shipping on orders above ₹999" },
-              { Icon: RefreshCw, text: "7-day easy returns" },
-              { Icon: Shield, text: "100% authentic & quality guaranteed" },
-            ].map(({ Icon, text }) => (
-              <div key={text} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <Icon size={16} color="var(--rose)" />
-                <span style={{ fontSize: "13px", color: "var(--charcoal-light)" }}>{text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <span className="breadcrumb-active">{product.title}</span>
       </div>
 
-      {/* Related Products */}
-      {related.length > 0 && (
-        <div style={{ marginTop: "80px" }}>
-          <p className="section-subtitle">You might also love</p>
-          <h2 className="section-title" style={{ marginBottom: "32px" }}>Related Products</h2>
-          <div className="product-grid">
-            {related.slice(0, 4).map((p) => (
-              <a key={p.id} href={`/product/${p.slug ?? p.id}`} className="card" style={{ display: "block" }}>
-                <div style={{ aspectRatio: "3/4", overflow: "hidden", background: "var(--cream-dark)" }}>
-                  <img
-                    src={p.images?.[0] ?? "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=600"}
-                    alt={p.title}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                  />
-                </div>
-                <div style={{ padding: "14px" }}>
-                  <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "14px", fontWeight: "400", marginBottom: "6px" }}>{p.title}</h3>
-                  <span className="price">₹{p.price.toLocaleString("en-IN")}</span>
-                </div>
-              </a>
+      <section className="product-detail-layout">
+        <div data-testid="product-gallery" className="luxury-product-gallery">
+          <div className="product-thumb-column">
+            {images.map((image, index) => (
+              <button
+                key={`${image}-${index}`}
+                type="button"
+                className={activeImage === index ? "active" : ""}
+                onClick={() => setActiveImage(index)}
+                aria-label={`View product image ${index + 1}`}
+              >
+                <img src={image} alt="" loading="lazy" />
+              </button>
             ))}
           </div>
+          <div className="product-main-image-wrap">
+            <motion.div 
+              className="product-main-image" 
+              initial={{ opacity: 0.7, scale: 0.98 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              key={currentImage}
+            >
+              <img src={currentImage} alt={product.title} loading="eager" className="detail-zoom-img" />
+              {discount > 0 && <span className="detail-sale-badge">{discount}% OFF</span>}
+            </motion.div>
+          </div>
         </div>
+
+        <aside data-testid="sticky-buy-panel" className="sticky-buy-panel">
+          <p className="store-label">{product.categories?.name ?? "Girls Accessories"}</p>
+          <h1>{product.title}</h1>
+          
+          <div className="detail-rating">
+            <div className="stars-wrap">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star key={star} size={13} fill="currentColor" />
+              ))}
+            </div>
+            <span>4.9 rating (128 reviews)</span>
+          </div>
+
+          <div className="detail-price-row">
+            <strong className="detail-current-price">₹{product.price.toLocaleString("en-IN")}</strong>
+            {product.compare_at_price && <span className="detail-compare-price">₹{product.compare_at_price.toLocaleString("en-IN")}</span>}
+          </div>
+
+          {product.description && <p className="detail-description">{product.description}</p>}
+
+          {/* Luxury Urgency Indicators */}
+          <div className="detail-stock-row">
+            {product.stock > 0 ? (
+              product.stock <= 5 ? (
+                <span className="urgency-pill animate-pulse">
+                  <span className="urgency-dot bg-rose" /> Only {product.stock} left in stock — selling fast!
+                </span>
+              ) : (
+                <span className="urgency-pill stock-available">
+                  <span className="urgency-dot bg-emerald" /> {product.stock} in stock
+                </span>
+              )
+            ) : (
+              <span className="urgency-pill stock-unavailable">
+                <span className="urgency-dot bg-muted" /> Sold out
+              </span>
+            )}
+            <span className="premium-label">Gift-ready dispatch</span>
+          </div>
+
+          <div style={{ display: "flex", gap: "16px", alignItems: "center", marginTop: "24px" }}>
+            <div className="quantity-control" aria-label="Quantity">
+              <button type="button" id="qty-minus" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>-</button>
+              <span>{quantity}</span>
+              <button type="button" id="qty-plus" onClick={() => setQuantity((value) => value + 1)}>+</button>
+            </div>
+
+            <div className="detail-actions" style={{ flex: 1 }}>
+              <button
+                id="add-to-cart-btn"
+                type="button"
+                className={`store-button store-button-dark flex items-center justify-center gap-2 ${isAdding ? "adding" : ""}`}
+                onClick={addToCart}
+                disabled={product.stock <= 0 || isAdding}
+                style={{ flex: 1 }}
+              >
+                {isAdding ? (
+                  <>
+                    <span className="shimmer-spinner"></span> ADDING...
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag size={16} /> ADD TO BAG
+                  </>
+                )}
+              </button>
+              <button
+                id="wishlist-btn"
+                type="button"
+                className={`wishlist-icon-btn ${isFavorite ? "active" : ""}`}
+                onClick={toggleFavorite}
+                aria-label="Add to wishlist"
+              >
+                <Heart size={18} fill={isFavorite ? "var(--rose)" : "none"} stroke={isFavorite ? "var(--rose)" : "currentColor"} />
+              </button>
+              <button
+                type="button"
+                className="share-button"
+                aria-label="Copy product link"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href)
+                  toast.success("Product link copied", { icon: "🔗" })
+                }}
+              >
+                <Share2 size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div className="detail-trust-row">
+            <span><Truck size={15} /> Free shipping over ₹999</span>
+            <span><ShieldCheck size={15} /> Skin-friendly hypoallergenic finish</span>
+          </div>
+
+          <div className="product-accordions">
+            {accordions.map((item) => {
+              const open = openAccordion === item.title
+              return (
+                <div key={item.title} className="product-accordion">
+                  <button type="button" onClick={() => setOpenAccordion(open ? "" : item.title)} aria-expanded={open}>
+                    {item.title}
+                    <motion.span animate={{ rotate: open ? 180 : 0 }}>
+                      <ChevronDown size={17} />
+                    </motion.span>
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {open && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <p>{item.body}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )
+            })}
+          </div>
+        </aside>
+      </section>
+
+      {related.length > 0 && (
+        <section className="store-section product-recommendations" aria-labelledby="recommendations-heading">
+          <div className="section-heading-row">
+            <div>
+              <p className="store-label">Styled together</p>
+              <h2 id="recommendations-heading">Complete the Spark</h2>
+            </div>
+            <Link href="/shop" className="text-link">Shop all</Link>
+          </div>
+          <div className="bestseller-carousel">
+            {related.slice(0, 4).map((item) => (
+              <ProductCard key={item.id} product={item} />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   )

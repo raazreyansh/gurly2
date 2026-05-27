@@ -15,6 +15,18 @@ function browserCatalogProducts() {
   return mergeProducts(readLocalProducts(), MOCK_PRODUCTS)
 }
 
+async function serverCatalogProducts(fallback: Product[] = MOCK_PRODUCTS) {
+  if (typeof window !== "undefined") return fallback
+
+  try {
+    const { readServerProducts } = await import("@/services/server-catalog")
+    return mergeProducts(await readServerProducts(), fallback)
+  } catch (error) {
+    logUnexpectedSupabaseError("Exception reading server fallback products:", error)
+    return fallback
+  }
+}
+
 export async function getProducts(options?: {
   featured?: boolean
   categorySlug?: string
@@ -58,21 +70,29 @@ export async function getProducts(options?: {
 
     if (error) {
       logUnexpectedSupabaseError("Error fetching products:", error)
-      return filterCatalogProducts(MOCK_PRODUCTS, options)
+      return filterCatalogProducts(await serverCatalogProducts(MOCK_PRODUCTS), options)
     }
     if (!data || data.length === 0) {
-      return filterCatalogProducts(MOCK_PRODUCTS, options)
+      return filterCatalogProducts(await serverCatalogProducts(MOCK_PRODUCTS), options)
     }
-    return data as Product[]
+    return filterCatalogProducts(await serverCatalogProducts(data as Product[]), options)
   } catch (err) {
     logUnexpectedSupabaseError("Exception fetching products:", err)
-    return filterCatalogProducts(MOCK_PRODUCTS, options)
+    return filterCatalogProducts(await serverCatalogProducts(MOCK_PRODUCTS), options)
   }
 }
 
 export async function getProductBySlug(slug: string) {
   if (typeof window !== "undefined") {
     return browserCatalogProducts().find((product) => product.slug === slug || product.id === slug) ?? null
+  }
+
+  try {
+    const { findServerProduct } = await import("@/services/server-catalog")
+    const serverProduct = await findServerProduct(slug)
+    if (serverProduct) return serverProduct
+  } catch (error) {
+    logUnexpectedSupabaseError("Exception reading server fallback product:", error)
   }
 
   try {
@@ -110,11 +130,11 @@ export async function searchProducts(term: string) {
     const error = result?.error
 
     if (!error && data && data.length > 0) {
-      return data as Product[]
+      return searchCatalogProducts(await serverCatalogProducts(data as Product[]), query)
     }
-    return searchCatalogProducts(MOCK_PRODUCTS, query)
+    return searchCatalogProducts(await serverCatalogProducts(MOCK_PRODUCTS), query)
   } catch {
-    return searchCatalogProducts(MOCK_PRODUCTS, query)
+    return searchCatalogProducts(await serverCatalogProducts(MOCK_PRODUCTS), query)
   }
 }
 

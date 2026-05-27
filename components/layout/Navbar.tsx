@@ -1,245 +1,179 @@
 "use client"
 
 import Link from "next/link"
-import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Gift, Heart, Home, Menu, Search, ShoppingBag, Sparkles, User, X } from "lucide-react"
+import { useEffect, useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { useCart } from "@/store/cart"
+import { CartDrawer } from "@/components/cart/CartDrawer"
 
 const navItems = [
   { label: "Shop", href: "/shop" },
-  { label: "New Arrivals", href: "/shop?category=new-arrivals" },
   { label: "Earrings", href: "/shop?category=earrings" },
-  { label: "Necklaces", href: "/shop?category=necklaces" },
-  { label: "Bracelets", href: "/shop?category=bracelets" },
-  { label: "Accessories", href: "/shop?category=accessories" },
-  { label: "About Us", href: "/about" },
+  { label: "Collections", href: "/shop?category=bracelets" },
+  { label: "Gift Sets", href: "/shop?category=new-arrivals" },
+  { label: "About", href: "/about" },
+]
+
+const mobileItems = [
+  { label: "Home", href: "/", Icon: Home },
+  { label: "Shop", href: "/shop", Icon: Sparkles },
+  { label: "Gifts", href: "/shop?category=new-arrivals", Icon: Gift },
+  { label: "Wishlist", href: "/wishlist", Icon: Heart },
 ]
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [cartOpen, setCartOpen] = useState(false)
   const [searchQ, setSearchQ] = useState("")
-  const { items } = useCart()
-  const cartCount = items.reduce((a, b) => a + b.quantity, 0)
+  const { count } = useCart()
+  const cartCount = count()
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20)
+    const handler = () => setScrolled(window.scrollY > 30)
+    handler()
     window.addEventListener("scroll", handler)
     return () => window.removeEventListener("scroll", handler)
   }, [])
 
+  function submitSearch(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const q = searchQ.trim()
+    if (q) window.location.href = `/search?q=${encodeURIComponent(q)}`
+  }
+
   return (
     <>
-      <div style={{
-        background: "var(--charcoal)",
-        color: "var(--cream)",
-        fontSize: "11px",
-        fontWeight: "600",
-        letterSpacing: "0.15em",
-        textTransform: "uppercase",
-        textAlign: "center",
-        padding: "8px 24px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "8px",
-        fontFamily: "var(--font-sans)",
-      }}>
-        <span>✦ LAUNCH SALE: Use code <strong style={{ color: "var(--rose-light)", textDecoration: "underline" }}>LAUNCH30</strong> for 30% OFF all items! ✦</span>
-      </div>
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-          height: "var(--nav-h)",
-          background: scrolled ? "rgba(253,246,238,0.95)" : "var(--cream)",
-          backdropFilter: scrolled ? "blur(12px)" : "none",
-          borderBottom: `1px solid ${scrolled ? "var(--border)" : "transparent"}`,
-          transition: "all 0.3s ease",
-        }}
-      >
-        <div className="container" style={{ height: "100%", display: "flex", alignItems: "center" }}>
-          {/* Logo */}
-          <Link
-            href="/"
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: "26px",
-              fontWeight: "700",
-              letterSpacing: "0.12em",
-              color: "var(--charcoal)",
-              textTransform: "uppercase",
-            }}
-          >
+      <header className={`luxury-nav ${scrolled ? "luxury-nav-scrolled" : "luxury-nav-transparent"}`}>
+        <div className="luxury-nav-inner">
+          <Link href="/" className="luxury-logo" aria-label="GURLY home">
             GURLY
           </Link>
 
-          {/* Nav Links */}
-          <nav style={{ marginLeft: "48px", gap: "32px", alignItems: "center" }} className="hidden md:flex">
+          <nav className="luxury-nav-links hidden md:flex" aria-label="Primary navigation">
             {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                style={{
-                  fontSize: "12px",
-                  fontWeight: "500",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "var(--charcoal-light)",
-                  transition: "color 0.2s ease",
-                  whiteSpace: "nowrap",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--rose)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--charcoal-light)")}
-              >
+              <Link key={item.href} href={item.href} className="mega-menu-link">
                 {item.label}
               </Link>
             ))}
           </nav>
 
-          {/* Right Icons */}
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "20px" }}>
+          <div className="luxury-nav-actions">
             <button
               id="nav-search-btn"
+              type="button"
               aria-label="Search"
-              onClick={() => setSearchOpen(!searchOpen)}
-              style={{ background: "none", border: "none", color: "var(--charcoal-light)", transition: "color 0.2s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--rose)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--charcoal-light)")}
+              onClick={() => setSearchOpen((value) => !value)}
+              className="nav-icon-button"
             >
               <Search size={18} />
             </button>
-            <Link
-              href="/wishlist"
-              id="nav-wishlist-link"
-              aria-label="Wishlist"
-              style={{ color: "var(--charcoal-light)", transition: "color 0.2s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--rose)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--charcoal-light)")}
-            >
+            <Link href="/wishlist" id="nav-wishlist-link" aria-label="Wishlist" className="nav-icon-button hidden sm:inline-flex">
               <Heart size={18} />
             </Link>
-            <Link
-              href="/cart"
+            <button
               id="nav-cart-link"
+              type="button"
               aria-label="Cart"
-              style={{ position: "relative", color: "var(--charcoal-light)", transition: "color 0.2s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--rose)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--charcoal-light)")}
+              className="nav-icon-button nav-cart-button"
+              onClick={() => setCartOpen(true)}
             >
               <ShoppingBag size={18} />
-              {cartCount > 0 && (
-                <span className="badge" style={{ position: "absolute", top: "-8px", right: "-8px", fontSize: "9px" }}>
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-            <Link
-              href="/account"
-              id="nav-account-link"
-              aria-label="Account"
-              style={{ color: "var(--charcoal-light)", transition: "color 0.2s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--rose)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--charcoal-light)")}
-            >
+              <AnimatePresence>
+                {cartCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                  >
+                    {cartCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+            <Link href="/account" id="nav-account-link" aria-label="Account" className="nav-icon-button hidden sm:inline-flex">
               <User size={18} />
             </Link>
-
-            {/* Mobile Menu Toggle */}
             <button
-              className="md:hidden"
+              type="button"
+              className="nav-icon-button md:hidden"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
-              onClick={() => setMenuOpen(!menuOpen)}
-              style={{ background: "none", border: "none", color: "var(--charcoal)" }}
+              onClick={() => setMenuOpen((value) => !value)}
             >
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
 
-        {/* Search Overlay */}
-        {searchOpen && (
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            right: 0,
-            background: "var(--white)",
-            borderBottom: "1px solid var(--border)",
-            padding: "16px 24px",
-            boxShadow: "var(--shadow-md)",
-          }}>
-            <div className="container">
-              <form onSubmit={(e) => { e.preventDefault(); window.location.href = `/search?q=${searchQ}` }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <Search size={16} color="var(--muted)" />
-                  <input
-                    id="nav-search-input"
-                    autoFocus
-                    value={searchQ}
-                    onChange={(e) => setSearchQ(e.target.value)}
-                    placeholder="Search earrings, necklaces, accessories..."
-                    style={{
-                      flex: 1,
-                      border: "none",
-                      outline: "none",
-                      fontSize: "15px",
-                      fontFamily: "var(--font-sans)",
-                      background: "transparent",
-                      color: "var(--charcoal)",
-                    }}
-                  />
-                  <button type="submit" className="btn btn-primary" style={{ padding: "8px 20px", fontSize: "12px" }}>
-                    Search
-                  </button>
-                </div>
+        <AnimatePresence>
+          {searchOpen && (
+            <motion.div 
+              className="luxury-search-panel"
+              initial={{ opacity: 0, y: -15, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: -15, height: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <form onSubmit={submitSearch} className="luxury-search-form">
+                <Search size={17} />
+                <input
+                  id="nav-search-input"
+                  autoFocus
+                  value={searchQ}
+                  onChange={(event) => setSearchQ(event.target.value)}
+                  placeholder="Search earrings, necklaces, gift sets..."
+                />
+                <button type="submit">Search</button>
               </form>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
-      {/* Mobile Menu */}
-      {menuOpen && (
-        <div style={{
-          position: "fixed",
-          top: "var(--nav-h)",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "var(--cream)",
-          zIndex: 99,
-          padding: "32px 24px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-        }} data-testid="mobile-menu">
-          {[
-            ...navItems,
-            { label: "Wishlist", href: "/wishlist" },
-            { label: "Cart", href: "/cart" },
-            { label: "Account", href: "/account" },
-          ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: "24px",
-                fontWeight: "400",
-                color: "var(--charcoal)",
-                padding: "12px 0",
-                borderBottom: "1px solid var(--border)",
-              }}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      )}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div 
+            className="mobile-menu-panel" 
+            data-testid="mobile-menu"
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            transition={{ duration: 0.25 }}
+          >
+            {[...navItems, { label: "Wishlist", href: "/wishlist" }, { label: "Cart", href: "/cart" }, { label: "Account", href: "/account" }].map((item) => (
+              <Link key={`${item.label}-${item.href}`} href={item.href} onClick={() => setMenuOpen(false)}>
+                {item.label}
+              </Link>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="mobile-bottom-nav md:hidden" aria-label="Mobile shortcuts">
+        {mobileItems.map(({ label, href, Icon }) => (
+          <Link key={href} href={href}>
+            <Icon size={17} />
+            <span>{label}</span>
+          </Link>
+        ))}
+        <button type="button" onClick={() => setCartOpen(true)}>
+          <div className="relative">
+            <ShoppingBag size={17} />
+            {cartCount > 0 && (
+              <span className="absolute -top-1.5 -right-2 w-4 h-4 rounded-full bg-rose text-white text-[8px] flex items-center justify-center font-bold">
+                {cartCount}
+              </span>
+            )}
+          </div>
+          <span>Cart</span>
+        </button>
+      </div>
+
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   )
 }
+

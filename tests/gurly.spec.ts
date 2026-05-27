@@ -1,6 +1,23 @@
 import { test, expect } from '@playwright/test'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
 
 const BASE = 'http://localhost:3000'
+const SERVER_PRODUCTS_PATH = path.join(process.cwd(), '.local', 'products.json')
+
+async function removeServerFallbackProducts(match: (product: { id?: string; title?: string }) => boolean) {
+  try {
+    const raw = await readFile(SERVER_PRODUCTS_PATH, 'utf8')
+    const products = JSON.parse(raw)
+    if (!Array.isArray(products)) return
+
+    const next = products.filter((product) => !match(product))
+    await mkdir(path.dirname(SERVER_PRODUCTS_PATH), { recursive: true })
+    await writeFile(SERVER_PRODUCTS_PATH, JSON.stringify(next, null, 2), 'utf8')
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+  }
+}
 
 // ============================================================
 // GURLY — E2E Test Suite
@@ -23,8 +40,28 @@ test.describe('Homepage', () => {
 
   test('hero section renders', async ({ page }) => {
     await page.goto(BASE)
-    await expect(page.locator('h1')).toContainText('Own Your')
+    await expect(page.locator('h1')).toContainText('Own Your Spark')
     await expect(page.locator('#hero-shop-btn')).toBeVisible()
+    await expect(page.getByText('10K+ Customers')).toBeVisible()
+    await expect(page.getByText('500+ Pieces')).toBeVisible()
+    await expect(page.getByText('4.9 Rating')).toBeVisible()
+  })
+
+  test('premium commerce homepage sections render above the fold flow', async ({ page }) => {
+    await page.goto(BASE)
+    await expect(page.getByRole('heading', { name: 'Trending Now' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Shop the Store' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Bestsellers' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Community Spark' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Early Access' })).toBeVisible()
+  })
+
+  test('navbar cart opens right drawer without leaving the storefront', async ({ page }) => {
+    await page.goto(BASE)
+    await page.click('#nav-cart-link')
+    await expect(page).toHaveURL(BASE + '/')
+    await expect(page.getByTestId('cart-drawer')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Your Cart' })).toBeVisible()
   })
 
   test('navbar has all key links', async ({ page }) => {
@@ -163,7 +200,7 @@ test.describe('Search Page', () => {
   test('query parameter pre-fills search and shows matching products', async ({ page }) => {
     await page.goto(`${BASE}/search?q=earrings`)
     await expect(page.locator('#search-input')).toHaveValue('earrings')
-    await expect(page.locator('text=Gold Hoop Earrings')).toBeVisible()
+    await expect(page.locator('a[href="/product/gold-hoop-earrings"]')).toBeVisible()
   })
 })
 
@@ -294,12 +331,12 @@ test.describe('Admin Pages', () => {
   })
 
   test('admin can save product edits when Supabase products table is unavailable', async ({ page }) => {
-    await page.route('**/rest/v1/products*', async (route) => {
+    await page.route('**/api/admin/products/prod-1', async (route) => {
       if (route.request().method() === 'PATCH') {
         await route.fulfill({
-          status: 404,
+          status: 500,
           contentType: 'application/json',
-          body: JSON.stringify({ message: "Could not find the table 'public.products' in the schema cache" }),
+          body: JSON.stringify({ error: 'Simulated backend failure' }),
         })
         return
       }
@@ -347,12 +384,12 @@ test.describe('Admin Pages', () => {
   })
 
   test('admin can create a product when Supabase products table is unavailable', async ({ page }) => {
-    await page.route('**/rest/v1/products*', async (route) => {
+    await page.route('**/api/admin/products', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
-          status: 404,
+          status: 500,
           contentType: 'application/json',
-          body: JSON.stringify({ message: "Could not find the table 'public.products' in the schema cache" }),
+          body: JSON.stringify({ error: 'Simulated backend failure' }),
         })
         return
       }
@@ -371,6 +408,34 @@ test.describe('Admin Pages', () => {
     await expect(page).toHaveURL(/\/admin\/products$/)
     await expect(page.getByText('QA Local Bracelet')).toBeVisible()
     await expect(page.getByText('qa-local-bracelet')).toBeVisible()
+  })
+
+  test('admin-created fallback product appears in customer catalogue and detail pages', async ({ page }) => {
+    const productName = `QA Connected Bracelet ${Date.now()}`
+    const productSlug = productName.toLowerCase().replace(/\s+/g, '-')
+
+    try {
+      await page.goto(`${BASE}/admin/products/new`)
+      await page.fill('#product-title', productName)
+      await page.fill('#product-description', 'Created in admin and visible to customer catalogue pages.')
+      await page.fill('#product-price', '1599')
+      await page.fill('#product-compare-price', '2199')
+      await page.fill('#product-stock', '12')
+      await page.check('#product-featured')
+      await page.click('#publish-product-btn')
+
+      await expect(page).toHaveURL(/\/admin\/products$/)
+      await expect(page.getByText(productName)).toBeVisible()
+
+      await page.goto(`${BASE}/shop`)
+      await expect(page.getByRole('link', { name: new RegExp(productName) })).toBeVisible()
+
+      await page.goto(`${BASE}/product/${productSlug}`)
+      await expect(page.locator('h1')).toContainText(productName)
+      await expect(page.locator('#add-to-cart-btn')).toBeVisible()
+    } finally {
+      await removeServerFallbackProducts((product) => product.title === productName)
+    }
   })
 
   test('admin analytics page loads', async ({ page }) => {
@@ -497,6 +562,17 @@ test.describe('Navigation flows', () => {
     await page.goto(`${BASE}/shop`)
     await page.locator('a:has-text("GURLY")').first().click()
     await expect(page).toHaveURL(BASE + '/')
+  })
+})
+
+test.describe('Product detail commerce UX', () => {
+  test('product page has luxury gallery, sticky buy panel, accordions and recommendations', async ({ page }) => {
+    await page.goto(`${BASE}/product/gold-hoop-earrings`)
+    await expect(page.getByTestId('product-gallery')).toBeVisible()
+    await expect(page.getByTestId('sticky-buy-panel')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Materials and care' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Shipping and returns' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Complete the Spark' })).toBeVisible()
   })
 })
 

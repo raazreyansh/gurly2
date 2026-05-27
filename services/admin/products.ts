@@ -8,6 +8,31 @@ function findFallbackProduct(id: string) {
   return [...readLocalProducts(), ...MOCK_PRODUCTS].find((product) => product.id === id || product.slug === id) ?? null
 }
 
+async function serverFallbackProducts(fallback: Product[] = MOCK_PRODUCTS) {
+  if (typeof window !== "undefined") return fallback
+
+  try {
+    const { readServerProducts } = await import("@/services/server-catalog")
+    const { mergeProducts } = await import("@/services/local-catalog")
+    return mergeProducts(await readServerProducts(), fallback)
+  } catch (error) {
+    logUnexpectedSupabaseError("Exception reading server fallback admin products:", error)
+    return fallback
+  }
+}
+
+async function findServerFallbackProduct(id: string) {
+  if (typeof window !== "undefined") return findFallbackProduct(id)
+
+  try {
+    const { findServerProduct } = await import("@/services/server-catalog")
+    return await findServerProduct(id) ?? findFallbackProduct(id)
+  } catch (error) {
+    logUnexpectedSupabaseError("Exception reading server fallback admin product:", error)
+    return findFallbackProduct(id)
+  }
+}
+
 function saveFallbackProduct(product: Partial<Product>, existing?: Product | null) {
   if (!product.title && !existing?.title) return null
   if (typeof product.price !== "number" && typeof existing?.price !== "number") return null
@@ -37,12 +62,12 @@ export async function getAdminProducts() {
 
     if (error) {
       logUnexpectedSupabaseError("Error fetching admin products:", error)
-      return MOCK_PRODUCTS
+      return serverFallbackProducts(MOCK_PRODUCTS)
     }
-    return data?.length ? (data as Product[]) : MOCK_PRODUCTS
+    return data?.length ? serverFallbackProducts(data as Product[]) : serverFallbackProducts(MOCK_PRODUCTS)
   } catch (err) {
     logUnexpectedSupabaseError("Exception fetching admin products:", err)
-    return MOCK_PRODUCTS
+    return serverFallbackProducts(MOCK_PRODUCTS)
   }
 }
 
@@ -57,11 +82,11 @@ export async function getAdminProductById(id: string) {
     const error = result?.error
 
     if (error || !data) {
-      return findFallbackProduct(id)
+      return findServerFallbackProduct(id)
     }
     return data as Product | null
   } catch {
-    return findFallbackProduct(id)
+    return findServerFallbackProduct(id)
   }
 }
 

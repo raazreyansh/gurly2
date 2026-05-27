@@ -1,8 +1,9 @@
 import { getProducts, getCategories } from "@/services/products"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
-import { SlidersHorizontal } from "lucide-react"
+import { SlidersHorizontal, Sparkles } from "lucide-react"
 import Link from "next/link"
+import { ProductCard } from "@/components/product/ProductCard"
 
 interface SearchParams {
   category?: string
@@ -37,57 +38,65 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     return `/shop?${nextParams.toString()}`
   }
 
+  const categoryName = params.category
+    ? categories?.find((c) => c.slug === params.category)?.name ?? params.category
+    : "All Accessories"
+
   return (
-    <>
+    <div className="storefront-shell flex flex-col min-h-screen">
       <Navbar />
-      <main>
-        {/* Header */}
-        <div style={{ background: "var(--white)", borderBottom: "1px solid var(--border)", padding: "40px 0" }}>
+      
+      <main className="flex-grow">
+        {/* Luxury Header */}
+        <div className="py-12 bg-gradient-to-b from-sky-light/30 to-transparent border-b border-white/40">
           <div className="container">
-            <p style={{ fontSize: "12px", color: "var(--muted)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "8px" }}>
-              {(products?.length ?? 0)} items
-            </p>
-            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "36px", fontWeight: "500" }}>
-              {params.category ? params.category.charAt(0).toUpperCase() + params.category.slice(1) : "All Products"}
+            <div className="flex items-center gap-1.5 mb-2">
+              <Sparkles size={11} className="text-rose" fill="currentColor" />
+              <p className="store-label mb-0">Premium Discovery</p>
+            </div>
+            <h1 className="font-serif text-4xl font-medium text-charcoal">
+              {categoryName}
             </h1>
+            <p className="text-muted text-xs mt-2">
+              Showing {(products?.length ?? 0)} premium piece{(products?.length ?? 0) !== 1 ? "s" : ""}
+            </p>
           </div>
         </div>
 
-        <div className="container" style={{ paddingTop: "32px", paddingBottom: "80px" }}>
-          <div style={{ display: "flex", gap: "40px" }}>
-            {/* Sidebar Filters */}
-            <aside style={{ width: "220px", flexShrink: 0 }} className="hidden md:block">
-              <div style={{ position: "sticky", top: "calc(var(--nav-h) + 24px)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "24px" }}>
-                  <SlidersHorizontal size={15} color="var(--charcoal)" />
-                  <span style={{ fontSize: "12px", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase" }}>Filters</span>
+        <div className="container py-12 px-4">
+          <div className="flex flex-col md:flex-row gap-10">
+            {/* Immersive Glass Sidebar Filters */}
+            <aside className="w-full md:w-[240px] flex-shrink-0">
+              <div className="sticky-buy-panel p-6 bg-white/60 border border-white/70 rounded-3xl sticky top-[118px] space-y-8">
+                
+                <div className="flex items-center gap-2 pb-4 border-b border-slate-100/50">
+                  <SlidersHorizontal size={14} className="text-charcoal" />
+                  <span className="text-xs font-bold tracking-wider uppercase text-charcoal">Filters</span>
                 </div>
 
-                {/* Categories Filter */}
-                <div style={{ marginBottom: "32px" }}>
-                  <h3 style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "16px" }}>Category</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {/* Categories */}
+                <div>
+                  <h3 className="text-[10px] font-extrabold tracking-widest uppercase text-muted mb-4">Category</h3>
+                  <div className="flex flex-col gap-2">
                     <Link
                       href="/shop"
-                      style={{
-                        fontSize: "13px",
-                        color: !params.category ? "var(--rose)" : "var(--charcoal-light)",
-                        fontWeight: !params.category ? "600" : "400",
-                        transition: "color 0.2s",
-                      }}
+                      className={`text-sm py-1.5 px-3 rounded-xl transition-all duration-200 ${
+                        !params.category
+                          ? "bg-rose-light/10 text-rose font-bold"
+                          : "text-charcoal-light hover:text-charcoal hover:bg-slate-100/50"
+                      }`}
                     >
-                      All ({products?.length ?? 0})
+                      All Pieces
                     </Link>
                     {categories?.map((cat) => (
                       <Link
                         key={cat.id}
                         href={`/shop?category=${cat.slug}`}
-                        style={{
-                          fontSize: "13px",
-                          color: params.category === cat.slug ? "var(--rose)" : "var(--charcoal-light)",
-                          fontWeight: params.category === cat.slug ? "600" : "400",
-                          transition: "color 0.2s",
-                        }}
+                        className={`text-sm py-1.5 px-3 rounded-xl transition-all duration-200 ${
+                          params.category === cat.slug
+                            ? "bg-rose-light/10 text-rose font-bold"
+                            : "text-charcoal-light hover:text-charcoal hover:bg-slate-100/50"
+                        }`}
                       >
                         {cat.name}
                       </Link>
@@ -95,64 +104,74 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                   </div>
                 </div>
 
-                {/* Price Filter */}
+                {/* Price Ranges */}
                 <div>
-                  <h3 style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "16px" }}>Price Range</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <h3 className="text-[10px] font-extrabold tracking-widest uppercase text-muted mb-4">Price Range</h3>
+                  <div className="flex flex-col gap-2">
                     {[
                       { label: "Under ₹500", maxPrice: 500 },
                       { label: "₹500 – ₹1,000", minPrice: 500, maxPrice: 1000 },
                       { label: "₹1,000 – ₹2,000", minPrice: 1000, maxPrice: 2000 },
                       { label: "Above ₹2,000", minPrice: 2000 },
-                    ].map(({ label, minPrice: min, maxPrice: max }) => (
-                      <Link
-                        key={label}
-                        href={priceHref({ minPrice: min, maxPrice: max })}
-                        style={{ textAlign: "left", fontSize: "13px", color: "var(--charcoal-light)" }}
-                      >
-                        {label}
-                      </Link>
-                    ))}
+                    ].map(({ label, minPrice: min, maxPrice: max }) => {
+                      const isCurrentPrice = 
+                        params.minPrice === String(min || "") && 
+                        params.maxPrice === String(max || "")
+                      
+                      return (
+                        <Link
+                          key={label}
+                          href={priceHref({ minPrice: min, maxPrice: max })}
+                          className={`text-sm py-1.5 px-3 rounded-xl transition-all duration-200 ${
+                            isCurrentPrice
+                              ? "bg-rose-light/10 text-rose font-bold"
+                              : "text-charcoal-light hover:text-charcoal hover:bg-slate-100/50"
+                          }`}
+                        >
+                          {label}
+                        </Link>
+                      )
+                    })}
                   </div>
                 </div>
+
+                {/* Reset Filters */}
+                {(params.category || params.minPrice || params.maxPrice) && (
+                  <div className="pt-4 border-t border-slate-100/50 text-center">
+                    <Link 
+                      href="/shop" 
+                      className="text-[10px] font-bold tracking-wider uppercase text-muted hover:text-rose transition-colors"
+                    >
+                      Reset All Filters
+                    </Link>
+                  </div>
+                )}
               </div>
             </aside>
 
-            {/* Products */}
-            <div style={{ flex: 1 }}>
+            {/* Product Display Panel */}
+            <div className="flex-1">
               {products && products.length > 0 ? (
-                <div className="product-grid">
+                <div className="product-grid gap-y-10">
                   {products.map((p) => (
-                    <a key={p.id} href={`/product/${p.slug ?? p.id}`} className="card" style={{ display: "block" }}>
-                      <div style={{ aspectRatio: "3/4", overflow: "hidden", background: "var(--cream-dark)" }}>
-                        <img
-                          src={p.images?.[0] ?? "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=600"}
-                          alt={p.title}
-                          style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s" }}
-                          className="hover-scale"
-                        />
-                      </div>
-                      <div style={{ padding: "16px" }}>
-                        <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "15px", fontWeight: "400", marginBottom: "8px" }}>{p.title}</h3>
-                        <span className="price">₹{p.price.toLocaleString("en-IN")}</span>
-                        {p.compare_at_price && (
-                          <span className="price-compare" style={{ marginLeft: "8px" }}>₹{p.compare_at_price.toLocaleString("en-IN")}</span>
-                        )}
-                      </div>
-                    </a>
+                    <ProductCard key={p.id} product={p} />
                   ))}
                 </div>
               ) : (
-                <div style={{ textAlign: "center", padding: "80px", color: "var(--muted)" }}>
-                  <p style={{ fontFamily: "var(--font-serif)", fontSize: "20px", marginBottom: "8px" }}>No products found</p>
-                  <p style={{ fontSize: "13px" }}>Try a different category or check back soon.</p>
+                <div className="newsletter-glass text-center py-20 rounded-3xl p-12">
+                  <p className="font-serif text-2xl text-charcoal mb-2">No luxury pieces found</p>
+                  <p className="text-muted text-sm mb-6">Try clearing price filter criteria or browsing other categories.</p>
+                  <Link href="/shop" className="store-button store-button-dark">
+                    Browse All Accessories
+                  </Link>
                 </div>
               )}
             </div>
           </div>
         </div>
       </main>
+
       <Footer />
-    </>
+    </div>
   )
 }
