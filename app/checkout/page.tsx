@@ -79,9 +79,23 @@ export default function CheckoutPage() {
   const [addressData, setAddressData] = useState<AddressForm | null>(null)
   const [processing, setProcessing] = useState(false)
 
-  const { register, handleSubmit, formState: { errors } } = useForm<AddressForm>({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<AddressForm>({
     resolver: zodResolver(addressSchema)
   })
+
+  useEffect(() => {
+    if (user) {
+      reset({
+        name: user.user_metadata?.full_name || "",
+        phone: user.phone || user.user_metadata?.phone || "",
+        line1: "",
+        line2: "",
+        city: "",
+        state: "",
+        pincode: "",
+      })
+    }
+  }, [user, reset])
 
   useEffect(() => {
     // Dynamically load Razorpay SDK
