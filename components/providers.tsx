@@ -2,9 +2,17 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Toaster } from "sonner"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem("gurly_local_products")
+      } catch {}
+    }
+  }, [])
+
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {

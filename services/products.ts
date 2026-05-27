@@ -76,7 +76,7 @@ export async function getProducts(options?: {
   }
 
   if (typeof window !== "undefined") {
-    return filterCatalogProducts(browserCatalogProducts(), options)
+    return []
   }
 
   return filterCatalogProducts(await serverCatalogProducts([]), options)
@@ -99,7 +99,7 @@ export async function getProductBySlug(slug: string) {
   }
 
   if (typeof window !== "undefined") {
-    return browserCatalogProducts().find((product) => product.slug === slug || product.id === slug) ?? null
+    return null
   }
 
   try {
@@ -132,7 +132,7 @@ export async function searchProducts(term: string) {
   }
 
   if (typeof window !== "undefined") {
-    return searchCatalogProducts(browserCatalogProducts(), query)
+    return []
   }
 
   try {
