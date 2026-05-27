@@ -1,6 +1,7 @@
 import { getAdminProducts } from "@/services/admin/products"
 import { AdminProductsClient } from "@/components/admin/AdminProductsClient"
 
+export const dynamic = "force-dynamic"
 export const metadata = { title: "Products" }
 
 export default async function AdminProductsPage() {
