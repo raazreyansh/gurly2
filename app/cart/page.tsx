@@ -18,24 +18,24 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="storefront-shell bg-[#0C0C0C] text-[#FEFDF0] flex flex-col min-h-screen font-sans">
+      <div className="storefront-shell bg-[#041C12] text-[#F7F4EB] flex flex-col min-h-screen font-sans">
         <Navbar />
         <main className="flex-grow flex items-center justify-center py-32 px-6">
           <motion.div 
-            className="bg-[#141414] border border-[#FEFDF0]/5 max-w-lg w-full text-center p-16 rounded-none"
+            className="bg-[#03170F] border border-[#DFBA73]/15 max-w-lg w-full text-center p-16 rounded-none"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="w-16 h-16 bg-[#FFE600]/10 text-[#FFE600] rounded-none flex items-center justify-center mx-auto mb-8">
+            <div className="w-16 h-16 bg-[#DFBA73]/10 text-[#DFBA73] rounded-none flex items-center justify-center mx-auto mb-8">
               <ShoppingBag size={24} />
             </div>
-            <h1 className="font-serif text-3xl font-light mb-4">Your Shopping Bag is Empty</h1>
-            <p className="text-[#A6A498] text-xs max-w-sm mx-auto mb-10 leading-relaxed uppercase tracking-wider">
-              Looks like you haven&apos;t added any luxury jewelry or premium accessories to your selection yet.
+            <h1 className="font-serif text-3xl font-light mb-4">Your Ledger is Empty</h1>
+            <p className="text-[#C8C5B9] text-xs max-w-sm mx-auto mb-10 leading-relaxed uppercase tracking-wider">
+              Looks like you haven&apos;t added any sovereign luxury jewelry or premium accessories to your selection yet.
             </p>
-            <Link href="/shop" className="px-8 py-4 bg-[#FFE600] hover:bg-white text-black text-[10px] uppercase font-extrabold tracking-widest transition-colors duration-300 rounded-none inline-block">
-              Explore Our Store
+            <Link href="/shop" className="px-8 py-4 bg-[#DFBA73] hover:bg-[#F7F4EB] text-[#041C12] text-[10px] uppercase font-extrabold tracking-widest transition-colors duration-300 rounded-none inline-block">
+              Explore Our Ledger
             </Link>
           </motion.div>
         </main>
@@ -45,17 +45,17 @@ export default function CartPage() {
   }
 
   return (
-    <div className="storefront-shell bg-[#0C0C0C] text-[#FEFDF0] flex flex-col min-h-screen font-sans">
+    <div className="storefront-shell bg-[#041C12] text-[#F7F4EB] flex flex-col min-h-screen font-sans">
       <Navbar />
       
       <main className="flex-grow pb-32 pt-24">
         {/* Luxury Page Header */}
-        <div className="py-16 bg-[#0E0E0E] border-b border-[#FEFDF0]/10">
+        <div className="py-16 bg-[#03170F] border-b border-[#DFBA73]/15">
           <div className="max-w-7xl mx-auto px-6 md:px-12 text-left">
-            <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#FFE600] uppercase mb-2">LUXURY SELECTION</p>
-            <h1 className="font-serif text-4xl md:text-5xl font-light text-[#FEFDF0]">Your Shopping Bag</h1>
-            <p className="text-[#A6A498] text-xs mt-3 uppercase tracking-wider">
-              {items.reduce((a, b) => a + b.quantity, 0)} item{items.reduce((a, b) => a + b.quantity, 0) !== 1 ? "s" : ""} selected
+            <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#DFBA73] uppercase mb-2">SOVEREIGN LEDGER</p>
+            <h1 className="font-serif text-4xl md:text-5xl font-light text-[#F7F4EB]">Your Selection Tray</h1>
+            <p className="text-[#C8C5B9] text-xs mt-3 uppercase tracking-wider">
+              {items.reduce((a, b) => a + b.quantity, 0)} item{items.reduce((a, b) => a + b.quantity, 0) !== 1 ? "s" : ""} selected in ledger
             </p>
           </div>
         </div>
@@ -70,7 +70,7 @@ export default function CartPage() {
                   {items.map((item) => (
                     <motion.div 
                       key={item.productId} 
-                      className="bg-[#141414] border border-[#FEFDF0]/5 p-6 rounded-none grid grid-cols-1 sm:grid-cols-[100px_1fr_auto] gap-6 items-center text-left"
+                      className="bg-[#03170F] border border-[#DFBA73]/10 p-6 rounded-none grid grid-cols-1 sm:grid-cols-[100px_1fr_auto] gap-6 items-center text-left"
                       layout
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -80,20 +80,20 @@ export default function CartPage() {
                       <img
                         src={item.image}
                         alt={item.title}
-                        className="w-full sm:w-[100px] h-[130px] object-cover border border-[#FEFDF0]/5 rounded-none flex-shrink-0"
+                        className="w-full sm:w-[100px] h-[130px] object-cover border border-[#DFBA73]/10 rounded-none flex-shrink-0"
                       />
                       <div className="space-y-3">
-                        <span className="text-[9px] font-extrabold tracking-widest text-[#FFE600] uppercase">Earrings & Accessories</span>
-                        <h3 className="font-serif text-xl font-light text-[#FEFDF0] hover:text-[#FFE600] transition-colors">{item.title}</h3>
-                        <p className="text-[#FFE600] font-mono text-sm">₹{item.price.toLocaleString("en-IN")}</p>
+                        <span className="text-[8px] font-extrabold tracking-widest text-[#DFBA73] uppercase">Sovereign Ornaments</span>
+                        <h3 className="font-serif text-xl font-light text-[#F7F4EB] hover:text-[#DFBA73] transition-colors">{item.title}</h3>
+                        <p className="text-[#DFBA73] font-mono text-sm">₹{item.price.toLocaleString("en-IN")}</p>
 
                         {/* Quantity controls */}
                         <div className="flex items-center gap-6 pt-2">
-                          <div className="flex items-center border border-[#FEFDF0]/10 bg-[#0C0C0C] font-extrabold">
+                          <div className="flex items-center border border-[#DFBA73]/20 bg-[#041C12] font-extrabold">
                             <button
                               id={`qty-minus-${item.productId}`}
                               type="button"
-                              className="px-3 py-1.5 hover:text-[#FFE600] transition-colors text-xs"
+                              className="px-3 py-1.5 hover:text-[#DFBA73] transition-colors text-xs"
                               onClick={() => update(item.productId, item.quantity - 1)}
                               aria-label="Decrease quantity"
                             >
@@ -103,7 +103,7 @@ export default function CartPage() {
                             <button
                               id={`qty-plus-${item.productId}`}
                               type="button"
-                              className="px-3 py-1.5 hover:text-[#FFE600] transition-colors text-xs"
+                              className="px-3 py-1.5 hover:text-[#DFBA73] transition-colors text-xs"
                               onClick={() => update(item.productId, item.quantity + 1)}
                               aria-label="Increase quantity"
                             >
@@ -114,14 +114,14 @@ export default function CartPage() {
                           <button
                             id={`remove-${item.productId}`}
                             type="button"
-                            className="text-[#A6A498] hover:text-[#EF4444] transition-colors duration-200"
+                            className="text-[#C8C5B9] hover:text-[#EF4444] transition-colors duration-200"
                             onClick={() => { 
                               remove(item.productId); 
-                              toast.success(`${item.title} removed from bag`, {
+                              toast.success(`${item.title} removed from ledger`, {
                                 style: {
-                                  background: "#161616",
-                                  color: "#FEFDF0",
-                                  border: "1px solid #FFE600",
+                                  background: "#041C12",
+                                  color: "#F7F4EB",
+                                  border: "1px solid #DFBA73",
                                   borderRadius: "0px"
                                 }
                               }) 
@@ -133,7 +133,7 @@ export default function CartPage() {
                         </div>
                       </div>
                       
-                      <div className="font-mono text-lg text-[#FFE600] font-extrabold sm:text-right">
+                      <div className="font-mono text-lg text-[#DFBA73] font-extrabold sm:text-right">
                         ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                       </div>
                     </motion.div>
@@ -141,24 +141,24 @@ export default function CartPage() {
                 </AnimatePresence>
               </div>
 
-              <div className="flex justify-between items-center pt-4 border-t border-[#FEFDF0]/10 uppercase text-[9px] font-extrabold tracking-widest">
+              <div className="flex justify-between items-center pt-4 border-t border-[#DFBA73]/15 uppercase text-[8px] font-extrabold tracking-widest">
                 <button 
                   onClick={() => {
                     clear();
-                    toast.success("Cart cleared", {
+                    toast.success("Ledger cleared", {
                       style: {
-                        background: "#161616",
-                        color: "#FEFDF0",
-                        border: "1px solid #FFE600",
+                        background: "#041C12",
+                        color: "#F7F4EB",
+                        border: "1px solid #DFBA73",
                         borderRadius: "0px"
                       }
                     })
                   }}
-                  className="text-[#A6A498] hover:text-[#FFE600] transition-colors"
+                  className="text-[#C8C5B9] hover:text-[#DFBA73] transition-colors"
                 >
-                  Clear Shopping Bag
+                  Clear Selection Ledger
                 </button>
-                <Link href="/shop" className="text-[#FFE600] hover:text-white border-b border-[#FFE600]/30 hover:border-white pb-0.5 transition-all">
+                <Link href="/shop" className="text-[#DFBA73] hover:text-white border-b border-[#DFBA73]/30 hover:border-white pb-0.5 transition-all">
                   Continue Discovery
                 </Link>
               </div>
@@ -166,23 +166,23 @@ export default function CartPage() {
 
             {/* Sticky Order Summary */}
             <div className="lg:col-span-1">
-              <aside className="bg-[#141414] border border-[#FEFDF0]/5 p-8 rounded-none space-y-6 text-left">
-                <h2 className="font-serif text-2xl font-light text-[#FEFDF0]">Order Summary</h2>
+              <aside className="bg-[#03170F] border border-[#DFBA73]/10 p-8 rounded-none space-y-6 text-left">
+                <h2 className="font-serif text-2xl font-light text-[#F7F4EB]">Valuation Summary</h2>
 
                 {/* Free Shipping bar */}
-                <div className="bg-[#0C0C0C] border border-[#FFE600]/10 p-5">
+                <div className="bg-[#041C12] border border-[#DFBA73]/10 p-5">
                   {subtotal >= shippingThreshold ? (
-                    <p className="text-[10px] font-extrabold tracking-widest text-[#58B47E] text-center uppercase">
+                    <p className="text-[9px] font-extrabold tracking-widest text-[#58B47E] text-center uppercase">
                       ✨ FREE SHIPPING UNLOCKED!
                     </p>
                   ) : (
                     <>
-                      <p className="text-[10px] font-extrabold tracking-widest text-[#D4D2C5] text-center mb-3 uppercase">
-                        Add <strong className="text-[#FFE600]">₹{remainingForFreeShipping.toLocaleString("en-IN")}</strong> more for <strong className="text-[#FFE600]">FREE shipping</strong>
+                      <p className="text-[9px] font-extrabold tracking-widest text-[#C8C5B9] text-center mb-3 uppercase">
+                        Add <strong className="text-[#DFBA73]">₹{remainingForFreeShipping.toLocaleString("en-IN")}</strong> more for <strong className="text-[#DFBA73]">FREE shipping</strong>
                       </p>
-                      <div className="bg-[#FEFDF0]/5 h-1 w-full overflow-hidden">
+                      <div className="bg-[#F7F4EB]/5 h-1 w-full overflow-hidden">
                         <div 
-                          className="bg-[#FFE600] h-full" 
+                          className="bg-[#DFBA73] h-full" 
                           style={{ width: `${progressPercent}%` }}
                         />
                       </div>
@@ -190,54 +190,54 @@ export default function CartPage() {
                   )}
                 </div>
 
-                <div className="space-y-4 text-xs font-extrabold uppercase tracking-widest text-[#A6A498] border-b border-[#FEFDF0]/10 pb-6">
+                <div className="space-y-4 text-[9px] font-extrabold uppercase tracking-widest text-[#C8C5B9] border-b border-[#DFBA73]/15 pb-6">
                   <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span className="text-[#FEFDF0] font-mono">₹{subtotal.toLocaleString("en-IN")}</span>
+                    <span>Ledger Subtotal</span>
+                    <span className="text-[#F7F4EB] font-mono">₹{subtotal.toLocaleString("en-IN")}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span className={shipping === 0 ? "text-[#58B47E] font-extrabold" : "text-[#FEFDF0]"}>
+                    <span>Shipping Courier</span>
+                    <span className={shipping === 0 ? "text-[#58B47E] font-extrabold" : "text-[#F7F4EB]"}>
                       {shipping === 0 ? "FREE" : `₹${shipping}`}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Keepsake Wrapping</span>
+                    <span>Velvet Wrapping</span>
                     <span className="text-[#58B47E] font-extrabold">FREE</span>
                   </div>
                 </div>
 
-                <div className="space-y-2 pb-6 border-b border-[#FEFDF0]/10">
-                  <div className="flex justify-between text-[#FEFDF0] uppercase tracking-widest font-extrabold text-sm">
-                    <span>Total</span>
-                    <span className="font-mono text-[#FFE600] text-lg font-light">₹{(subtotal + shipping).toLocaleString("en-IN")}</span>
+                <div className="space-y-2 pb-6 border-b border-[#DFBA73]/15">
+                  <div className="flex justify-between text-[#F7F4EB] uppercase tracking-widest font-extrabold text-sm">
+                    <span>Total Valuation</span>
+                    <span className="font-mono text-[#DFBA73] text-lg font-light">₹{(subtotal + shipping).toLocaleString("en-IN")}</span>
                   </div>
-                  <p className="text-[8px] text-[#A6A498] tracking-widest text-right uppercase">GST & Custom Duties Included</p>
+                  <p className="text-[8px] text-[#C8C5B9] tracking-widest text-right uppercase">GST & Duties Included</p>
                 </div>
 
                 <div className="space-y-4">
                   <Link 
                     href="/checkout" 
-                    className="w-full py-4 bg-[#FFE600] hover:bg-white text-black text-[10px] uppercase font-extrabold tracking-widest transition-colors flex items-center justify-center gap-2 rounded-none"
+                    className="w-full py-4 bg-[#DFBA73] hover:bg-[#F7F4EB] text-[#041C12] text-[9px] uppercase font-extrabold tracking-widest transition-colors flex items-center justify-center gap-2 rounded-none"
                     id="proceed-checkout-btn"
                   >
-                    Proceed to Checkout <ArrowRight size={13} />
+                    Acquire Selection <ArrowRight size={13} />
                   </Link>
                 </div>
 
                 {/* Trust Seals */}
-                <div className="space-y-3 pt-6 border-t border-[#FEFDF0]/10 text-[9px] font-extrabold tracking-widest uppercase text-[#A6A498]">
+                <div className="space-y-3 pt-6 border-t border-[#DFBA73]/10 text-[8px] font-extrabold tracking-widest uppercase text-[#C8C5B9]">
                   <div className="flex items-center gap-3">
-                    <ShieldCheck size={14} className="text-[#FFE600]" />
+                    <ShieldCheck size={14} className="text-[#DFBA73]" />
                     <span>Secure 256-bit SSL Checkout</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Gift size={14} className="text-[#FFE600]" />
-                    <span>Luxury Keepsake packaging included</span>
+                    <Gift size={14} className="text-[#DFBA73]" />
+                    <span>Sovereign velvet boxes included</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Award size={14} className="text-[#FFE600]" />
-                    <span>Hypoallergenic skin-friendly finish</span>
+                    <Award size={14} className="text-[#DFBA73]" />
+                    <span>Hypoallergenic certified skin-friendly</span>
                   </div>
                 </div>
               </aside>

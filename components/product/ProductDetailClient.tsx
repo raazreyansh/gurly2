@@ -17,15 +17,15 @@ interface Props {
 const accordions = [
   {
     title: "Materials and care",
-    body: "Premium plated finish, skin-friendly polish, and smooth edges. Store separately in the GURLY pouch and wipe gently after wear.",
+    body: "Premium plated finish, skin-friendly polish, and smooth edges. Store separately in the GURLY velvet pouch and wipe gently after wear.",
   },
   {
     title: "Shipping and returns",
-    body: "Fast dispatch, free shipping over ₹999, and a 7-day return window for unused accessories in original packaging.",
+    body: "Fast secure dispatch, free shipping over ₹999, and a 7-day return window for unused accessories in original gold-embossed packaging.",
   },
   {
-    title: "Gift packaging",
-    body: "Every order arrives in a soft luxury wrap with gift-ready presentation for birthdays, bridesmaids, and everyday surprises.",
+    title: "Sovereign Gift packaging",
+    body: "Every piece arrives in a soft velvet wrap with gift-ready presentation for bridesmaids, premium surprises, and cherished celebrations.",
   },
 ]
 
@@ -85,12 +85,12 @@ export function ProductDetailClient({ product, related }: Props) {
           image: images[0] ?? "",
         })
       }
-      toast.success(`${quantity} x ${product.title} added to bag`, {
+      toast.success(`${quantity} x ${product.title} added to ledger`, {
         icon: "✨",
         style: {
-          background: "#161616",
-          color: "#FEFDF0",
-          border: "1px solid #FFE600",
+          background: "#041C12",
+          color: "#F7F4EB",
+          border: "1px solid #DFBA73",
           borderRadius: "0px"
         }
       })
@@ -105,18 +105,18 @@ export function ProductDetailClient({ product, related }: Props) {
       toast.success("Added to wishlist", {
         icon: "💖",
         style: {
-          background: "#161616",
-          color: "#FEFDF0",
-          border: "1px solid #FFE600",
+          background: "#041C12",
+          color: "#F7F4EB",
+          border: "1px solid #DFBA73",
           borderRadius: "0px"
         }
       })
     } else {
       toast.info("Removed from wishlist", {
         style: {
-          background: "#161616",
-          color: "#FEFDF0",
-          border: "1px solid rgba(254, 253, 240, 0.1)",
+          background: "#041C12",
+          color: "#F7F4EB",
+          border: "1px solid rgba(223, 186, 115, 0.1)",
           borderRadius: "0px"
         }
       })
@@ -124,14 +124,14 @@ export function ProductDetailClient({ product, related }: Props) {
   }
 
   return (
-    <div className="product-detail-shell bg-[#0C0C0C] text-[#FEFDF0] min-h-screen pt-28 font-sans max-w-7xl mx-auto px-6 md:px-12">
+    <div className="product-detail-shell bg-[#041C12] text-[#F7F4EB] min-h-screen pt-28 font-sans max-w-7xl mx-auto px-6 md:px-12">
       {/* Breadcrumb */}
-      <div className="product-breadcrumb flex items-center gap-2.5 text-xs text-[#A6A498] uppercase tracking-wider mb-10">
+      <div className="product-breadcrumb flex items-center gap-2.5 text-[9px] text-[#C8C5B9] uppercase tracking-wider mb-10">
         <Link href="/" className="hover:text-white transition-colors">Home</Link>
         <span>/</span>
         <Link href="/shop" className="hover:text-white transition-colors">Shop</Link>
         <span>/</span>
-        <span className="text-[#FFE600] font-extrabold">{product.title}</span>
+        <span className="text-[#DFBA73] font-extrabold">{product.title}</span>
       </div>
 
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
@@ -144,8 +144,8 @@ export function ProductDetailClient({ product, related }: Props) {
                 type="button"
                 className={`w-16 h-20 border transition-all ${
                   activeImage === index 
-                    ? "border-[#FFE600] opacity-100" 
-                    : "border-[#FEFDF0]/10 opacity-60 hover:opacity-100"
+                    ? "border-[#DFBA73] opacity-100" 
+                    : "border-[#F7F4EB]/10 opacity-60 hover:opacity-100"
                 }`}
                 onClick={() => setActiveImage(index)}
                 aria-label={`View product image ${index + 1}`}
@@ -154,7 +154,7 @@ export function ProductDetailClient({ product, related }: Props) {
               </button>
             ))}
           </div>
-          <div className="flex-grow order-1 md:order-2 bg-[#141414] border border-[#FEFDF0]/5 relative aspect-[3/4]">
+          <div className="flex-grow order-1 md:order-2 bg-[#03170F] border border-[#DFBA73]/10 relative aspect-[3/4]">
             <motion.div 
               className="w-full h-full" 
               initial={{ opacity: 0.7 }} 
@@ -164,7 +164,7 @@ export function ProductDetailClient({ product, related }: Props) {
             >
               <img src={currentImage} alt={product.title} loading="eager" className="w-full h-full object-cover" />
               {discount > 0 && (
-                <span className="absolute top-4 left-4 bg-black text-[#FFE600] border border-[#FFE600]/30 text-[10px] font-extrabold px-3 py-1 tracking-widest uppercase">
+                <span className="absolute top-4 left-4 bg-black text-[#DFBA73] border border-[#DFBA73]/30 text-[9px] font-extrabold px-3 py-1 tracking-widest uppercase">
                   {discount}% OFF
                 </span>
               )}
@@ -175,34 +175,34 @@ export function ProductDetailClient({ product, related }: Props) {
         {/* Right Sticky Buy Panel */}
         <aside data-testid="sticky-buy-panel" className="lg:col-span-5 space-y-8 text-left">
           <div>
-            <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#FFE600] uppercase mb-2">{product.categories?.name ?? "Girls Accessories"}</p>
-            <h1 className="font-serif text-3xl md:text-4xl font-light text-[#FEFDF0] leading-tight">{product.title}</h1>
+            <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#DFBA73] uppercase mb-2">{product.categories?.name ?? "Girls Accessories"}</p>
+            <h1 className="font-serif text-3xl md:text-4xl font-light text-[#F7F4EB] leading-tight">{product.title}</h1>
             
-            <div className="flex items-center gap-2 mt-4 text-[#FFE600] text-xs font-extrabold">
+            <div className="flex items-center gap-2 mt-4 text-[#DFBA73] text-[10px] font-extrabold">
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} size={11} fill="currentColor" stroke="none" />
+                  <Star key={star} size={10} fill="currentColor" stroke="none" />
                 ))}
               </div>
-              <span className="text-[#A6A498] ml-1.5 font-light">4.9 rating (128 reviews)</span>
+              <span className="text-[#C8C5B9] ml-1.5 font-light uppercase tracking-wider">4.9 rating (128 reviews)</span>
             </div>
           </div>
 
-          <div className="py-4 border-y border-[#FEFDF0]/10 flex items-baseline gap-3">
-            <strong className="text-3xl font-light text-[#FEFDF0]">₹{product.price.toLocaleString("en-IN")}</strong>
+          <div className="py-4 border-y border-[#DFBA73]/10 flex items-baseline gap-3">
+            <strong className="text-3xl font-light text-[#F7F4EB]">₹{product.price.toLocaleString("en-IN")}</strong>
             {product.compare_at_price && (
-              <span className="text-slate-400 line-through text-sm">₹{product.compare_at_price.toLocaleString("en-IN")}</span>
+              <span className="text-[#C8C5B9]/60 line-through text-sm">₹{product.compare_at_price.toLocaleString("en-IN")}</span>
             )}
           </div>
 
           {/* Visual Finish Swatches */}
           <div className="space-y-3">
-            <span className="text-[10px] font-extrabold tracking-widest text-[#A6A498] uppercase">
-              FINISH: <strong className="text-[#FEFDF0] font-extrabold">{selectedFinish}</strong>
+            <span className="text-[9px] font-extrabold tracking-widest text-[#C8C5B9] uppercase">
+              FINISH: <strong className="text-[#F7F4EB] font-extrabold">{selectedFinish}</strong>
             </span>
             <div className="flex gap-3">
               {[
-                { name: "Champagne Gold", color: "#e3d2be", border: "#FFE600" },
+                { name: "Champagne Gold", color: "#e3d2be", border: "#DFBA73" },
                 { name: "Sleek Silver", color: "#e2e8f0", border: "#FFF" },
                 { name: "Soft Rose Gold", color: "#fbcfe8", border: "#f43f5e" }
               ].map((finish) => (
@@ -213,16 +213,16 @@ export function ProductDetailClient({ product, related }: Props) {
                     setSelectedFinish(finish.name)
                     toast.success(`Selected finish: ${finish.name}`, {
                       style: {
-                        background: "#161616",
-                        color: "#FEFDF0",
-                        border: "1px solid #FFE600",
+                        background: "#041C12",
+                        color: "#F7F4EB",
+                        border: "1px solid #DFBA73",
                         borderRadius: "0px"
                       }
                     })
                   }}
                   className={`w-7 h-7 rounded-none border transition-all ${
                     selectedFinish === finish.name 
-                      ? "border-[#FFE600] scale-110 shadow-lg" 
+                      ? "border-[#DFBA73] scale-110 shadow-lg" 
                       : "border-transparent opacity-75 hover:opacity-100"
                   }`}
                   style={{ background: finish.color }}
@@ -233,51 +233,51 @@ export function ProductDetailClient({ product, related }: Props) {
           </div>
 
           {/* Delivery Urgency Countdown */}
-          <div className="bg-[#141414] border border-[#FFE600]/20 p-5 flex items-start gap-4">
+          <div className="bg-[#03170F] border border-[#DFBA73]/20 p-5 flex items-start gap-4">
             <span className="text-xl">🚚</span>
             <div className="space-y-1">
-              <p className="text-xs font-extrabold text-[#FEFDF0]">
-                Dispatch within{" "}
-                <span className="font-mono text-[#FFE600] font-extrabold text-sm">
+              <p className="text-xs font-extrabold text-[#F7F4EB] uppercase tracking-wider">
+                Sovereign Dispatch within{" "}
+                <span className="font-mono text-[#DFBA73] font-extrabold text-sm">
                   {String(countdown.hours).padStart(2, "0")}h : {String(countdown.minutes).padStart(2, "0")}m : {String(countdown.seconds).padStart(2, "0")}s
                 </span>
               </p>
-              <p className="text-[11px] text-[#A6A498] leading-relaxed">
+              <p className="text-[10px] text-[#C8C5B9] leading-relaxed uppercase tracking-wider">
                 Expected delivery by <strong>Friday, May 30th</strong>. Free shipping applied!
               </p>
             </div>
           </div>
 
           {product.description && (
-            <p className="text-sm text-[#D4D2C5] leading-relaxed">{product.description}</p>
+            <p className="text-xs text-[#C8C5B9] uppercase tracking-wider leading-relaxed">{product.description}</p>
           )}
 
           {/* Stock Indicators */}
-          <div className="flex items-center justify-between text-xs pb-3 border-b border-[#FEFDF0]/10">
+          <div className="flex items-center justify-between text-[9px] pb-3 border-b border-[#DFBA73]/10">
             {product.stock > 0 ? (
               product.stock <= 5 ? (
                 <span className="text-[#EF4444] font-extrabold uppercase tracking-widest animate-pulse flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-[#EF4444]" /> ONLY {product.stock} LEFT IN STOCK
+                  <span className="w-1.5 h-1.5 bg-[#EF4444]" /> ONLY {product.stock} PIECES LEFT IN LEDGER
                 </span>
               ) : (
                 <span className="text-[#58B47E] font-extrabold uppercase tracking-widest flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-[#58B47E]" /> {product.stock} IN STOCK
+                  <span className="w-1.5 h-1.5 bg-[#58B47E]" /> {product.stock} PIECES IN LEDGER
                 </span>
               )
             ) : (
               <span className="text-gray-400 font-extrabold uppercase tracking-widest flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-gray-500" /> OUT OF STOCK
+                <span className="w-1.5 h-1.5 bg-gray-500" /> SOVEREIGN SHORTAGE
               </span>
             )}
-            <span className="text-[#FFE600] text-[10px] font-extrabold tracking-widest uppercase">GIFT BOX READY</span>
+            <span className="text-[#DFBA73] text-[9px] font-extrabold tracking-widest uppercase">VELVET BOX READY</span>
           </div>
 
           <div className="flex gap-4 items-center">
             {/* Quantity */}
-            <div className="flex items-center border border-[#FEFDF0]/20 h-14 bg-[#141414] font-extrabold">
-              <button type="button" className="px-4 py-2 hover:text-[#FFE600]" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>-</button>
+            <div className="flex items-center border border-[#DFBA73]/20 h-14 bg-[#03170F] font-extrabold">
+              <button type="button" className="px-4 py-2 hover:text-[#DFBA73]" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>-</button>
               <span className="px-4 text-xs font-mono">{quantity}</span>
-              <button type="button" className="px-4 py-2 hover:text-[#FFE600]" onClick={() => setQuantity((value) => value + 1)}>+</button>
+              <button type="button" className="px-4 py-2 hover:text-[#DFBA73]" onClick={() => setQuantity((value) => value + 1)}>+</button>
             </div>
 
             {/* Actions */}
@@ -285,66 +285,66 @@ export function ProductDetailClient({ product, related }: Props) {
               <button
                 id="add-to-cart-btn"
                 type="button"
-                className="flex-1 py-4 bg-[#FFE600] hover:bg-white text-black text-[10px] uppercase font-extrabold tracking-[0.2em] transition-colors flex items-center justify-center gap-2"
+                className="flex-1 py-4 bg-[#DFBA73] hover:bg-[#F7F4EB] text-[#041C12] text-[9px] uppercase font-extrabold tracking-[0.2em] transition-colors flex items-center justify-center gap-2"
                 onClick={addToCart}
                 disabled={product.stock <= 0 || isAdding}
               >
                 {isAdding ? (
-                  "ADDING..."
+                  "ACQUIRING..."
                 ) : (
                   <>
-                    <ShoppingBag size={14} /> ADD TO BAG
+                    <ShoppingBag size={14} /> ACQUIRE PIECE
                   </>
                 )}
               </button>
               <button
                 id="wishlist-btn"
                 type="button"
-                className={`w-14 h-14 border border-[#FEFDF0]/10 hover:border-[#FFE600] flex items-center justify-center transition-all ${
-                  isFavorite ? "text-red-500 bg-[#FFE600]/5" : "text-[#FEFDF0] hover:text-[#FFE600]"
+                className={`w-14 h-14 border border-[#DFBA73]/15 hover:border-[#DFBA73] flex items-center justify-center transition-all ${
+                  isFavorite ? "text-red-500 bg-[#DFBA73]/5" : "text-[#F7F4EB] hover:text-[#DFBA73]"
                 }`}
                 onClick={toggleFavorite}
                 aria-label="Add to wishlist"
               >
-                <Heart size={16} fill={isFavorite ? "#EF4444" : "none"} stroke={isFavorite ? "#EF4444" : "currentColor"} />
+                <Heart size={15} fill={isFavorite ? "#EF4444" : "none"} stroke={isFavorite ? "#EF4444" : "currentColor"} />
               </button>
               <button
                 type="button"
-                className="w-14 h-14 border border-[#FEFDF0]/10 hover:border-[#FFE600] text-[#FEFDF0] hover:text-[#FFE600] flex items-center justify-center transition-all"
+                className="w-14 h-14 border border-[#DFBA73]/15 hover:border-[#DFBA73] text-[#F7F4EB] hover:text-[#DFBA73] flex items-center justify-center transition-all"
                 aria-label="Copy product link"
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href)
-                  toast.success("Product link copied", {
+                  toast.success("Acquisition URL copied", {
                     style: {
-                      background: "#161616",
-                      color: "#FEFDF0",
-                      border: "1px solid #FFE600",
+                      background: "#041C12",
+                      color: "#F7F4EB",
+                      border: "1px solid #DFBA73",
                       borderRadius: "0px"
                     }
                   })
                 }}
               >
-                <Share2 size={15} />
+                <Share2 size={14} />
               </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 text-[10px] font-extrabold tracking-widest text-[#A6A498] uppercase">
-            <span className="flex items-center gap-1.5"><Truck size={13} className="text-[#FFE600]" /> FREE DISPATCH</span>
-            <span className="flex items-center gap-1.5"><ShieldCheck size={13} className="text-[#FFE600]" /> HYPOALLERGENIC</span>
+          <div className="flex items-center gap-6 text-[9px] font-extrabold tracking-widest text-[#C8C5B9] uppercase">
+            <span className="flex items-center gap-1.5"><Truck size={13} className="text-[#DFBA73]" /> SECURE DISPATCH</span>
+            <span className="flex items-center gap-1.5"><ShieldCheck size={13} className="text-[#DFBA73]" /> HYPOALLERGENIC</span>
           </div>
 
           {/* Accordions */}
-          <div className="border-t border-[#FEFDF0]/10 pt-4">
+          <div className="border-t border-[#DFBA73]/10 pt-4">
             {accordions.map((item) => {
               const open = openAccordion === item.title
               return (
-                <div key={item.title} className="border-b border-[#FEFDF0]/10 py-4">
+                <div key={item.title} className="border-b border-[#DFBA73]/10 py-4">
                   <button 
                     type="button" 
                     onClick={() => setOpenAccordion(open ? "" : item.title)} 
                     aria-expanded={open}
-                    className="w-full flex items-center justify-between text-xs font-extrabold tracking-widest uppercase text-[#FEFDF0] hover:text-[#FFE600] transition-colors text-left"
+                    className="w-full flex items-center justify-between text-[10px] font-extrabold tracking-widest uppercase text-[#F7F4EB] hover:text-[#DFBA73] transition-colors text-left"
                   >
                     {item.title}
                     <motion.span animate={{ rotate: open ? 180 : 0 }}>
@@ -360,7 +360,7 @@ export function ProductDetailClient({ product, related }: Props) {
                         transition={{ duration: 0.25, ease: "easeInOut" }}
                         style={{ overflow: "hidden" }}
                       >
-                        <p className="text-xs text-[#D4D2C5] leading-relaxed mt-3">{item.body}</p>
+                        <p className="text-xs text-[#C8C5B9] leading-relaxed mt-3">{item.body}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -373,13 +373,13 @@ export function ProductDetailClient({ product, related }: Props) {
 
       {/* Recommendations */}
       {related.length > 0 && (
-        <section className="py-24 border-t border-[#FEFDF0]/10 mt-20 text-left" aria-labelledby="recommendations-heading">
+        <section className="py-24 border-t border-[#DFBA73]/10 mt-20 text-left" aria-labelledby="recommendations-heading">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#FFE600] uppercase mb-2">Styled together</p>
-              <h2 id="recommendations-heading" className="font-serif text-3xl font-light text-[#FEFDF0]">Complete the Spark</h2>
+              <p className="text-[9px] font-extrabold tracking-[0.25em] text-[#DFBA73] uppercase mb-2">Styled together</p>
+              <h2 id="recommendations-heading" className="font-serif text-3xl font-light text-[#F7F4EB]">Complete the Spark</h2>
             </div>
-            <Link href="/shop" className="text-xs font-extrabold tracking-widest uppercase text-[#FFE600] hover:text-white border-b border-[#FFE600]/30 hover:border-white transition-colors pb-0.5">Shop all</Link>
+            <Link href="/shop" className="text-[9px] font-extrabold tracking-widest uppercase text-[#DFBA73] hover:text-white border-b border-[#DFBA73]/30 hover:border-white transition-colors pb-0.5">Shop all</Link>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {related.slice(0, 4).map((item) => (
@@ -397,7 +397,7 @@ export function ProductDetailClient({ product, related }: Props) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
-            className="md:hidden fixed bottom-4 left-4 right-4 z-50 bg-[#161616] border border-[#FFE600]/30 p-3 flex items-center justify-between gap-4"
+            className="md:hidden fixed bottom-4 left-4 right-4 z-50 bg-[#03170F] border border-[#DFBA73]/30 p-3 flex items-center justify-between gap-4"
           >
             <div className="flex items-center gap-3">
               <img
@@ -406,10 +406,10 @@ export function ProductDetailClient({ product, related }: Props) {
                 className="w-10 h-10 object-cover"
               />
               <div className="flex flex-col text-left">
-                <span className="text-xs font-extrabold text-[#FEFDF0] truncate max-w-[140px] uppercase tracking-wider">
+                <span className="text-[10px] font-extrabold text-[#F7F4EB] truncate max-w-[140px] uppercase tracking-wider">
                   {product.title}
                 </span>
-                <span className="text-[11px] font-mono text-[#FFE600]">
+                <span className="text-[11px] font-mono text-[#DFBA73]">
                   ₹{product.price.toLocaleString("en-IN")}
                 </span>
               </div>
@@ -419,9 +419,9 @@ export function ProductDetailClient({ product, related }: Props) {
               type="button"
               onClick={addToCart}
               disabled={product.stock <= 0 || isAdding}
-              className="py-2.5 px-5 bg-[#FFE600] text-black text-[9px] font-extrabold tracking-[0.15em] uppercase rounded-none transition-colors"
+              className="py-2.5 px-5 bg-[#DFBA73] text-[#041C12] text-[9px] font-extrabold tracking-[0.15em] uppercase rounded-none transition-colors"
             >
-              {isAdding ? "Adding..." : product.stock > 0 ? "Add to Bag" : "Sold Out"}
+              {isAdding ? "Acquiring..." : product.stock > 0 ? "Acquire" : "Sold Out"}
             </button>
           </motion.div>
         )}
