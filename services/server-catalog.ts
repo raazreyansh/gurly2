@@ -49,8 +49,12 @@ export async function readServerProducts(): Promise<Product[]> {
 }
 
 export async function writeServerProducts(products: Product[]) {
-  await mkdir(path.dirname(SERVER_PRODUCTS_PATH), { recursive: true })
-  await writeFile(SERVER_PRODUCTS_PATH, JSON.stringify(products, null, 2), "utf8")
+  try {
+    await mkdir(path.dirname(SERVER_PRODUCTS_PATH), { recursive: true })
+    await writeFile(SERVER_PRODUCTS_PATH, JSON.stringify(products, null, 2), "utf8")
+  } catch (error) {
+    console.warn("Failed to write to local server catalogue (expected on read-only platforms like Vercel):", error)
+  }
 }
 
 export async function findServerProduct(idOrSlug: string) {
