@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createProduct } from '@/app/admin/products/actions'
 import { supabase } from '@/lib/supabase'
@@ -25,6 +25,12 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
   // Multi-format media state
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<Array<{ type: string; url: string; name: string }>>([])
+
+  // Image Cropping Studio state fields
+  const [croppingIndex, setCroppingIndex] = useState<number | null>(null)
+  const [zoom, setZoom] = useState<number>(1)
+  const [offsetX, setOffsetX] = useState<number>(0)
+  const [offsetY, setOffsetY] = useState<number>(0)
   
   const activeCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES
 
@@ -202,6 +208,77 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
     })
   }
 
+  // Draw crop preview canvas whenever offsets or zoom sliders adjust
+  useEffect(() => {
+    if (croppingIndex === null) return
+    const file = files[croppingIndex]
+    if (!file) return
+
+    const canvas = document.getElementById('cropCanvas') as HTMLCanvasElement
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const img = new Image()
+    // Use object URL to prevent CORS or load blocks
+    img.src = previews[croppingIndex]?.url || URL.createObjectURL(file)
+    img.onload = () => {
+      // Set high-fidelity editorial canvas boundaries
+      canvas.width = 600
+      canvas.height = 800
+
+      // Clean fill backdrop
+      ctx.fillStyle = '#111111'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      const scale = zoom
+      const w = canvas.width * scale
+      const h = (canvas.width * (img.height / img.width)) * scale
+      
+      const x = (canvas.width - w) / 2 + (offsetX * 3 * scale)
+      const y = (canvas.height - h) / 2 + (offsetY * 3 * scale)
+
+      ctx.drawImage(img, x, y, w, h)
+    }
+  }, [croppingIndex, zoom, offsetX, offsetY])
+
+  const handleApplyCrop = () => {
+    if (croppingIndex === null) return
+    const canvas = document.getElementById('cropCanvas') as HTMLCanvasElement
+    if (!canvas) return
+
+    canvas.toBlob((blob) => {
+      if (!blob) return
+
+      const file = files[croppingIndex]
+      const croppedFile = new File(
+        [blob],
+        file.name.replace(/\.[^/.]+$/, "") + "-cropped.webp",
+        { type: 'image/webp', lastModified: Date.now() }
+      )
+
+      const updatedFiles = [...files]
+      updatedFiles[croppingIndex] = croppedFile
+
+      const updatedPreviews = [...previews]
+      updatedPreviews[croppingIndex] = {
+        type: 'image',
+        url: URL.createObjectURL(croppedFile),
+        name: croppedFile.name
+      }
+
+      setFiles(updatedFiles)
+      setPreviews(updatedPreviews)
+      setCroppingIndex(null)
+      
+      // Reset studio composition parameters
+      setZoom(1)
+      setOffsetX(0)
+      setOffsetY(0)
+    }, 'image/webp', 0.95)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.categoryId) {
@@ -294,7 +371,8 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-3xl border border-neutral-200 p-8 lg:p-12 space-y-8 bg-white text-black select-none">
+    <>
+      <form onSubmit={handleSubmit} className="max-w-3xl border border-neutral-200 p-8 lg:p-12 space-y-8 bg-white text-black select-none">
       {/* Title Header */}
       <h2 className="text-[10px] tracking-[0.25em] font-bold text-neutral-400 uppercase border-b border-neutral-100 pb-3">
         Listing Particulars
@@ -527,13 +605,29 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
                     </div>
                   )}
 
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[9px] font-bold tracking-[0.2em] text-white uppercase cursor-pointer"
-                  >
-                    Remove Asset
-                  </button>
+                  <div className="absolute inset-0 bg-black/85 opacity-0 group-hover:opacity-100 transition flex flex-col justify-stretch select-none">
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="flex-1 border-b border-white/10 text-[8px] font-mono font-bold tracking-[0.2em] text-red-400 hover:bg-red-950/20 uppercase cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                    {preview.type === 'image' && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCroppingIndex(index)
+                          setZoom(1)
+                          setOffsetX(0)
+                          setOffsetY(0)
+                        }}
+                        className="flex-1 text-[8px] font-mono font-bold tracking-[0.2em] text-white hover:bg-white/10 uppercase cursor-pointer"
+                      >
+                        Crop
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -614,5 +708,90 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
         {loading ? 'CREATING CATALOG ENTRY...' : 'CREATE PRODUCT'}
       </button>
     </form>
+
+      {/* Couture Image Cropping Studio Modal */}
+      {croppingIndex !== null && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+          <div className="bg-white max-w-md w-full p-6 border border-neutral-200 flex flex-col gap-5 shadow-2xl">
+            <div className="border-b border-neutral-100 pb-3.5 flex justify-between items-center">
+              <h3 className="text-[10px] font-bold tracking-[0.25em] uppercase text-black">
+                Image Composition Studio
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setCroppingIndex(null)}
+                className="text-neutral-400 hover:text-black uppercase tracking-widest text-[9px] font-mono font-bold cursor-pointer"
+              >
+                ✕ Cancel
+              </button>
+            </div>
+
+            {/* Editor Canvas Frame */}
+            <div className="relative aspect-[3/4] max-h-[360px] w-full bg-neutral-950 overflow-hidden flex items-center justify-center border border-neutral-200">
+              <canvas id="cropCanvas" className="max-w-full max-h-full object-contain" />
+              {/* Luxury crop boundaries */}
+              <div className="absolute inset-4 border border-dashed border-white/40 pointer-events-none flex items-center justify-center">
+                <span className="text-[7px] font-mono tracking-[0.3em] text-white bg-black/70 px-2 py-1 select-none">
+                  3:4 LUXURY CROP BOUNDS
+                </span>
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="space-y-4 pt-2 border-t border-neutral-100">
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between text-[8px] tracking-widest font-mono uppercase text-neutral-400 font-bold">
+                  <span>Composition Zoom</span>
+                  <span className="text-black">{Math.round(zoom * 100)}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="3" 
+                  step="0.05"
+                  value={zoom} 
+                  onChange={(e) => setZoom(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-neutral-100 accent-black appearance-none cursor-pointer"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <span className="text-[8px] tracking-widest font-mono uppercase text-neutral-400 font-bold">Align Horiz</span>
+                  <input 
+                    type="range" 
+                    min="-80" 
+                    max="80" 
+                    value={offsetX} 
+                    onChange={(e) => setOffsetX(parseInt(e.target.value))}
+                    className="w-full h-1 bg-neutral-100 accent-black appearance-none cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <span className="text-[8px] tracking-widest font-mono uppercase text-neutral-400 font-bold">Align Vert</span>
+                  <input 
+                    type="range" 
+                    min="-80" 
+                    max="80" 
+                    value={offsetY} 
+                    onChange={(e) => setOffsetY(parseInt(e.target.value))}
+                    className="w-full h-1 bg-neutral-100 accent-black appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleApplyCrop}
+              className="w-full bg-black text-white py-3.5 text-xs font-semibold tracking-[0.25em] uppercase hover:opacity-85 transition cursor-pointer"
+            >
+              Apply Composition & Crop
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
