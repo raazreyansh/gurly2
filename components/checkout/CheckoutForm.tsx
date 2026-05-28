@@ -45,27 +45,33 @@ export default function CheckoutForm() {
     const shipping = subtotal > 999 ? 0 : 99
     const grandTotal = subtotal + tax + shipping
 
+    const orderPayload = {
+      customer: {
+        name: formData.name,
+        phone: formData.phone,
+      },
+      paymentMethod,
+      items: items.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity,
+      })),
+    }
+
     try {
       // 1. CASH ON DELIVERY (COD) direct order placement
       if (paymentMethod === 'cod') {
         const res = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            total: grandTotal,
-            items: items.map(item => ({
-              productId: item.id,
-              quantity: item.quantity,
-              price: item.price
-            }))
-          })
+          body: JSON.stringify(orderPayload),
         })
 
         if (res.ok) {
           clearCart()
           router.push('/order/success')
         } else {
-          throw new Error("COD Order Placement Failed")
+          const data = await res.json().catch(() => null)
+          throw new Error(data?.error || "COD Order Placement Failed")
         }
         return
       }
@@ -118,13 +124,9 @@ export default function CheckoutForm() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                total: grandTotal,
-                items: items.map(item => ({
-                  productId: item.id,
-                  quantity: item.quantity,
-                  price: item.price
-                }))
-              })
+                ...orderPayload,
+                paymentMethod: 'razorpay',
+              }),
             })
 
             if (finalRes.ok) {

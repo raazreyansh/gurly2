@@ -3,6 +3,7 @@
 import { Heart, ShieldCheck } from 'lucide-react'
 import { useCartStore } from '@/store/useCartStore'
 import { useWishlistStore } from '@/store/useWishlistStore'
+import { getPrimaryProductImage } from '@/lib/product-media'
 
 export default function ProductInfo({
   product,
@@ -36,19 +37,7 @@ export default function ProductInfo({
 
   const wishlisted = hasItem(product.id)
 
-  const mediaArray = Array.isArray(product.media) 
-    ? product.media 
-    : Array.isArray(product.images) 
-    ? product.images 
-    : []
-  
-  const parseImageField = (val: any): string => {
-    if (!val) return '/images/models/community_2.png'
-    if (typeof val === 'string') return val
-    if (typeof val === 'object' && val.url) return val.url
-    return '/images/models/community_2.png'
-  }
-  const firstImage = parseImageField(mediaArray[0])
+  const firstImage = getPrimaryProductImage(product.media || product.images)
 
   const toggleWishlist = () => {
     if (wishlisted) {

@@ -3,6 +3,7 @@ import ProductForm from '@/components/admin/ProductForm'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { normalizeProductMedia } from '@/lib/product-media'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,7 +26,7 @@ export default async function EditProductPage({ params }: Props) {
     ...product,
     price: Number(product.price),
     compareAtPrice: product.compareAtPrice ? Number(product.compareAtPrice) : null,
-    media: Array.isArray(product.media) ? product.media : [],
+    media: normalizeProductMedia(product.media),
   }
 
   return (

@@ -3,6 +3,7 @@ import ProductCard from '@/components/product/ProductCard'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 const FALLBACK_CATEGORIES = [
   { id: '1', name: 'Earrings', slug: 'earrings' },
@@ -12,10 +13,10 @@ const FALLBACK_CATEGORIES = [
 ]
 
 const FALLBACK_PRODUCTS = [
-  { id: '101', title: 'Royal Jhumka', slug: 'royal-jhumka', price: 2999, compareAtPrice: 3999, images: ['/images/models/community_1.png'], category: { slug: 'earrings' } },
-  { id: '102', title: 'Luxury Pendant', slug: 'luxury-pendant', price: 4999, compareAtPrice: 5999, images: ['/images/models/community_2.png'], category: { slug: 'necklaces' } },
-  { id: '103', title: 'Prestige Ring', slug: 'prestige-ring', price: 1999, compareAtPrice: null, images: ['/images/models/community_3.png'], category: { slug: 'rings' } },
-  { id: '104', title: 'Classic Choker', slug: 'classic-choker', price: 8999, compareAtPrice: 9999, images: ['/images/models/community_4.png'], category: { slug: 'necklaces' } },
+  { id: '101', title: 'Royal Jhumka', slug: 'royal-jhumka', price: 2999, compareAtPrice: 3999, media: [{ type: 'image', url: '/images/models/community_1.png' }], category: { slug: 'earrings' } },
+  { id: '102', title: 'Luxury Pendant', slug: 'luxury-pendant', price: 4999, compareAtPrice: 5999, media: [{ type: 'image', url: '/images/models/community_2.png' }], category: { slug: 'necklaces' } },
+  { id: '103', title: 'Prestige Ring', slug: 'prestige-ring', price: 1999, compareAtPrice: null, media: [{ type: 'image', url: '/images/models/community_3.png' }], category: { slug: 'rings' } },
+  { id: '104', title: 'Classic Choker', slug: 'classic-choker', price: 8999, compareAtPrice: 9999, media: [{ type: 'image', url: '/images/models/community_4.png' }], category: { slug: 'necklaces' } },
 ]
 
 interface ShopPageProps {
@@ -42,6 +43,12 @@ export default async function ShopPage({
             },
           }
         : undefined,
+      include: {
+        category: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     })
   } catch (error) {
     console.error("Prisma shop catalog error:", error)

@@ -4,6 +4,7 @@ import ProductInfo from '@/components/product/ProductInfo'
 import ProductRecommendations from '@/components/product/ProductRecommendations'
 import ProductReviews from '@/components/product/ProductReviews'
 import { notFound } from 'next/navigation'
+import { getPrimaryProductImage, normalizeProductMedia } from '@/lib/product-media'
 
 interface Props {
   params: Promise<{
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 // 12. Dynamic SEO Metadata Generator
 export async function generateMetadata({ params }: Props) {
@@ -22,14 +24,7 @@ export async function generateMetadata({ params }: Props) {
 
   if (!product) return {}
 
-  const imageArray = Array.isArray(product.media) ? (product.media as any) : []
-  const parseImageField = (val: any): string => {
-    if (!val) return '/images/models/community_2.png'
-    if (typeof val === 'string') return val
-    if (typeof val === 'object' && val.url) return val.url
-    return '/images/models/community_2.png'
-  }
-  const firstImage = parseImageField(imageArray[0])
+  const firstImage = getPrimaryProductImage(product.media)
   const domain = 'https://gurly.luxury'
 
   return {
@@ -47,7 +42,7 @@ export async function generateMetadata({ params }: Props) {
           alt: product.title
         }
       ],
-      type: 'og:product'
+      type: 'website'
     },
     twitter: {
       card: 'summary_large_image',
@@ -74,14 +69,11 @@ export default async function ProductPage({
     notFound()
   }
 
-  const imageArray = Array.isArray(product.media) ? (product.media as any) : []
-  const parseImageField = (val: any): string => {
-    if (!val) return '/images/models/community_2.png'
-    if (typeof val === 'string') return val
-    if (typeof val === 'object' && val.url) return val.url
-    return '/images/models/community_2.png'
+  const safeProduct = {
+    ...product,
+    media: normalizeProductMedia(product.media),
   }
-  const firstImage = parseImageField(imageArray[0])
+  const firstImage = getPrimaryProductImage(safeProduct.media)
 
   // 13. Rich JSON-LD Product Schema
   const jsonLdSchema = {
@@ -119,25 +111,25 @@ export default async function ProductPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 border-b border-neutral-100">
         {/* Left Side: Photo preview workspace */}
-        <ProductGallery product={product} />
+        <ProductGallery product={safeProduct} />
 
         {/* Right Side: Description attributes */}
         <div className="border-l border-neutral-100">
-          <ProductInfo product={product} />
+          <ProductInfo product={safeProduct} />
         </div>
       </div>
 
       {/* Customer Verified Reviews */}
       <ProductReviews
-        productId={product.id}
-        slug={product.slug || ''}
-        reviews={product.reviews}
+        productId={safeProduct.id}
+        slug={safeProduct.slug || ''}
+        reviews={safeProduct.reviews}
       />
 
       {/* Related picks recommendations */}
       <ProductRecommendations
-        categoryId={product.categoryId || ''}
-        currentId={product.id}
+        categoryId={safeProduct.categoryId || ''}
+        currentId={safeProduct.id}
       />
     </div>
   )

@@ -1,12 +1,15 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { ExternalLink, Pencil, Plus } from 'lucide-react'
 import DeleteProductButton from './DeleteProductButton'
+import { getPrimaryProductImage, normalizeProductMedia } from '@/lib/product-media'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export default async function AdminProductsPage() {
   let products: any[] = []
+  let loadError = ''
   try {
     products = await prisma.product.findMany({
       include: {
@@ -18,6 +21,7 @@ export default async function AdminProductsPage() {
     })
   } catch (error) {
     console.error("Products catalog admin error:", error)
+    loadError = error instanceof Error ? error.message : 'Unable to load products.'
   }
 
   return (
@@ -42,7 +46,12 @@ export default async function AdminProductsPage() {
       {/* Grid List */}
       <div className="border border-neutral-200">
         <div className="overflow-x-auto">
-          {products.length === 0 ? (
+          {loadError ? (
+            <div className="space-y-3 bg-red-50 p-10 text-xs font-semibold uppercase tracking-wider text-red-700">
+              <p>PRODUCT CATALOG LOAD FAILED</p>
+              <p className="font-mono text-[10px] normal-case tracking-normal text-red-500">{loadError}</p>
+            </div>
+          ) : products.length === 0 ? (
             <div className="p-16 text-center text-xs text-neutral-400 font-semibold tracking-wider bg-white">
               NO PRODUCTS FOUND IN CATALOG
             </div>
@@ -52,6 +61,7 @@ export default async function AdminProductsPage() {
                 <tr className="border-b border-neutral-200 text-[9px] tracking-[0.25em] font-bold text-neutral-400 uppercase bg-neutral-50/50">
                   <th className="px-6 py-4">Item</th>
                   <th className="px-6 py-4">Category</th>
+                  <th className="px-6 py-4">Listing Audit</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Stock</th>
                   <th className="px-6 py-4">Price</th>
@@ -60,18 +70,10 @@ export default async function AdminProductsPage() {
               </thead>
               <tbody className="divide-y divide-neutral-100 text-xs text-black">
                 {products.map((product) => {
-                  let imageSrc = '/images/models/community_2.png'
-                  const parseImageField = (val: any): string => {
-                    if (!val) return '/images/models/community_2.png'
-                    if (typeof val === 'string') return val
-                    if (typeof val === 'object' && val.url) return val.url
-                    return '/images/models/community_2.png'
-                  }
-                  
-                  const mediaArray = Array.isArray(product.media) ? product.media : []
-                  if (mediaArray.length > 0) {
-                    imageSrc = parseImageField(mediaArray[0])
-                  }
+                  const imageSrc = getPrimaryProductImage(product.media)
+                  const mediaCount = normalizeProductMedia(product.media).length
+                  const hasValidSlug = Boolean(product.slug)
+                  const hasMedia = mediaCount > 0
 
                   return (
                     <tr key={product.id} className="hover:bg-neutral-50/30 transition">
@@ -80,6 +82,8 @@ export default async function AdminProductsPage() {
                           <img
                             src={imageSrc}
                             alt={product.title}
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-full object-cover"
                           />
                         </div>
@@ -92,6 +96,16 @@ export default async function AdminProductsPage() {
                       </td>
                       <td className="px-6 py-4 text-neutral-500 uppercase tracking-widest font-semibold text-[10px]">
                         {product.category?.name || 'Unassigned'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-1 text-[9px] font-bold uppercase tracking-widest">
+                          <span className={hasValidSlug ? 'text-emerald-600' : 'text-red-500'}>
+                            {hasValidSlug ? `/${product.slug}` : 'Missing slug'}
+                          </span>
+                          <span className={hasMedia ? 'text-emerald-600' : 'text-red-500'}>
+                            {hasMedia ? `${mediaCount} media file${mediaCount === 1 ? '' : 's'}` : 'Missing media'}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div>
@@ -123,7 +137,14 @@ export default async function AdminProductsPage() {
                             className="p-2 text-neutral-400 hover:text-black transition inline-flex items-center"
                             title="Edit Product"
                           >
-                            <Plus className="h-4 w-4 rotate-45" /> {/* Use Plus rotated 45deg or we can just import Pencil */}
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                          <Link
+                            href={`/product/${product.slug}`}
+                            className="p-2 text-neutral-400 hover:text-black transition inline-flex items-center"
+                            title="View Storefront Product"
+                          >
+                            <ExternalLink className="h-4 w-4" />
                           </Link>
                           <DeleteProductButton id={product.id} />
                         </div>

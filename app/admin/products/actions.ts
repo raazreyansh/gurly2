@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { productSchema } from '@/lib/validations/product'
+import { normalizeProductMedia } from '@/lib/product-media'
 
 export interface ActionResponse<T = any> {
   success: boolean
@@ -12,8 +13,27 @@ export interface ActionResponse<T = any> {
 
 function revalidateAll() {
   revalidatePath('/admin/products')
+  revalidatePath('/admin/products/new')
+  revalidatePath('/admin')
   revalidatePath('/shop')
   revalidatePath('/')
+}
+
+function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function prepareProductInput(rawData: any) {
+  return {
+    ...rawData,
+    title: typeof rawData?.title === 'string' ? rawData.title.trim() : rawData?.title,
+    slug: slugify(String(rawData?.slug || rawData?.title || '')),
+    media: normalizeProductMedia(rawData?.media),
+  }
 }
 
 export async function deleteProduct(productId: string): Promise<ActionResponse> {
@@ -37,7 +57,7 @@ export async function deleteProduct(productId: string): Promise<ActionResponse> 
 export async function createProduct(rawData: any): Promise<ActionResponse> {
   try {
     // 1. Strict input validation using centralized Zod schema
-    const parsed = productSchema.safeParse(rawData)
+    const parsed = productSchema.safeParse(prepareProductInput(rawData))
     if (!parsed.success) {
       const errorMsg = parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
       return { success: false, error: `Validation Failure: ${errorMsg}` }
@@ -71,7 +91,7 @@ export async function updateProduct(productId: string, rawData: any): Promise<Ac
     }
 
     // 1. Strict input validation using centralized Zod schema
-    const parsed = productSchema.safeParse(rawData)
+    const parsed = productSchema.safeParse(prepareProductInput(rawData))
     if (!parsed.success) {
       const errorMsg = parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
       return { success: false, error: `Validation Failure: ${errorMsg}` }

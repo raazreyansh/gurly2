@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 export interface CartItem {
   id: string
@@ -20,56 +21,66 @@ interface CartState {
   clearCart: () => void
 }
 
-export const useCartStore = create<CartState>((set) => ({
-  isOpen: false,
-  items: [],
-
-  toggleCart: () =>
-    set((state) => ({
-      isOpen: !state.isOpen,
-    })),
-
-  closeCart: () =>
-    set({
+export const useCartStore = create<CartState>()(
+  persist(
+    (set) => ({
       isOpen: false,
-    }),
-
-  openCart: () =>
-    set({
-      isOpen: true,
-    }),
-
-  addItem: (item) =>
-    set((state) => {
-      const existing = state.items.find((i) => i.id === item.id)
-      if (existing) {
-        return {
-          items: state.items.map((i) =>
-            i.id === item.id ? { ...i, quantity: i.quantity + (item.quantity ?? 1) } : i
-          ),
-          isOpen: true,
-        }
-      }
-      return {
-        items: [...state.items, { ...item, quantity: item.quantity ?? 1 }],
-        isOpen: true,
-      }
-    }),
-
-  removeItem: (id) =>
-    set((state) => ({
-      items: state.items.filter((i) => i.id !== id),
-    })),
-
-  updateQuantity: (id, qty) =>
-    set((state) => ({
-      items: state.items
-        .map((i) => (i.id === id ? { ...i, quantity: qty } : i))
-        .filter((i) => i.quantity > 0),
-    })),
-
-  clearCart: () =>
-    set({
       items: [],
+
+      toggleCart: () =>
+        set((state) => ({
+          isOpen: !state.isOpen,
+        })),
+
+      closeCart: () =>
+        set({
+          isOpen: false,
+        }),
+
+      openCart: () =>
+        set({
+          isOpen: true,
+        }),
+
+      addItem: (item) =>
+        set((state) => {
+          const existing = state.items.find((i) => i.id === item.id)
+          if (existing) {
+            return {
+              items: state.items.map((i) =>
+                i.id === item.id ? { ...i, quantity: i.quantity + (item.quantity ?? 1) } : i
+              ),
+              isOpen: true,
+            }
+          }
+          return {
+            items: [...state.items, { ...item, quantity: item.quantity ?? 1 }],
+            isOpen: true,
+          }
+        }),
+
+      removeItem: (id) =>
+        set((state) => ({
+          items: state.items.filter((i) => i.id !== id),
+        })),
+
+      updateQuantity: (id, qty) =>
+        set((state) => ({
+          items: state.items
+            .map((i) => (i.id === id ? { ...i, quantity: qty } : i))
+            .filter((i) => i.quantity > 0),
+        })),
+
+      clearCart: () =>
+        set({
+          items: [],
+        }),
     }),
-}))
+    {
+      name: 'gurly-cart-storage',
+      partialize: (state) => ({
+        items: state.items,
+      }),
+    },
+  ),
+)

@@ -2,11 +2,11 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-
-interface MediaItem {
-  type: string
-  url: string
-}
+import {
+  FALLBACK_PRODUCT_IMAGE,
+  ProductMediaItem,
+  normalizeProductMedia,
+} from '@/lib/product-media'
 
 export default function ProductGallery({
   product,
@@ -17,27 +17,15 @@ export default function ProductGallery({
     media?: any
   }
 }) {
-  // Parse images securely allowing backward compatibility for strings
-  const rawImages = Array.isArray(product.media) 
-    ? product.media 
-    : Array.isArray(product.images) 
-    ? product.images 
-    : []
-  const mediaItems: MediaItem[] = rawImages.map((item: any) => {
-    if (typeof item === 'string') {
-      return { type: 'image', url: item }
-    }
-    if (item && typeof item === 'object' && item.url) {
-      return { type: item.type || 'image', url: item.url }
-    }
-    return { type: 'image', url: '/images/models/community_2.png' }
-  })
+  const mediaItems = normalizeProductMedia(product.media).length
+    ? normalizeProductMedia(product.media)
+    : normalizeProductMedia(product.images)
 
   if (mediaItems.length === 0) {
-    mediaItems.push({ type: 'image', url: '/images/models/community_2.png' })
+    mediaItems.push({ type: 'image', url: FALLBACK_PRODUCT_IMAGE })
   }
 
-  const [active, setActive] = useState<MediaItem>(mediaItems[0] || { type: 'image', url: '/images/models/community_2.png' })
+  const [active, setActive] = useState<ProductMediaItem>(mediaItems[0])
 
   return (
     <div className="grid grid-cols-[80px_1fr] sm:grid-cols-[100px_1fr] gap-4 p-6 lg:p-12 bg-white">

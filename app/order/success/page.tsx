@@ -18,7 +18,7 @@ export default function OrderSuccessPage() {
 
         <div className="rounded border border-neutral-100 p-6 bg-neutral-50 inline-block mb-10">
           <p className="text-[10px] text-neutral-400 uppercase tracking-widest font-bold">Order Reference</p>
-          <p className="font-mono text-xs mt-2 font-semibold">#GURLY-{Math.floor(Math.random() * 900000 + 100000)}</p>
+          <p className="font-mono text-xs mt-2 font-semibold">#GURLY-RECENT</p>
         </div>
 
         <div className="flex flex-col gap-3 justify-center items-center">

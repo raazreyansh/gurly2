@@ -6,6 +6,7 @@ import { createProduct, updateProduct } from '@/app/admin/products/actions'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { productSchema } from '@/lib/validations/product'
+import { normalizeProductMedia } from '@/lib/product-media'
 
 interface Category {
   id: string
@@ -26,6 +27,14 @@ interface ExistingProduct {
   media: any[]
 }
 
+function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
 const FALLBACK_CATEGORIES = [
   { id: '1', name: 'Earrings', slug: 'earrings' },
   { id: '2', name: 'Necklaces', slug: 'necklaces' },
@@ -40,7 +49,9 @@ export default function ProductForm({ categories, existingProduct }: { categorie
   
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<Array<{ type: string; url: string; name: string }>>([])
-  const [existingMedia, setExistingMedia] = useState<Array<{ type: string; url: string }>>(existingProduct?.media || [])
+  const [existingMedia, setExistingMedia] = useState<Array<{ type: string; url: string }>>(
+    normalizeProductMedia(existingProduct?.media),
+  )
 
   const [croppingIndex, setCroppingIndex] = useState<number | null>(null)
   const [zoom, setZoom] = useState<number>(1)
@@ -293,11 +304,11 @@ export default function ProductForm({ categories, existingProduct }: { categorie
         }
       }
 
-      const finalMedia = [...existingMedia, ...uploadedMedia]
+      const finalMedia = normalizeProductMedia([...existingMedia, ...uploadedMedia])
 
       const payload = {
-        title: formData.title,
-        slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        title: formData.title.trim(),
+        slug: slugify(formData.slug || formData.title),
         description: formData.description,
         price: Number(formData.price),
         compareAtPrice: formData.compareAtPrice ? Number(formData.compareAtPrice) : null,
@@ -321,6 +332,7 @@ export default function ProductForm({ categories, existingProduct }: { categorie
       if (result.success) {
         toast.success(isEditMode ? "Product updated successfully!" : "Product created successfully!", { id: toastId })
         router.push('/admin/products')
+        router.refresh()
       } else {
         throw new Error(result.error || "Execution failed")
       }
@@ -352,9 +364,8 @@ export default function ProductForm({ categories, existingProduct }: { categorie
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-[9px] tracking-widest font-bold uppercase text-neutral-400 font-mono">Slug (URL Parameter) *</label>
+            <label className="text-[9px] tracking-widest font-bold uppercase text-neutral-400 font-mono">Slug (auto if blank)</label>
             <input
-              required
               type="text"
               name="slug"
               placeholder="e.g. royal-gold-choker"
@@ -443,7 +454,7 @@ export default function ProductForm({ categories, existingProduct }: { categorie
                 Click to Upload Campaign Media
               </p>
               <p className="mt-1 text-[10px] text-neutral-400 font-medium font-mono uppercase text-center">
-                Supports: Images & Videos (MAX 10)
+                Auto-adjusts images to WebP, max 1600x2000, before publish
               </p>
               <input
                 type="file"
@@ -463,6 +474,8 @@ export default function ProductForm({ categories, existingProduct }: { categorie
                     <img
                       src={preview.url}
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="aspect-square w-full object-cover pointer-events-none select-none"
                     />
                   )}
@@ -530,7 +543,7 @@ export default function ProductForm({ categories, existingProduct }: { categorie
                   {m.type === 'video' ? (
                     <video src={m.url} muted className="aspect-square w-full object-cover" />
                   ) : (
-                    <img src={m.url} alt="" className="aspect-square w-full object-cover" />
+                    <img src={m.url} alt="" loading="lazy" decoding="async" className="aspect-square w-full object-cover" />
                   )}
                   <button
                     type="button"

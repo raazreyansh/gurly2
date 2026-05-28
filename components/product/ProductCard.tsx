@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useCartStore } from '@/store/useCartStore'
 import { ShoppingBag } from 'lucide-react'
+import { getPrimaryProductImage } from '@/lib/product-media'
 
 export interface SimpleProduct {
   id: string
@@ -26,36 +27,7 @@ export default function ProductCard({
   const { addItem } = useCartStore()
   const [loaded, setLoaded] = useState(false)
 
-  // Safe extraction of the first image
-  let imageSrc = '/images/models/community_2.png'
-  
-  const parseImageField = (val: any): string => {
-    if (!val) return '/images/models/community_2.png'
-    if (typeof val === 'string') return val
-    if (typeof val === 'object' && val.url) return val.url
-    return '/images/models/community_2.png'
-  }
-
-  const rawImages = Array.isArray(product.media) 
-    ? product.media 
-    : Array.isArray(product.images) 
-    ? product.images 
-    : typeof product.images === 'string' 
-    ? product.images 
-    : []
-
-  if (Array.isArray(rawImages) && rawImages.length > 0) {
-    imageSrc = parseImageField(rawImages[0])
-  } else if (typeof rawImages === 'string') {
-    try {
-      const parsed = JSON.parse(rawImages)
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        imageSrc = parseImageField(parsed[0])
-      }
-    } catch {
-      imageSrc = rawImages
-    }
-  }
+  const imageSrc = getPrimaryProductImage(product.media || product.images)
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault()

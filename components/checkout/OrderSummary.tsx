@@ -2,22 +2,15 @@
 
 import { useCartStore } from '@/store/useCartStore'
 
-const FALLBACK_SUMMARY_ITEMS = [
-  { id: '101', title: 'Royal Jhumka Earrings', image: '/images/models/community_1.png', quantity: 1, price: 2999 },
-  { id: '102', title: 'Luxury Crystal Pendant', image: '/images/models/community_2.png', quantity: 1, price: 4999 },
-]
-
 export default function OrderSummary() {
   const { items } = useCartStore()
 
-  const list = items.length > 0 ? items : FALLBACK_SUMMARY_ITEMS
-
-  const subtotal = list.reduce(
+  const subtotal = items.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0,
   )
 
-  const shipping = subtotal > 999 ? 0 : 99
+  const shipping = subtotal === 0 || subtotal > 999 ? 0 : 99
   const tax = subtotal * 0.18
   const total = subtotal + shipping + tax
 
@@ -28,7 +21,11 @@ export default function OrderSummary() {
       </h2>
 
       <div className="space-y-6 max-h-[50vh] overflow-y-auto pr-2 hide-scrollbar">
-        {list.map((item) => (
+        {items.length === 0 ? (
+          <div className="border border-dashed border-neutral-200 bg-white p-8 text-center text-xs font-semibold uppercase tracking-widest text-neutral-400">
+            Your cart is empty
+          </div>
+        ) : items.map((item) => (
           <div
             key={item.id}
             className="flex gap-4 items-center"

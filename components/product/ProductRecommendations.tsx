@@ -17,6 +17,9 @@ export default async function ProductRecommendations({
         // Exclude the current product to avoid redundancy
         id: currentId ? { not: currentId } : undefined,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
       take: 4,
     })
   } catch (error) {
@@ -27,6 +30,9 @@ export default async function ProductRecommendations({
   if (products.length < 2) {
     try {
       products = await prisma.product.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        },
         take: 4,
       })
     } catch (e) {
