@@ -66,7 +66,14 @@ export default function NewProductPage() {
       router.refresh()
     } catch (error) {
       console.warn("Product publish failed; saving locally instead:", error)
-      saveLocalProduct({ ...formData, images: imageUrls })
+      const fallbackProduct = saveLocalProduct({ ...formData, images: imageUrls })
+      void fetch("/api/admin/products/fallback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, images: imageUrls, id: fallbackProduct.id }),
+      }).catch((fallbackError) => {
+        console.warn("Fallback catalogue publish failed:", fallbackError)
+      })
       toast.success("Product saved locally")
       toast.warning("Product was not published to Supabase.")
       router.push("/admin/products")

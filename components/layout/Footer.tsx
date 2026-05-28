@@ -5,38 +5,84 @@ const shopLinks = [
   { href: "/shop?category=earrings", label: "Earrings" },
   { href: "/shop?category=necklaces", label: "Necklaces" },
   { href: "/shop?category=bracelets", label: "Bracelets" },
-  { href: "/shop?category=accessories", label: "Accessories" },
+  { href: "/shop?category=new-arrivals", label: "Gift Sets" },
 ]
 
 const helpLinks = [
-  { href: "/support", label: "Help" },
-  { href: "/support", label: "Returns" },
+  { href: "/support", label: "Contact Us" },
+  { href: "/support", label: "Shipping & Delivery" },
   { href: "/account/orders", label: "Track Order" },
-  { href: "/privacy", label: "Privacy" },
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/wishlist", label: "Wishlist" },
+]
+
+const aboutLinks = [
+  { href: "/about", label: "Our Story" },
+  { href: "/terms", label: "Terms & Conditions" },
+  { href: "/support", label: "Returns & Exchange" },
 ]
 
 export function Footer() {
   return (
-    <footer className="border-t border-[#E8E8E8] bg-white mt-auto">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        {/* Brand */}
-        <Link href="/" className="font-sans text-xs font-black tracking-[0.18em] uppercase text-black shrink-0">
-          GURLY
-        </Link>
-
-        {/* Links */}
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          {[...shopLinks, ...helpLinks].map(({ href, label }) => (
-            <Link key={`${label}-${href}`} href={href} className="text-[11px] font-medium text-black/50 hover:text-black transition-colors uppercase tracking-wide">
-              {label}
+    <footer className="luxury-footer">
+      <div className="container">
+        <div className="footer-grid">
+          <div>
+            <Link href="/" className="footer-brand-title">
+              GURLY
             </Link>
-          ))}
+            <p className="footer-brand-text">Premium accessories for girls who love to shine beautifully.</p>
+            <div className="footer-social-links" aria-label="Social links">
+              <a className="footer-social-icon" href="https://instagram.com" target="_blank" rel="noreferrer">IG</a>
+              <a className="footer-social-icon" href="https://pinterest.com" target="_blank" rel="noreferrer">PT</a>
+              <a className="footer-social-icon" href="https://facebook.com" target="_blank" rel="noreferrer">FB</a>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="footer-section-title">Shop</h3>
+            <div className="footer-link-col">
+              {shopLinks.map(({ href, label }) => (
+                <Link key={`${label}-${href}`} href={href}>
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="footer-section-title">Customer Care</h3>
+            <div className="footer-link-col">
+              {helpLinks.map(({ href, label }) => (
+                <Link key={`${label}-${href}`} href={href}>
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="footer-section-title">About GURLY</h3>
+            <div className="footer-link-col">
+              {aboutLinks.map(({ href, label }) => (
+                <Link key={`${label}-${href}`} href={href}>
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Copyright */}
-        <p className="text-[10px] text-black/30 font-medium uppercase tracking-wider shrink-0">
-          © 2026 GURLY
-        </p>
+        <div className="footer-bottom-bar">
+          <span>© 2026 GURLY. All rights reserved.</span>
+          <div className="footer-bottom-links" aria-label="Secure payments">
+            <span>VISA</span>
+            <span>MC</span>
+            <span>UPI</span>
+            <span>RuPay</span>
+            <span>LPI</span>
+          </div>
+        </div>
       </div>
     </footer>
   )

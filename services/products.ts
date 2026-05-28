@@ -38,6 +38,8 @@ export async function getProducts(options?: {
   maxPrice?: number
   limit?: number
 }) {
+  const fallbackProducts = typeof window !== "undefined" ? browserCatalogProducts() : await serverCatalogProducts([])
+
   try {
     let query = supabase
       .from("products")
@@ -69,20 +71,23 @@ export async function getProducts(options?: {
     const error = result?.error
 
     if (!error && data && data.length > 0) {
-      return filterCatalogProducts(data as Product[], options)
+      return filterCatalogProducts(mergeProducts(fallbackProducts, data as Product[]), options)
     }
   } catch (err) {
     logUnexpectedSupabaseError("Exception fetching products from Supabase:", err)
   }
 
-  if (typeof window !== "undefined") {
-    return []
-  }
-
-  return filterCatalogProducts(await serverCatalogProducts([]), options)
+  return filterCatalogProducts(fallbackProducts, options)
 }
 
 export async function getProductBySlug(slug: string) {
+  const fallbackProducts = typeof window !== "undefined" ? browserCatalogProducts() : await serverCatalogProducts([])
+  const fallbackProduct = fallbackProducts.find((product) => product.slug === slug || product.id === slug)
+
+  if (fallbackProduct) {
+    return fallbackProduct
+  }
+
   try {
     const result = await withSupabaseTimeout(supabase
       .from("products")
@@ -117,6 +122,8 @@ export async function searchProducts(term: string) {
   const query = term.trim().toLowerCase()
   if (!query) return []
 
+  const fallbackProducts = typeof window !== "undefined" ? browserCatalogProducts() : await serverCatalogProducts([])
+
   try {
     const result = await withSupabaseTimeout(supabase
       .from("products")
@@ -125,25 +132,13 @@ export async function searchProducts(term: string) {
     const data = result?.data
 
     if (data && data.length > 0) {
-      return data as Product[]
+      return searchCatalogProducts(mergeProducts(fallbackProducts, data as Product[]), query)
     }
   } catch (err) {
     logUnexpectedSupabaseError("Exception searching products in Supabase:", err)
   }
 
-  if (typeof window !== "undefined") {
-    return []
-  }
-
-  try {
-    const { readServerProducts } = await import("@/services/server-catalog")
-    const serverProducts = await readServerProducts()
-    if (serverProducts.length > 0) {
-      return searchCatalogProducts(serverProducts, query)
-    }
-  } catch {}
-
-  return searchCatalogProducts(MOCK_PRODUCTS, query)
+  return searchCatalogProducts(fallbackProducts.length > 0 ? fallbackProducts : MOCK_PRODUCTS, query)
 }
 
 export async function getCategories() {

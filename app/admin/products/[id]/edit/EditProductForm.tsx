@@ -59,6 +59,11 @@ export function EditProductForm({ product }: { product: Product }) {
       })
 
       if (!response.ok) {
+        await fetch(`/api/admin/products/fallback/${product.id}`, {
+          method: "DELETE",
+        }).catch((fallbackError) => {
+          console.warn("Fallback catalogue delete failed:", fallbackError)
+        })
         throw new Error("Failed to delete product from server catalogue")
       }
 
@@ -108,7 +113,14 @@ export function EditProductForm({ product }: { product: Product }) {
       router.refresh()
     } catch (error) {
       console.warn("Product update failed; saving locally instead:", error)
-      saveLocalProduct({ id: product.id, ...payload })
+      const fallbackProduct = saveLocalProduct({ id: product.id, ...payload })
+      void fetch("/api/admin/products/fallback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, id: fallbackProduct.id }),
+      }).catch((fallbackError) => {
+        console.warn("Fallback catalogue update failed:", fallbackError)
+      })
       toast.success("Product saved locally")
       toast.warning("Product was not published to Supabase.")
       router.push("/admin/products")

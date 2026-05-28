@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase/client"
 import { withSupabaseTimeout } from "@/lib/supabase/timeout"
-import { readLocalProducts, saveLocalProduct } from "@/services/local-catalog"
+import { mergeProducts, readLocalProducts, saveLocalProduct } from "@/services/local-catalog"
 import { logUnexpectedSupabaseError } from "@/services/supabase-errors"
 import type { Product } from "@/types/database"
 
@@ -55,6 +55,8 @@ function saveFallbackProduct(product: Partial<Product>, existing?: Product | nul
 }
 
 export async function getAdminProducts() {
+  const fallbackProducts = await serverFallbackProducts([])
+
   try {
     const result = await withSupabaseTimeout(supabase
       .from("products")
@@ -65,16 +67,21 @@ export async function getAdminProducts() {
 
     if (error) {
       logUnexpectedSupabaseError("Error fetching admin products:", error)
-      return serverFallbackProducts([])
+      return fallbackProducts
     }
-    return data?.length ? (data as Product[]) : serverFallbackProducts([])
+    return data?.length ? mergeProducts(fallbackProducts, data as Product[]) : fallbackProducts
   } catch (err) {
     logUnexpectedSupabaseError("Exception fetching admin products:", err)
-    return serverFallbackProducts([])
+    return fallbackProducts
   }
 }
 
 export async function getAdminProductById(id: string) {
+  const fallbackProduct = await findServerFallbackProduct(id)
+  if (fallbackProduct) {
+    return fallbackProduct
+  }
+
   try {
     const result = await withSupabaseTimeout(supabase
       .from("products")
@@ -85,11 +92,11 @@ export async function getAdminProductById(id: string) {
     const error = result?.error
 
     if (error || !data) {
-      return findServerFallbackProduct(id)
+      return null
     }
     return data as Product | null
   } catch {
-    return findServerFallbackProduct(id)
+    return null
   }
 }
 
@@ -140,7 +147,7 @@ export async function deleteProduct(id: string) {
   try {
     const { deleteServerProduct } = await import("@/services/server-catalog")
     await deleteServerProduct(id)
-  } catch (e) {
+  } catch {
     // Fail silently in browser context where filesystem is inaccessible
   }
 
