@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Search, ShoppingBag, User } from 'lucide-react'
 import { useCartStore } from '@/store/useCartStore'
+import { useSearchStore } from '@/store/useSearchStore'
 
 const navItems = [
   { label: 'SHOP', href: '/shop' },
@@ -13,6 +14,7 @@ const navItems = [
 
 export default function Navbar() {
   const { toggleCart, items } = useCartStore()
+  const { openSearch } = useSearchStore()
   const cartCount = items.reduce((acc, curr) => acc + curr.quantity, 0)
 
   return (
@@ -38,7 +40,7 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-6 text-black">
-          <button className="hover:opacity-70 transition">
+          <button onClick={openSearch} className="hover:opacity-70 transition" title="Search Catalogue">
             <Search className="h-4 w-4" />
           </button>
           <Link href="/account" className="hover:opacity-70 transition">
