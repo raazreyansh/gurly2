@@ -46,7 +46,46 @@ export default function Footer() {
 
       </div>
 
-      <div className="mx-auto max-w-[1600px] border-t border-neutral-200 mt-16 pt-8 flex flex-col sm:flex-row justify-between items-center text-[10px] text-neutral-400 font-semibold tracking-widest uppercase">
+      {/* Founders & Socials section */}
+      <div className="mx-auto max-w-[1600px] border-t border-neutral-200 mt-16 pt-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between text-black">
+          <div>
+            <p className="text-[10px] tracking-[0.25em] font-bold text-neutral-400 uppercase">
+              FOUNDERS
+            </p>
+            <div className="mt-4 space-y-2 text-xs font-semibold uppercase tracking-wider text-neutral-600">
+              <p>Satyam Kumar — Founder</p>
+              <p>Gulshan Kumar — Co-Founder</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-6 text-[10px] font-bold tracking-[0.25em] uppercase text-neutral-500">
+            <a
+              href="https://www.instagram.com/itss.satyaa/?hl=en"
+              target="_blank"
+              className="hover:text-black transition"
+            >
+              INSTAGRAM
+            </a>
+            <a
+              href="https://github.com/raazreyansh"
+              target="_blank"
+              className="hover:text-black transition"
+            >
+              GITHUB
+            </a>
+            <a
+              href="https://www.linkedin.com/in/satyaaaa"
+              target="_blank"
+              className="hover:text-black transition"
+            >
+              LINKEDIN
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1600px] border-t border-neutral-200 mt-10 pt-8 flex flex-col sm:flex-row justify-between items-center text-[10px] text-neutral-400 font-semibold tracking-widest uppercase">
         <p>© {new Date().getFullYear()} GURLY. All rights reserved.</p>
         <p className="mt-4 sm:mt-0">Crafted with deliberate care</p>
       </div>
