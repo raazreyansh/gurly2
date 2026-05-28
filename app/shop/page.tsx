@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/product/ProductCard'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 const FALLBACK_CATEGORIES = [
   { id: '1', name: 'Earrings', slug: 'earrings' },
   { id: '2', name: 'Necklaces', slug: 'necklaces' },
