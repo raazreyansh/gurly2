@@ -92,7 +92,7 @@ export default function CheckoutForm() {
       const rzpOrder = await createOrderRes.json()
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY || 'rzp_test_Su0ajfrL2Gog3D',
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY || '',
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
         name: 'GURLY.',
