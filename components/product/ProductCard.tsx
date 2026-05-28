@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useCartStore } from '@/store/useCartStore'
@@ -23,6 +24,7 @@ export default function ProductCard({
   product,
 }: ProductCardProps) {
   const { addItem } = useCartStore()
+  const [loaded, setLoaded] = useState(false)
 
   // Safe extraction of the first image
   let imageSrc = '/images/models/community_2.png'
@@ -70,12 +72,21 @@ export default function ProductCard({
     <div className="group block bg-white">
       <Link href={`/product/${product.slug || ''}`} className="block">
         <div className="aspect-[3/4] overflow-hidden bg-neutral-50 relative border border-neutral-100">
+          {!loaded && (
+            <div className="absolute inset-0 bg-gradient-to-tr from-neutral-50 to-neutral-100/80 animate-pulse flex items-center justify-center select-none">
+              <span className="text-[7px] font-mono tracking-[0.25em] text-neutral-300 uppercase">GURLY STUDIO</span>
+            </div>
+          )}
+
           <motion.img
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
             src={imageSrc}
             alt={product.title}
-            className="h-full w-full object-cover"
+            onLoad={() => setLoaded(true)}
+            className={`h-full w-full object-cover transition-opacity duration-700 ease-out ${
+              loaded ? 'opacity-100' : 'opacity-0'
+            }`}
           />
 
           {/* Quick Add To Cart Button overlay */}
