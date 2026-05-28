@@ -1,5 +1,7 @@
 "use client"
 
+import "./admin.css"
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useSyncExternalStore } from "react"

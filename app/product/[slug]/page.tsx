@@ -1,6 +1,5 @@
 import { getProductBySlug, getProducts } from "@/services/products"
-import { Navbar } from "@/components/layout/Navbar"
-import { Footer } from "@/components/layout/Footer"
+import { StorefrontLayout } from "@/components/layout/StorefrontLayout"
 import { ProductDetailClient } from "@/components/product/ProductDetailClient"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
@@ -27,12 +26,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (!product) notFound()
 
   return (
-    <>
-      <Navbar />
-      <main>
+    <StorefrontLayout>
+      <main className="bg-white min-h-screen">
         <ProductDetailClient product={product} related={related ?? []} />
       </main>
-      <Footer />
-    </>
+    </StorefrontLayout>
   )
 }

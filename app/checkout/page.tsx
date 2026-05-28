@@ -11,8 +11,10 @@ import { toast } from "sonner"
 import { Footer } from "@/components/layout/Footer"
 import { Navbar } from "@/components/layout/Navbar"
 import { useAuth } from "@/hooks/useAuth"
-import { useCart } from "@/store/cart"
+import { useCartStore } from "@/store/useCartStore"
 import { validateCoupon } from "@/services/coupon"
+import Image from "next/image"
+import { StorefrontLayout } from "@/components/layout/StorefrontLayout"
 
 const schema = z.object({
   name: z.string().min(2, "Name required"),
@@ -59,7 +61,7 @@ const fields: { name: keyof AddressForm; placeholder: string; cols: number }[] =
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, total, clear } = useCart()
+  const { items, getCartTotal, clearCart } = useCartStore()
   const { user, loading: authLoading } = useAuth()
   const [couponCode, setCouponCode] = useState("")
   const [discount, setDiscount] = useState(0)
@@ -96,8 +98,8 @@ export default function CheckoutPage() {
     }
   }, [])
 
-  const shipping = total() >= 999 ? 0 : 99
-  const finalTotal = total() + shipping - discount
+  const shipping = getCartTotal() >= 999 ? 0 : 99
+  const finalTotal = getCartTotal() + shipping - discount
 
   async function applyCoupon() {
     if (!couponCode) return
@@ -106,11 +108,11 @@ export default function CheckoutPage() {
       setCouponMsg("Invalid code")
       return
     }
-    if (coupon.min_order && total() < coupon.min_order) {
+    if (coupon.min_order && getCartTotal() < coupon.min_order) {
       setCouponMsg(`Min order Rs. ${coupon.min_order}`)
       return
     }
-    const amount = coupon.type === "flat" ? coupon.value : (total() * coupon.value) / 100
+    const amount = coupon.type === "flat" ? coupon.value : (getCartTotal() * coupon.value) / 100
     setDiscount(amount)
     setCouponMsg(`✓ ${coupon.type === "percent" ? `${coupon.value}%` : `Rs. ${coupon.value}`} off`)
     toast.success("Coupon applied")
@@ -164,7 +166,7 @@ export default function CheckoutPage() {
                   payment_status: "paid",
                   status: "processing",
                 })
-                clear()
+                clearCart()
                 toast.dismiss(verifyId)
                 toast.success("Payment successful")
                 router.push("/order/success")
@@ -202,7 +204,7 @@ export default function CheckoutPage() {
           }
           toast.dismiss(mockLoad)
           toast.success("Order placed")
-          clear()
+          clearCart()
           router.push("/order/success")
           setProcessing(false)
         }, 1800)
@@ -217,97 +219,84 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="storefront-shell min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center py-32 px-6 text-center">
-          <div className="empty-shop-state">
-            <h1>Your cart is empty</h1>
-            <p>Browse the collection and add a few pieces before checking out.</p>
-            <Link href="/shop" className="store-button store-button-dark">Shop Now</Link>
-          </div>
+      <StorefrontLayout>
+        <main className="flex-1 flex flex-col items-center justify-center py-40 px-6 text-center bg-white min-h-[70vh]">
+          <h1 className="font-serif text-3xl text-black mb-4">Your bag is empty</h1>
+          <p className="text-neutral-500 text-sm mb-8">Browse the collection to add items.</p>
+          <Link href="/shop" className="bg-black text-white px-8 py-3 text-xs uppercase tracking-widest font-semibold hover:opacity-80 transition">Shop Now</Link>
         </main>
-        <Footer />
-      </div>
+      </StorefrontLayout>
     )
   }
 
   if (authLoading) {
     return (
-      <div className="storefront-shell min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
+      <StorefrontLayout>
+        <main className="flex-1 flex items-center justify-center min-h-[70vh]">
           <div className="spinner" />
         </main>
-        <Footer />
-      </div>
+      </StorefrontLayout>
     )
   }
 
   if (!user) {
     return (
-      <div className="storefront-shell min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center py-32 px-6">
-          <div className="checkout-auth-card">
-            <Lock size={24} />
-            <h1>Sign in to checkout</h1>
-            <p>Create an account to track your order and save your details.</p>
-            <div className="checkout-auth-actions">
-              <Link href="/login?redirect=/checkout" className="store-button store-button-dark">
-                Sign In <ArrowRight size={12} />
-              </Link>
-              <Link href="/register?redirect=/checkout" className="store-button store-button-light">
-                Create Account
-              </Link>
-            </div>
+      <StorefrontLayout>
+        <main className="flex-1 flex flex-col items-center justify-center py-40 px-6 text-center bg-white min-h-[70vh]">
+          <Lock size={24} className="mx-auto text-neutral-300 mb-6" />
+          <h1 className="font-serif text-3xl text-black mb-4">Sign in to checkout</h1>
+          <p className="text-neutral-500 text-sm mb-8">Create an account to track your order and save your details.</p>
+          <div className="flex gap-4">
+            <Link href="/login?redirect=/checkout" className="bg-black text-white px-8 py-3 text-xs uppercase tracking-widest font-semibold hover:opacity-80 transition">
+              Sign In
+            </Link>
+            <Link href="/register?redirect=/checkout" className="border border-black px-8 py-3 text-xs uppercase tracking-widest font-semibold text-black hover:bg-neutral-50 transition">
+              Create Account
+            </Link>
           </div>
         </main>
-        <Footer />
-      </div>
+      </StorefrontLayout>
     )
   }
 
-  const inputClass = "store-input"
+  const inputClass = "w-full border-b border-neutral-300 py-3 text-sm outline-none focus:border-black transition-colors placeholder:text-neutral-400 bg-transparent"
 
   return (
-    <div className="storefront-shell min-h-screen flex flex-col">
-      <Navbar />
-
-      <main className="flex-1 pt-16">
-        <section className="store-section">
-          <div className="section-heading-row">
+    <StorefrontLayout>
+      <main className="flex-1 pt-12 pb-24 bg-white">
+        <section className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="mb-12 border-b border-neutral-100 pb-8 flex justify-between items-end">
             <div>
-              <p className="store-label">Secure checkout</p>
-              <h1>Checkout</h1>
+              <h1 className="font-serif text-4xl text-black">Checkout</h1>
             </div>
-            <div className="checkout-steps">
-              <span className={step === "address" ? "active" : ""}>1. Shipping</span>
-              <span>2. Payment</span>
+            <div className="flex gap-4 text-xs uppercase tracking-widest font-semibold">
+              <span className={step === "address" ? "text-black" : "text-neutral-400"}>1. Shipping</span>
+              <span className={step === "payment" ? "text-black" : "text-neutral-400"}>2. Payment</span>
             </div>
           </div>
         </section>
 
-        <section className="checkout-grid">
-          <div className="checkout-flow">
+        <section className="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-12 gap-16">
+          <div className="lg:col-span-7">
             {step === "address" ? (
               <form onSubmit={handleSubmit((data) => { setAddressData(data); setStep("payment") })}>
-                <h2>Shipping</h2>
-                <div className="checkout-fields">
+                <h2 className="font-serif text-2xl mb-6">Shipping Address</h2>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-8">
                   {fields.map(({ name, placeholder, cols }) => (
                     <div key={name} style={{ gridColumn: `span ${cols}` }}>
                       <input id={`checkout-${name}`} {...register(name)} placeholder={placeholder} className={inputClass} />
-                      {errors[name] && <p className="checkout-error">{errors[name]?.message}</p>}
+                      {errors[name] && <p className="text-red-500 text-xs mt-1">{errors[name]?.message}</p>}
                     </div>
                   ))}
                 </div>
-                <button type="submit" id="checkout-continue-btn" className="store-button store-button-dark checkout-primary">
+                <button type="submit" id="checkout-continue-btn" className="w-full bg-black text-white py-4 text-xs uppercase tracking-widest font-semibold hover:opacity-80 transition">
                   Continue to Payment
                 </button>
               </form>
             ) : (
               <div>
-                <h2>Payment</h2>
-                <div className="checkout-payment-card">
+                <h2 className="font-serif text-2xl mb-6">Payment</h2>
+                <div className="bg-neutral-50 p-6 mb-8 text-sm text-neutral-600">
                   <p>Secure checkout via Razorpay - UPI, Card, Net Banking, Wallets</p>
                 </div>
                 <button
@@ -315,70 +304,72 @@ export default function CheckoutPage() {
                   type="button"
                   onClick={handlePayment}
                   disabled={processing}
-                  className="store-button store-button-dark checkout-primary"
+                  className="w-full bg-black text-white py-4 text-xs uppercase tracking-widest font-semibold hover:opacity-80 transition disabled:opacity-50"
                 >
                   {processing ? "Processing..." : `Pay Rs. ${finalTotal.toLocaleString("en-IN")}`}
                 </button>
-                <button onClick={() => setStep("address")} disabled={processing} className="checkout-back">
+                <button onClick={() => setStep("address")} disabled={processing} className="w-full mt-4 text-xs uppercase tracking-widest font-semibold text-neutral-500 hover:text-black transition">
                   Back
                 </button>
               </div>
             )}
           </div>
 
-          <aside className="cart-summary-card">
-            <h2>Order</h2>
+          <aside className="lg:col-span-5 bg-neutral-50 p-8 h-fit">
+            <h2 className="font-serif text-2xl mb-6">Order Summary</h2>
 
-            <div className="checkout-summary-items">
+            <div className="space-y-6 mb-8 max-h-[400px] overflow-y-auto pr-2">
               {items.map((item) => (
-                <div key={item.productId} className="checkout-item">
-                  <img src={item.image} alt={item.title} />
-                  <div>
-                    <p>{item.title}</p>
-                    <span>Qty: {item.quantity}</span>
+                <div key={item.product.id} className="flex gap-4">
+                  <div className="relative w-20 h-20 bg-neutral-100 flex-shrink-0">
+                    <Image src={item.product.images?.[0] || '/product.png'} alt={item.product.title} fill className="object-cover" />
                   </div>
-                  <strong>Rs. {(item.price * item.quantity).toLocaleString("en-IN")}</strong>
+                  <div className="flex-1 flex flex-col justify-center text-sm">
+                    <p className="font-medium text-black line-clamp-1">{item.product.title}</p>
+                    <p className="text-neutral-500 mt-1">Qty: {item.quantity}</p>
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <strong className="text-sm font-medium">Rs. {(item.product.price * item.quantity).toLocaleString("en-IN")}</strong>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <div className="coupon-card">
-              <div className="coupon-row">
+            <div className="mb-8">
+              <div className="flex">
                 <input
                   id="coupon-input"
                   value={couponCode}
                   onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
                   placeholder="Coupon code"
-                  className="store-input"
+                  className="flex-1 border-b border-neutral-300 py-2 text-sm outline-none focus:border-black transition-colors bg-transparent"
                 />
-                <button id="apply-coupon-btn" type="button" onClick={applyCoupon} className="coupon-apply">
+                <button id="apply-coupon-btn" type="button" onClick={applyCoupon} className="border-b border-black px-4 py-2 text-xs uppercase tracking-widest font-semibold hover:opacity-60 transition">
                   Apply
                 </button>
               </div>
-              {couponMsg && <p className={couponMsg.startsWith("✓") ? "coupon-success" : "coupon-error"}>{couponMsg}</p>}
+              {couponMsg && <p className={`text-xs mt-2 ${couponMsg.startsWith("✓") ? "text-green-600" : "text-red-500"}`}>{couponMsg}</p>}
             </div>
 
-            <div className="summary-breakdown">
-              <div>
-                <span>Subtotal</span><strong>Rs. {total().toLocaleString("en-IN")}</strong>
+            <div className="space-y-4 text-sm text-neutral-600 border-b border-neutral-200 pb-6 mb-6">
+              <div className="flex justify-between">
+                <span>Subtotal</span><strong>Rs. {getCartTotal().toLocaleString("en-IN")}</strong>
               </div>
               {discount > 0 && (
-                <div className="discount-row">
+                <div className="flex justify-between text-green-600">
                   <span>Discount</span><strong>-Rs. {discount.toLocaleString("en-IN")}</strong>
                 </div>
               )}
-              <div>
+              <div className="flex justify-between">
                 <span>Shipping</span><strong>{shipping === 0 ? "Free" : `Rs. ${shipping}`}</strong>
               </div>
-              <div className="summary-total">
-                <span>Total</span><strong>Rs. {finalTotal.toLocaleString("en-IN")}</strong>
-              </div>
+            </div>
+            <div className="flex justify-between items-center text-black">
+              <span className="font-medium">Total</span><strong className="font-serif text-2xl">Rs. {finalTotal.toLocaleString("en-IN")}</strong>
             </div>
           </aside>
         </section>
       </main>
-
-      <Footer />
-    </div>
+    </StorefrontLayout>
   )
 }

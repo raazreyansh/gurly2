@@ -1,147 +1,61 @@
-"use client"
+'use client'
 
-import { motion } from "framer-motion"
-import { Heart, ShoppingBag, Sparkles, Star } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { toast } from "sonner"
-import { useCart } from "@/store/cart"
-import type { Product } from "@/types/database"
+import Link from 'next/link'
+import Image from 'next/image'
+import { type Product } from '@/types/database'
+import { useCartStore } from '@/store/useCartStore'
+import { ShoppingBag } from 'lucide-react'
 
-interface Props {
-  product?: Product
-  priority?: boolean
-  loading?: boolean
-}
+export function ProductCard({ product, priority = false }: { product: Product, priority?: boolean }) {
+  const { addItem } = useCartStore()
 
-export function ProductCard({ product, priority = false, loading = false }: Props) {
-  const router = useRouter()
-  const { add } = useCart()
-  const [isAdding, setIsAdding] = useState(false)
-  const [isFav, setIsFav] = useState(false)
-
-  if (loading || !product) {
-    return (
-      <div className="luxury-product-card luxury-product-card-loading">
-        <div className="luxury-product-media animate-pulse" />
-        <div className="luxury-product-info">
-          <div className="h-3 w-2/3 rounded-full bg-black/10 animate-pulse" />
-          <div className="h-3 w-1/3 rounded-full bg-black/10 animate-pulse" />
-        </div>
-      </div>
-    )
-  }
-
-  const currentProduct = product
-  const image = product.images?.[0] ?? "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=700"
-  const hoverImage = product.images?.[1] ?? image
-  const productPath = product.slug ? `/product/${product.slug}` : `/product/${product.id}`
-  const onSale = typeof product.compare_at_price === "number" && product.compare_at_price > product.price
-
-  function quickAdd(event: React.MouseEvent) {
-    event.preventDefault()
-    event.stopPropagation()
-    setIsAdding(true)
-    setTimeout(() => {
-      add({ productId: currentProduct.id, title: currentProduct.title, price: currentProduct.price, quantity: 1, image })
-      toast.success("Added to bag")
-      setIsAdding(false)
-    }, 350)
-  }
-
-  function toggleFav(event: React.MouseEvent) {
-    event.preventDefault()
-    event.stopPropagation()
-    setIsFav((value) => !value)
-    toast.success(isFav ? "Removed from wishlist" : "Saved to wishlist")
-  }
+  const imageUrl = product.images?.[0] || '/product.png'
 
   return (
-    <motion.article
-      className="luxury-product-card"
-      role="link"
-      tabIndex={0}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      onClick={() => router.push(productPath)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault()
-          router.push(productPath)
-        }
-      }}
-    >
-      <div aria-label={product.title} className="luxury-product-link">
-        <div className="luxury-product-media">
-          <img
-            src={image}
-            alt={product.title}
-            loading={priority ? "eager" : "lazy"}
-            className="product-primary-image"
-          />
-          <img
-            src={hoverImage}
-            alt=""
-            loading="lazy"
-            className="product-secondary-image"
-          />
-
-          <div className="product-card-badges">
-            {product.featured && (
-              <span className="badge-featured">
-                <Sparkles size={10} /> New
-              </span>
-            )}
-            {onSale && (
-              <span className="badge-sale">
-                Sale
-              </span>
-            )}
+    <div className="group block relative w-full">
+      
+      <Link href={`/product/${product.slug}`} className="block relative w-full bg-[#fcfcfc] overflow-hidden aspect-[3/4]">
+        <Image
+          src={imageUrl}
+          alt={product.title}
+          fill
+          priority={priority}
+          sizes="(max-width: 768px) 50vw, 25vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+        />
+        
+        {product.compare_at_price && (
+          <div className="absolute top-3 left-3 bg-white text-black text-[10px] font-semibold px-2 py-1 uppercase tracking-widest">
+            Sale
           </div>
+        )}
+      </Link>
+
+      <div className="mt-4 flex flex-col gap-1 items-start">
+        <Link href={`/product/${product.slug}`} className="hover:opacity-70 transition-opacity">
+          <h3 className="font-sans text-sm font-medium text-black line-clamp-1">{product.title}</h3>
+        </Link>
+        
+        <div className="flex items-center gap-2">
+          <p className="font-sans text-sm text-neutral-500">
+            ₹{product.price.toLocaleString('en-IN')}
+          </p>
+          {product.compare_at_price && (
+            <p className="font-sans text-xs text-neutral-300 line-through">
+              ₹{product.compare_at_price.toLocaleString('en-IN')}
+            </p>
+          )}
         </div>
-
-        <div className="luxury-product-info">
-          <p className="card-category-label">{product.categories?.name ?? "Girls Accessories"}</p>
-          <h3>{product.title}</h3>
-          <div className="product-rating-row">
-            <div className="stars-wrap">
-              <Star size={11} fill="currentColor" />
-              <Star size={11} fill="currentColor" />
-              <Star size={11} fill="currentColor" />
-              <Star size={11} fill="currentColor" />
-              <Star size={11} fill="currentColor" />
-            </div>
-            <span>4.9</span>
-          </div>
-          <div className="product-price-row">
-            <strong className="current-price">Rs. {product.price.toLocaleString("en-IN")}</strong>
-            {onSale && product.compare_at_price && <span className="compare-price">Rs. {product.compare_at_price.toLocaleString("en-IN")}</span>}
-          </div>
-        </div>
-      </div>
-
-      <div className="quick-add-container">
-        <button
-          id={`cart-${product.id}`}
-          type="button"
-          onClick={quickAdd}
-          disabled={product.stock <= 0 || isAdding}
-          className={`premium-quick-add-btn ${isAdding ? "adding" : ""}`}
-        >
-          <ShoppingBag size={12} />
-          {isAdding ? "Adding..." : product.stock > 0 ? "Quick Add" : "Sold Out"}
-        </button>
       </div>
 
       <button
-        type="button"
-        onClick={toggleFav}
-        aria-label="Wishlist"
-        className={`wishlist-heart-btn ${isFav ? "active" : ""}`}
+        onClick={() => addItem(product)}
+        className="absolute bottom-20 right-3 bg-white text-black p-3 rounded-full opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:scale-110 shadow-lg"
+        aria-label="Add to cart"
       >
-        <Heart size={13} fill={isFav ? "currentColor" : "none"} />
+        <ShoppingBag size={16} />
       </button>
-    </motion.article>
+
+    </div>
   )
 }

@@ -1,129 +1,135 @@
-"use client"
+'use client'
 
-import Link from "next/link"
-import { AnimatePresence, motion } from "framer-motion"
-import { ArrowRight, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
-import { toast } from "sonner"
-import { useCart } from "@/store/cart"
+import { useCartStore } from '@/store/useCartStore'
+import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
+import Image from 'next/image'
+import { X, Minus, Plus } from 'lucide-react'
 
-interface CartDrawerProps {
-  open: boolean
-  onClose: () => void
-}
-
-export function CartDrawer({ open, onClose }: CartDrawerProps) {
-  const { items, remove, update, total, clear, count } = useCart()
-  const subtotal = total()
+export function CartDrawer() {
+  const { isOpen, closeCart, items, removeItem, updateQuantity, getCartTotal } = useCartStore()
+  const subtotal = getCartTotal()
   const shipping = subtotal >= 999 || subtotal === 0 ? 0 : 99
   const orderTotal = subtotal + shipping
 
   return (
     <AnimatePresence>
-      {open && (
+      {isOpen && (
         <motion.div
-          className="store-drawer-overlay"
+          className="fixed inset-0 z-[100] flex justify-end"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
         >
-          <motion.aside
-            data-testid="cart-drawer"
-            className="store-cart-drawer"
-            initial={{ x: "100%" }}
+          <div 
+            className="absolute inset-0 bg-black/40" 
+            onClick={closeCart}
+          />
+          
+          <motion.div
+            initial={{ x: '100%' }}
             animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 240, damping: 28 }}
-            onClick={(event) => event.stopPropagation()}
-            aria-label="Shopping cart drawer"
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="relative w-full max-w-md bg-white h-full flex flex-col shadow-2xl"
           >
-            <div className="cart-drawer-header">
-              <div>
-                <p className="store-label">Luxury tray</p>
-                <h2>Your Cart</h2>
-              </div>
-              <button type="button" onClick={onClose} className="icon-button" aria-label="Close cart">
-                <X size={18} />
+            <div className="flex items-center justify-between p-6 border-b border-neutral-100">
+              <h2 className="font-serif text-2xl text-black">
+                My Bag ({items.reduce((acc, i) => acc + i.quantity, 0)})
+              </h2>
+              <button onClick={closeCart} className="hover:opacity-60 transition">
+                <X size={20} />
               </button>
             </div>
 
-            {items.length === 0 ? (
-              <div className="cart-drawer-empty">
-                <ShoppingBag size={42} />
-                <h3>Your bag is empty</h3>
-                <p>Start with earrings, bracelets, necklaces, or gift-ready accessories.</p>
-                <Link href="/shop" className="store-button store-button-dark" onClick={onClose}>
-                  Start Shopping
-                </Link>
-              </div>
-            ) : (
-              <>
-                <div className="cart-drawer-items">
-                  {items.map((item) => (
-                    <article className="cart-line-item" key={item.productId}>
-                      <img src={item.image} alt={item.title} loading="lazy" />
-                      <div className="cart-line-content">
-                        <h3>{item.title}</h3>
-                        <p>Rs. {item.price.toLocaleString("en-IN")}</p>
-                        <div className="cart-qty-row">
-                          <button type="button" aria-label="Decrease quantity" onClick={() => update(item.productId, item.quantity - 1)}>
-                            <Minus size={12} />
-                          </button>
-                          <span>{item.quantity}</span>
-                          <button type="button" aria-label="Increase quantity" onClick={() => update(item.productId, item.quantity + 1)}>
-                            <Plus size={12} />
-                          </button>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        className="cart-remove"
-                        aria-label={`Remove ${item.title}`}
-                        onClick={() => {
-                          remove(item.productId)
-                          toast.success("Item removed")
-                        }}
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </article>
-                  ))}
-                </div>
-
-                <div className="cart-drawer-summary">
-                  <div>
-                    <span>Items</span>
-                    <strong>{count()}</strong>
-                  </div>
-                  <div>
-                    <span>Subtotal</span>
-                    <strong>Rs. {subtotal.toLocaleString("en-IN")}</strong>
-                  </div>
-                  <div>
-                    <span>Shipping</span>
-                    <strong>{shipping === 0 ? "Free" : `Rs. ${shipping}`}</strong>
-                  </div>
-                  <div className="cart-total">
-                    <span>Total</span>
-                    <strong>Rs. {orderTotal.toLocaleString("en-IN")}</strong>
-                  </div>
-                  <Link href="/checkout" id="drawer-checkout-btn" className="store-button store-button-dark" onClick={onClose}>
-                    Checkout <ArrowRight size={15} />
-                  </Link>
-                  <button
-                    type="button"
-                    className="cart-clear"
-                    onClick={() => {
-                      clear()
-                      toast.success("Cart cleared")
-                    }}
+            <div className="flex-1 overflow-y-auto p-6">
+              {items.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <p className="text-neutral-500 mb-6">Your bag is empty.</p>
+                  <button 
+                    onClick={closeCart}
+                    className="border-b border-black text-xs uppercase tracking-widest font-semibold hover:opacity-60 transition pb-1"
                   >
-                    Clear cart
+                    Continue Shopping
                   </button>
                 </div>
-              </>
+              ) : (
+                <div className="space-y-8">
+                  {items.map((item) => (
+                    <div key={item.product.id} className="flex gap-4">
+                      <Link href={`/product/${item.product.slug}`} onClick={closeCart} className="relative w-20 h-24 flex-shrink-0 bg-neutral-50">
+                        <Image 
+                          src={item.product.images?.[0] || '/product.png'} 
+                          alt={item.product.title}
+                          fill
+                          className="object-cover" 
+                        />
+                      </Link>
+                      
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start">
+                            <Link href={`/product/${item.product.slug}`} onClick={closeCart} className="hover:opacity-60 transition">
+                              <h3 className="font-sans text-sm font-medium text-black line-clamp-1">{item.product.title}</h3>
+                            </Link>
+                            <button 
+                              onClick={() => removeItem(item.product.id)}
+                              className="text-neutral-400 hover:text-black transition"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                          <p className="text-xs text-neutral-500 mt-1">Rs. {item.product.price.toLocaleString('en-IN')}</p>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-4">
+                          <div className="flex items-center gap-3 border border-neutral-200 px-2 py-1">
+                            <button onClick={() => updateQuantity(item.product.id, Math.max(1, item.quantity - 1))} className="hover:opacity-60 transition">
+                              <Minus size={10} />
+                            </button>
+                            <span className="text-xs font-medium w-4 text-center">{item.quantity}</span>
+                            <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="hover:opacity-60 transition">
+                              <Plus size={10} />
+                            </button>
+                          </div>
+                          <strong className="text-sm">Rs. {(item.product.price * item.quantity).toLocaleString('en-IN')}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {items.length > 0 && (
+              <div className="border-t border-neutral-100 p-6 bg-neutral-50">
+                <div className="flex justify-between text-sm text-neutral-600 mb-2">
+                  <span>Subtotal</span>
+                  <span>Rs. {subtotal.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between text-sm text-neutral-600 mb-6">
+                  <span>Shipping</span>
+                  <span>{shipping === 0 ? 'Free' : `Rs. ${shipping}`}</span>
+                </div>
+                <div className="flex justify-between items-center mb-6">
+                  <span className="font-medium text-black">Total</span>
+                  <span className="font-serif text-xl">Rs. {orderTotal.toLocaleString('en-IN')}</span>
+                </div>
+                <Link 
+                  href="/checkout"
+                  onClick={closeCart}
+                  className="block w-full bg-black text-white text-center py-4 text-xs uppercase tracking-widest font-semibold hover:opacity-80 transition"
+                >
+                  Proceed to Checkout
+                </Link>
+                <div className="text-center mt-4">
+                  <Link href="/cart" onClick={closeCart} className="text-xs uppercase tracking-widest border-b border-black pb-0.5 hover:opacity-60 transition">
+                    View Bag
+                  </Link>
+                </div>
+              </div>
             )}
-          </motion.aside>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
