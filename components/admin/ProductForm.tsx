@@ -112,6 +112,35 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
     setPreviews(listPreviews)
   }
 
+  // Native HTML5 drag-and-drop reordering logic
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === index) return
+
+    const updatedFiles = [...files]
+    const [draggedFile] = updatedFiles.splice(draggedIndex, 1)
+    updatedFiles.splice(index, 0, draggedFile)
+
+    const updatedPreviews = [...previews]
+    const [draggedPreview] = updatedPreviews.splice(draggedIndex, 1)
+    updatedPreviews.splice(index, 0, draggedPreview)
+
+    setFiles(updatedFiles)
+    setPreviews(updatedPreviews)
+    setDraggedIndex(index)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.categoryId) {
@@ -379,53 +408,66 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
         </div>
 
         {previews.length > 0 && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 bg-neutral-100 p-3 border border-neutral-200">
-            {previews.map((preview, index) => (
-              <div
-                key={index}
-                className="group relative bg-white border border-neutral-200 overflow-hidden flex items-center justify-center"
-              >
-                {preview.type === 'image' && (
-                  <img
-                    src={preview.url}
-                    alt=""
-                    className="aspect-square w-full object-cover"
-                  />
-                )}
-
-                {preview.type === 'video' && (
-                  <video
-                    src={preview.url}
-                    autoPlay
-                    muted
-                    loop
-                    className="aspect-square w-full object-cover"
-                  />
-                )}
-
-                {preview.type === 'pdf' && (
-                  <div className="aspect-square w-full flex flex-col items-center justify-center bg-neutral-50 p-2 text-center select-none">
-                    <span className="text-xs font-black tracking-widest text-red-600 bg-red-50 border border-red-200 px-2 py-1">PDF</span>
-                    <span className="text-[8px] text-neutral-400 font-bold uppercase truncate max-w-full mt-2.5 px-1">{preview.name}</span>
-                  </div>
-                )}
-
-                {preview.type === 'zip' && (
-                  <div className="aspect-square w-full flex flex-col items-center justify-center bg-neutral-50 p-2 text-center select-none">
-                    <span className="text-xs font-black tracking-widest text-blue-600 bg-blue-50 border border-blue-200 px-2 py-1">ZIP</span>
-                    <span className="text-[8px] text-neutral-400 font-bold uppercase truncate max-w-full mt-2.5 px-1">{preview.name}</span>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[9px] font-bold tracking-[0.2em] text-white uppercase cursor-pointer"
+          <div className="space-y-2">
+            <p className="text-[8px] text-neutral-400 font-mono uppercase tracking-[0.2em]">
+              ✨ Drag and drop assets to reorder display sequence precedence
+            </p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 bg-neutral-100 p-3 border border-neutral-200">
+              {previews.map((preview, index) => (
+                <div
+                  key={index}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDragEnd={handleDragEnd}
+                  className={`group relative bg-white border cursor-grab active:cursor-grabbing overflow-hidden flex items-center justify-center transition-all duration-300 ${
+                    draggedIndex === index 
+                      ? 'opacity-40 border-dashed border-black scale-95 shadow-lg' 
+                      : 'border-neutral-200 hover:border-black'
+                  }`}
                 >
-                  Remove Asset
-                </button>
-              </div>
-            ))}
+                  {preview.type === 'image' && (
+                    <img
+                      src={preview.url}
+                      alt=""
+                      className="aspect-square w-full object-cover pointer-events-none select-none"
+                    />
+                  )}
+
+                  {preview.type === 'video' && (
+                    <video
+                      src={preview.url}
+                      autoPlay
+                      muted
+                      loop
+                      className="aspect-square w-full object-cover pointer-events-none select-none"
+                    />
+                  )}
+
+                  {preview.type === 'pdf' && (
+                    <div className="aspect-square w-full flex flex-col items-center justify-center bg-neutral-50 p-2 text-center select-none pointer-events-none">
+                      <span className="text-xs font-black tracking-widest text-red-600 bg-red-50 border border-red-200 px-2 py-1">PDF</span>
+                      <span className="text-[8px] text-neutral-400 font-bold uppercase truncate max-w-full mt-2.5 px-1">{preview.name}</span>
+                    </div>
+                  )}
+
+                  {preview.type === 'zip' && (
+                    <div className="aspect-square w-full flex flex-col items-center justify-center bg-neutral-50 p-2 text-center select-none pointer-events-none">
+                      <span className="text-xs font-black tracking-widest text-blue-600 bg-blue-50 border border-blue-200 px-2 py-1">ZIP</span>
+                      <span className="text-[8px] text-neutral-400 font-bold uppercase truncate max-w-full mt-2.5 px-1">{preview.name}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[9px] font-bold tracking-[0.2em] text-white uppercase cursor-pointer"
+                  >
+                    Remove Asset
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
