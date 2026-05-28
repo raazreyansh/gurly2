@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import ProductGallery from '@/components/product/ProductGallery'
 import ProductInfo from '@/components/product/ProductInfo'
 import ProductRecommendations from '@/components/product/ProductRecommendations'
+import ProductReviews from '@/components/product/ProductReviews'
 import { notFound } from 'next/navigation'
 
 interface Props {
@@ -113,6 +114,13 @@ export default async function ProductPage({
           <ProductInfo product={product} />
         </div>
       </div>
+
+      {/* Customer Verified Reviews */}
+      <ProductReviews
+        productId={product.id}
+        slug={product.slug || ''}
+        reviews={product.reviews}
+      />
 
       {/* Related picks recommendations */}
       <ProductRecommendations

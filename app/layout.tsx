@@ -1,6 +1,7 @@
 import './globals.css'
 import { playfair, inter } from '@/lib/fonts'
 import StorefrontLayout from '@/components/layout/StorefrontLayout'
+import SmoothScrollProvider from '@/components/providers/SmoothScrollProvider'
 
 export const metadata = {
   title: 'GURLY. — Premium Jewellery & Luxury Accessories',
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${playfair.variable} ${inter.variable} antialiased`}>
-        <StorefrontLayout>{children}</StorefrontLayout>
+        <SmoothScrollProvider>
+          <StorefrontLayout>{children}</StorefrontLayout>
+        </SmoothScrollProvider>
       </body>
     </html>
   )
