@@ -16,14 +16,14 @@ export default function ProductInfo({
     description: string | null
     media?: any
     images?: any
-    material: string | null
-    plating: string | null
-    gemstone: string | null
-    antiTarnish: boolean
-    waterproof: boolean
-    hypoallergenic: boolean
-    handcrafted: boolean
-    shippingDays: number
+    material?: string | null
+    plating?: string | null
+    gemstone?: string | null
+    antiTarnish?: boolean
+    waterproof?: boolean
+    hypoallergenic?: boolean
+    handcrafted?: boolean
+    shippingDays?: number
     stock: number
   }
 }) {
@@ -104,63 +104,72 @@ export default function ProductInfo({
       </div>
 
       {/* Specs Panel */}
-      <div className="mt-8 grid grid-cols-2 gap-y-4 gap-x-8 border-b border-neutral-100 pb-8 text-xs font-semibold text-neutral-500 uppercase tracking-widest">
-        {product.material && (
-          <div className="flex flex-col gap-1">
-            <span className="text-[8px] text-neutral-400 font-bold tracking-[0.2em]">Material</span>
-            <span className="text-black font-serif text-sm tracking-wide lowercase first-letter:uppercase">{product.material}</span>
-          </div>
-        )}
+      {((product as any).material || (product as any).plating || ((product as any).gemstone && (product as any).gemstone !== 'None')) && (
+        <div className="mt-8 grid grid-cols-2 gap-y-4 gap-x-8 border-b border-neutral-100 pb-8 text-xs font-semibold text-neutral-500 uppercase tracking-widest">
+          {(product as any).material && (
+            <div className="flex flex-col gap-1">
+              <span className="text-[8px] text-neutral-400 font-bold tracking-[0.2em]">Material</span>
+              <span className="text-black font-serif text-sm tracking-wide lowercase first-letter:uppercase">{(product as any).material}</span>
+            </div>
+          )}
 
-        {product.plating && (
-          <div className="flex flex-col gap-1">
-            <span className="text-[8px] text-neutral-400 font-bold tracking-[0.2em]">Plating</span>
-            <span className="text-black font-serif text-sm tracking-wide lowercase first-letter:uppercase">{product.plating}</span>
-          </div>
-        )}
+          {(product as any).plating && (
+            <div className="flex flex-col gap-1">
+              <span className="text-[8px] text-neutral-400 font-bold tracking-[0.2em]">Plating</span>
+              <span className="text-black font-serif text-sm tracking-wide lowercase first-letter:uppercase">{(product as any).plating}</span>
+            </div>
+          )}
 
-        {product.gemstone && product.gemstone !== 'None' && (
-          <div className="flex flex-col gap-1 col-span-2">
-            <span className="text-[8px] text-neutral-400 font-bold tracking-[0.2em]">Gemstone setting</span>
-            <span className="text-black font-serif text-sm tracking-wide lowercase first-letter:uppercase">{product.gemstone}</span>
-          </div>
-        )}
-      </div>
+          {(product as any).gemstone && (product as any).gemstone !== 'None' && (
+            <div className="flex flex-col gap-1 col-span-2">
+              <span className="text-[8px] text-neutral-400 font-bold tracking-[0.2em]">Gemstone setting</span>
+              <span className="text-black font-serif text-sm tracking-wide lowercase first-letter:uppercase">{(product as any).gemstone}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Trust & Spec checklists */}
       <div className="mt-8 space-y-3.5 border-b border-neutral-100 pb-8 text-[10px] tracking-[0.2em] font-bold text-neutral-600 uppercase">
-        {product.antiTarnish && (
+        {(product as any).antiTarnish && (
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-black flex-shrink-0" />
             <span>✓ Lifetime Anti-Tarnish Guarantee</span>
           </div>
         )}
 
-        {product.waterproof && (
+        {(product as any).waterproof && (
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-black flex-shrink-0" />
             <span>✓ 100% Waterproof & Shower-Safe</span>
           </div>
         )}
 
-        {product.hypoallergenic && (
+        {(product as any).hypoallergenic && (
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-black flex-shrink-0" />
             <span>✓ Hypoallergenic (Nickel-free)</span>
           </div>
         )}
 
-        {product.handcrafted && (
+        {(product as any).handcrafted && (
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-black flex-shrink-0" />
             <span>✓ Handcrafted by Indian Artisans</span>
           </div>
         )}
 
-        <div className="flex items-center gap-2 text-neutral-400 font-medium">
-          <ShieldCheck className="h-4 w-4 text-neutral-400 flex-shrink-0" />
-          <span>Ships in {product.shippingDays} working days</span>
-        </div>
+        {(product as any).shippingDays ? (
+          <div className="flex items-center gap-2 text-neutral-400 font-medium">
+            <ShieldCheck className="h-4 w-4 text-neutral-400 flex-shrink-0" />
+            <span>Ships in {(product as any).shippingDays} working days</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-neutral-400 font-medium">
+            <ShieldCheck className="h-4 w-4 text-neutral-400 flex-shrink-0" />
+            <span>Ships in 3-4 working days</span>
+          </div>
+        )}
       </div>
 
       {/* Description copy */}

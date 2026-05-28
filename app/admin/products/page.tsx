@@ -93,7 +93,7 @@ export default async function AdminProductsPage() {
                       <td className="px-6 py-4 text-neutral-500 uppercase tracking-widest font-semibold text-[10px]">
                         {product.category?.name || 'Unassigned'}
                       </td>
-                      <td className="px-6 py-4 space-y-1">
+                      <td className="px-6 py-4">
                         <div>
                           {product.featured ? (
                             <span className="px-2 py-0.5 text-[8px] font-bold tracking-widest uppercase bg-black text-white">
@@ -102,13 +102,6 @@ export default async function AdminProductsPage() {
                           ) : (
                             <span className="px-2 py-0.5 text-[8px] font-semibold tracking-widest uppercase border border-neutral-200 text-neutral-400">
                               Standard
-                            </span>
-                          )}
-                        </div>
-                        <div>
-                          {product.trending && (
-                            <span className="px-2 py-0.5 text-[8px] font-bold tracking-widest uppercase bg-amber-500 text-white">
-                              Trending
                             </span>
                           )}
                         </div>

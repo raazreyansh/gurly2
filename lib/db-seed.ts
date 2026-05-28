@@ -52,14 +52,6 @@ export async function autoSeedDatabase() {
           featured: true,
           categoryId: earrings.id,
           media: [{ type: "image", url: "/images/models/community_1.png" }],
-          material: "18k Solid Gold",
-          plating: "24k Gold Plated",
-          gemstone: "Cubic Zirconia",
-          antiTarnish: true,
-          waterproof: true,
-          hypoallergenic: true,
-          handcrafted: true,
-          shippingDays: 3
         },
         {
           title: "Luxury Pendant",
@@ -71,14 +63,6 @@ export async function autoSeedDatabase() {
           featured: true,
           categoryId: necklaces.id,
           media: [{ type: "image", url: "/images/models/community_2.png" }],
-          material: "18k Solid Gold",
-          plating: "24k Gold Plated",
-          gemstone: "Diamond Cut Crystal",
-          antiTarnish: true,
-          waterproof: true,
-          hypoallergenic: true,
-          handcrafted: true,
-          shippingDays: 3
         },
         {
           title: "Prestige Solitaire Ring",
@@ -90,14 +74,6 @@ export async function autoSeedDatabase() {
           featured: true,
           categoryId: rings.id,
           media: [{ type: "image", url: "/images/models/community_3.png" }],
-          material: "925 Sterling Silver",
-          plating: "18k Gold Plated",
-          gemstone: "AAAAA Solitaire Moissanite",
-          antiTarnish: true,
-          waterproof: true,
-          hypoallergenic: true,
-          handcrafted: true,
-          shippingDays: 4
         },
         {
           title: "Classic Gold Choker",
@@ -109,14 +85,6 @@ export async function autoSeedDatabase() {
           featured: true,
           categoryId: necklaces.id,
           media: [{ type: "image", url: "/images/models/community_4.png" }],
-          material: "Brass Base",
-          plating: "24k Gold Overlay",
-          gemstone: "None",
-          antiTarnish: true,
-          waterproof: false,
-          hypoallergenic: true,
-          handcrafted: true,
-          shippingDays: 4
         },
         {
           title: "Aura Hoop Earrings",
@@ -128,14 +96,6 @@ export async function autoSeedDatabase() {
           featured: false,
           categoryId: earrings.id,
           media: [{ type: "image", url: "/images/models/community_1.png" }],
-          material: "Recycled Stainless Steel",
-          plating: "18k Gold PVD Plated",
-          gemstone: "None",
-          antiTarnish: true,
-          waterproof: true,
-          hypoallergenic: true,
-          handcrafted: false,
-          shippingDays: 3
         },
         {
           title: "Serene Cuff Bracelet",
@@ -147,14 +107,6 @@ export async function autoSeedDatabase() {
           featured: false,
           categoryId: bracelets.id,
           media: [{ type: "image", url: "/images/models/community_4.png" }],
-          material: "Recycled Stainless Steel",
-          plating: "18k Gold PVD Plated",
-          gemstone: "None",
-          antiTarnish: true,
-          waterproof: true,
-          hypoallergenic: true,
-          handcrafted: true,
-          shippingDays: 3
         }
       ]
     })

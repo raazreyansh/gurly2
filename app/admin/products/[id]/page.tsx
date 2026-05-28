@@ -26,7 +26,6 @@ export default async function EditProductPage({ params }: Props) {
     price: Number(product.price),
     compareAtPrice: product.compareAtPrice ? Number(product.compareAtPrice) : null,
     media: Array.isArray(product.media) ? product.media : [],
-    tags: product.tags || [],
   }
 
   return (
