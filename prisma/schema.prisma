@@ -33,38 +33,46 @@ model Category {
 }
 
 model Product {
-  id              String      @id @default(uuid())
-  title           String
-  slug            String      @unique
-  description     String
+  id               String      @id @default(uuid())
+  title            String
+  slug             String      @unique
+  shortDescription String?     @map("short_description")
+  description      String
 
-  price           Decimal
-  compareAtPrice  Decimal?    @map("compare_at_price")
+  price            Decimal
+  compareAtPrice   Decimal?    @map("compare_at_price")
 
-  stock           Int         @default(0)
+  stock            Int         @default(0)
 
-  featured        Boolean     @default(false)
+  featured         Boolean     @default(false)
+  trending         Boolean     @default(false)
 
-  media           Json        @default("[]")
+  media            Json        @default("[]")
+
+  tags             String[]    @default([])
+
+  // SEO fields
+  seoTitle         String?     @map("seo_title")
+  seoDescription   String?     @map("seo_description")
 
   // Luxury specifications
-  material        String?
-  plating         String?
-  gemstone        String?
-  antiTarnish     Boolean     @default(false) @map("anti_tarnish")
-  waterproof      Boolean     @default(false)
-  hypoallergenic  Boolean     @default(false)
-  handcrafted     Boolean     @default(true)
-  shippingDays    Int         @default(4) @map("shipping_days")
+  material         String?
+  plating          String?
+  gemstone         String?
+  antiTarnish      Boolean     @default(false) @map("anti_tarnish")
+  waterproof       Boolean     @default(false)
+  hypoallergenic   Boolean     @default(false)
+  handcrafted      Boolean     @default(true)
+  shippingDays     Int         @default(4) @map("shipping_days")
 
-  categoryId      String      @map("category_id")
-  category        Category    @relation(fields: [categoryId], references: [id])
-  orderItems      OrderItem[]
-  reviews         Review[]
-  wishlistItems   Wishlist[]
+  categoryId       String      @map("category_id")
+  category         Category    @relation(fields: [categoryId], references: [id])
+  orderItems       OrderItem[]
+  reviews          Review[]
+  wishlistItems    Wishlist[]
 
-  createdAt       DateTime    @default(now()) @map("created_at")
-  updatedAt       DateTime    @updatedAt @map("updated_at")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
 
   @@map("products")
 }

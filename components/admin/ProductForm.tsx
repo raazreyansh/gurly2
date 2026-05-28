@@ -2,13 +2,39 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createProduct } from '@/app/admin/products/actions'
+import { createProduct, updateProduct } from '@/app/admin/products/actions'
 import { supabase } from '@/lib/supabase'
 
 interface Category {
   id: string
   name: string
   slug: string | null
+}
+
+interface ExistingProduct {
+  id: string
+  title: string
+  slug: string
+  shortDescription?: string | null
+  description: string
+  price: number
+  compareAtPrice: number | null
+  stock: number
+  featured: boolean
+  trending: boolean
+  categoryId: string
+  media: any[]
+  tags: string[]
+  seoTitle?: string | null
+  seoDescription?: string | null
+  material?: string | null
+  plating?: string | null
+  gemstone?: string | null
+  antiTarnish: boolean
+  waterproof: boolean
+  hypoallergenic: boolean
+  handcrafted: boolean
+  shippingDays: number
 }
 
 const FALLBACK_CATEGORIES = [
@@ -18,13 +44,16 @@ const FALLBACK_CATEGORIES = [
   { id: '4', name: 'Bracelets', slug: 'bracelets' },
 ]
 
-export default function ProductForm({ categories }: { categories: Category[] }) {
+export default function ProductForm({ categories, existingProduct }: { categories: Category[]; existingProduct?: ExistingProduct }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const isEditMode = !!existingProduct
   
   // Multi-format media state
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<Array<{ type: string; url: string; name: string }>>([])
+  // Existing media from DB (edit mode)
+  const [existingMedia, setExistingMedia] = useState<Array<{ type: string; url: string }>>(existingProduct?.media || [])
 
   // Image Cropping Studio state fields
   const [croppingIndex, setCroppingIndex] = useState<number | null>(null)
@@ -35,23 +64,27 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
   const activeCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES
 
   const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    price: '',
-    compareAtPrice: '',
-    stock: '10',
-    featured: false,
-    categoryId: activeCategories[0]?.id || '',
-    // Luxury properties
-    material: '18k Solid Gold',
-    plating: '24k Gold Plated',
-    gemstone: 'None',
-    antiTarnish: true,
-    waterproof: true,
-    hypoallergenic: true,
-    handcrafted: true,
-    shippingDays: '3',
+    title: existingProduct?.title || '',
+    slug: existingProduct?.slug || '',
+    shortDescription: existingProduct?.shortDescription || '',
+    description: existingProduct?.description || '',
+    price: existingProduct?.price?.toString() || '',
+    compareAtPrice: existingProduct?.compareAtPrice?.toString() || '',
+    stock: existingProduct?.stock?.toString() || '10',
+    featured: existingProduct?.featured ?? false,
+    trending: existingProduct?.trending ?? false,
+    categoryId: existingProduct?.categoryId || activeCategories[0]?.id || '',
+    tags: existingProduct?.tags?.join(', ') || '',
+    seoTitle: existingProduct?.seoTitle || '',
+    seoDescription: existingProduct?.seoDescription || '',
+    material: existingProduct?.material || '18k Solid Gold',
+    plating: existingProduct?.plating || '24k Gold Plated',
+    gemstone: existingProduct?.gemstone || 'None',
+    antiTarnish: existingProduct?.antiTarnish ?? true,
+    waterproof: existingProduct?.waterproof ?? true,
+    hypoallergenic: existingProduct?.hypoallergenic ?? true,
+    handcrafted: existingProduct?.handcrafted ?? true,
+    shippingDays: existingProduct?.shippingDays?.toString() || '3',
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -338,16 +371,25 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
         }
       }
 
-      const result = await createProduct({
+      // Combine existing media (that weren't removed) with newly uploaded
+      const finalMedia = [...existingMedia, ...uploadedMedia]
+      const tagsArray = formData.tags ? formData.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : []
+
+      const payload = {
         title: formData.title,
         slug: formData.slug,
+        shortDescription: formData.shortDescription || undefined,
         description: formData.description,
         price: Number(formData.price),
         compareAtPrice: formData.compareAtPrice ? Number(formData.compareAtPrice) : null,
         stock: Number(formData.stock),
         featured: formData.featured,
+        trending: formData.trending,
         categoryId: formData.categoryId,
-        media: uploadedMedia, // dynamic structured media catalog objects!
+        media: finalMedia,
+        tags: tagsArray,
+        seoTitle: formData.seoTitle || undefined,
+        seoDescription: formData.seoDescription || undefined,
         material: formData.material,
         plating: formData.plating,
         gemstone: formData.gemstone,
@@ -356,7 +398,11 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
         hypoallergenic: formData.hypoallergenic,
         handcrafted: formData.handcrafted,
         shippingDays: Number(formData.shippingDays),
-      })
+      }
+
+      const result = isEditMode
+        ? await updateProduct(existingProduct!.id, payload)
+        : await createProduct(payload)
 
       if (result.success) {
         router.push('/admin/products')
@@ -687,7 +733,7 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
           </label>
         </div>
 
-        <label className="flex sm:col-span-2 items-center gap-3 border border-neutral-200 p-3.5 bg-neutral-50 cursor-pointer select-none">
+        <label className="flex items-center gap-3 border border-neutral-200 p-3.5 bg-neutral-50 cursor-pointer select-none">
           <input
             type="checkbox"
             name="featured"
@@ -695,9 +741,100 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
             onChange={handleChange}
             className="h-4.5 w-4.5 accent-black cursor-pointer"
           />
-          <span className="text-[10px] tracking-wider font-bold uppercase">Featured Listing Spotlight</span>
+          <span className="text-[10px] tracking-wider font-bold uppercase">Featured Spotlight</span>
+        </label>
+
+        <label className="flex items-center gap-3 border border-neutral-200 p-3.5 bg-neutral-50 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            name="trending"
+            checked={formData.trending}
+            onChange={handleChange}
+            className="h-4.5 w-4.5 accent-black cursor-pointer"
+          />
+          <span className="text-[10px] tracking-wider font-bold uppercase">Trending Now</span>
         </label>
       </div>
+
+      {/* SEO & Tags Section */}
+      <div className="pt-4 border-t border-neutral-100 space-y-4">
+        <label className="mb-2 block text-[9px] tracking-[0.25em] font-bold text-neutral-400 uppercase">
+          SEO & Discovery
+        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <label className="text-[9px] tracking-widest font-bold uppercase text-neutral-400">Short Description (Card Preview)</label>
+            <input
+              type="text"
+              name="shortDescription"
+              placeholder="Brief one-line teaser for product cards..."
+              value={formData.shortDescription}
+              onChange={handleChange}
+              className="border border-neutral-200 p-3.5 text-xs font-semibold text-black focus:border-black focus:outline-none bg-neutral-50"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-[9px] tracking-widest font-bold uppercase text-neutral-400">SEO Title</label>
+            <input
+              type="text"
+              name="seoTitle"
+              placeholder="Custom page title for Google..."
+              value={formData.seoTitle}
+              onChange={handleChange}
+              className="border border-neutral-200 p-3.5 text-xs font-semibold text-black focus:border-black focus:outline-none bg-neutral-50"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-[9px] tracking-widest font-bold uppercase text-neutral-400">SEO Description</label>
+            <input
+              type="text"
+              name="seoDescription"
+              placeholder="Meta description for search results..."
+              value={formData.seoDescription}
+              onChange={handleChange}
+              className="border border-neutral-200 p-3.5 text-xs font-semibold text-black focus:border-black focus:outline-none bg-neutral-50"
+            />
+          </div>
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <label className="text-[9px] tracking-widest font-bold uppercase text-neutral-400">Tags (comma-separated)</label>
+            <input
+              type="text"
+              name="tags"
+              placeholder="gold, jhumka, festive, wedding, bridal..."
+              value={formData.tags}
+              onChange={handleChange}
+              className="border border-neutral-200 p-3.5 text-xs font-semibold text-black focus:border-black focus:outline-none bg-neutral-50"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Existing Media (Edit Mode) */}
+      {isEditMode && existingMedia.length > 0 && (
+        <div className="pt-4 border-t border-neutral-100 space-y-3">
+          <label className="block text-[9px] tracking-[0.25em] font-bold text-neutral-400 uppercase">
+            Current Media ({existingMedia.length})
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-neutral-100 p-3 border border-neutral-200">
+            {existingMedia.map((m, i) => (
+              <div key={i} className="group relative bg-white border border-neutral-200 overflow-hidden">
+                {m.type === 'video' ? (
+                  <video src={m.url} muted className="aspect-square w-full object-cover" />
+                ) : (
+                  <img src={m.url} alt="" className="aspect-square w-full object-cover" />
+                )}
+                <button
+                  type="button"
+                  onClick={() => setExistingMedia(prev => prev.filter((_, idx) => idx !== i))}
+                  className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[8px] font-mono font-bold tracking-[0.2em] text-red-400 uppercase cursor-pointer"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Submit Trigger */}
       <button
@@ -705,7 +842,9 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
         type="submit"
         className="w-full bg-black py-4.5 text-xs font-semibold tracking-[0.3em] uppercase text-white hover:opacity-85 transition disabled:opacity-50 mt-6 cursor-pointer"
       >
-        {loading ? 'CREATING CATALOG ENTRY...' : 'CREATE PRODUCT'}
+        {loading
+          ? (isEditMode ? 'SAVING CHANGES...' : 'CREATING CATALOG ENTRY...')
+          : (isEditMode ? 'SAVE CHANGES' : 'CREATE PRODUCT')}
       </button>
     </form>
 

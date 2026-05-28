@@ -67,8 +67,10 @@ export default async function AdminProductsPage() {
                     if (typeof val === 'object' && val.url) return val.url
                     return '/images/models/community_2.png'
                   }
-                  if (Array.isArray(product.images) && product.images.length > 0) {
-                    imageSrc = parseImageField(product.images[0])
+                  
+                  const mediaArray = Array.isArray(product.media) ? product.media : []
+                  if (mediaArray.length > 0) {
+                    imageSrc = parseImageField(mediaArray[0])
                   }
 
                   return (
@@ -91,16 +93,25 @@ export default async function AdminProductsPage() {
                       <td className="px-6 py-4 text-neutral-500 uppercase tracking-widest font-semibold text-[10px]">
                         {product.category?.name || 'Unassigned'}
                       </td>
-                      <td className="px-6 py-4">
-                        {product.featured ? (
-                          <span className="px-2 py-0.5 text-[8px] font-bold tracking-widest uppercase bg-black text-white">
-                            Featured
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 text-[8px] font-semibold tracking-widest uppercase border border-neutral-200 text-neutral-400">
-                            Standard
-                          </span>
-                        )}
+                      <td className="px-6 py-4 space-y-1">
+                        <div>
+                          {product.featured ? (
+                            <span className="px-2 py-0.5 text-[8px] font-bold tracking-widest uppercase bg-black text-white">
+                              Featured
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 text-[8px] font-semibold tracking-widest uppercase border border-neutral-200 text-neutral-400">
+                              Standard
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          {product.trending && (
+                            <span className="px-2 py-0.5 text-[8px] font-bold tracking-widest uppercase bg-amber-500 text-white">
+                              Trending
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         {product.stock === 0 ? (
@@ -113,7 +124,16 @@ export default async function AdminProductsPage() {
                         ₹{Number(product.price).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <DeleteProductButton id={product.id} />
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/products/${product.id}`}
+                            className="p-2 text-neutral-400 hover:text-black transition inline-flex items-center"
+                            title="Edit Product"
+                          >
+                            <Plus className="h-4 w-4 rotate-45" /> {/* Use Plus rotated 45deg or we can just import Pencil */}
+                          </Link>
+                          <DeleteProductButton id={product.id} />
+                        </div>
                       </td>
                     </tr>
                   )
