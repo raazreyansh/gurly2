@@ -141,6 +141,67 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
     setDraggedIndex(null)
   }
 
+  const convertImageToWebP = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      if (!file.type.startsWith('image/')) {
+        resolve(file)
+        return
+      }
+
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          let width = img.width
+          let height = img.height
+          const MAX_WIDTH = 1600
+          const MAX_HEIGHT = 2000
+
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width)
+            width = MAX_WIDTH
+          }
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height)
+            height = MAX_HEIGHT
+          }
+
+          canvas.width = width
+          canvas.height = height
+
+          const ctx = canvas.getContext('2d')
+          if (!ctx) {
+            resolve(file)
+            return
+          }
+
+          ctx.drawImage(img, 0, 0, width, height)
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                resolve(file)
+                return
+              }
+              const convertedFile = new File(
+                [blob],
+                file.name.replace(/\.[^/.]+$/, "") + ".webp",
+                { type: 'image/webp', lastModified: Date.now() }
+              )
+              resolve(convertedFile)
+            },
+            'image/webp',
+            0.85
+          )
+        }
+        img.onerror = () => resolve(file)
+        img.src = e.target?.result as string
+      }
+      reader.onerror = () => resolve(file)
+      reader.readAsDataURL(file)
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.categoryId) {
@@ -155,7 +216,15 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
 
       // Upload file arrays directly to Supabase storage 'products' bucket
       if (files.length > 0) {
-        for (const file of files) {
+        for (let file of files) {
+          if (file.type.startsWith('image/')) {
+            try {
+              file = await convertImageToWebP(file)
+            } catch (err) {
+              console.error("WebP in-flight conversion failed:", err)
+            }
+          }
+
           const fileExt = file.name.split('.').pop()
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
           
