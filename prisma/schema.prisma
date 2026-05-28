@@ -8,13 +8,13 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid()) @db.Uuid
+  id         String   @id @default(uuid())
   email      String?  @unique
   fullName   String?  @map("full_name")
   avatarUrl  String?  @map("avatar_url")
   phone      String?
   role       String   @default("customer")
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt  DateTime @default(now()) @map("created_at")
   addresses  Address[]
   orders     Order[]
 
@@ -22,79 +22,82 @@ model User {
 }
 
 model Category {
-  id        String   @id @default(uuid()) @db.Uuid
+  id        String    @id @default(uuid())
   name      String
-  slug      String?  @unique
-  imageUrl  String?  @map("image_url")
+  slug      String?   @unique
+  imageUrl  String?   @map("image_url")
   products  Product[]
 
   @@map("categories")
 }
 
 model Product {
-  id             String   @id @default(uuid()) @db.Uuid
-  title          String
-  slug           String?  @unique
-  description    String?
-  price          Decimal  @db.Decimal(10,2)
-  compareAtPrice Decimal? @map("compare_at_price") @db.Decimal(10,2)
-  stock          Int      @default(0)
-  media          Json     @default("[]") @db.JsonB
-  videos         Json?    @db.JsonB
-  featured       Boolean  @default(false)
+  id              String      @id @default(uuid())
+  title           String
+  slug            String      @unique
+  description     String
 
-  // Luxury Commerce Specifications
-  material       String?
-  plating        String?
-  gemstone       String?
-  antiTarnish    Boolean  @default(false) @map("anti_tarnish")
-  waterproof     Boolean  @default(false)
-  hypoallergenic Boolean  @default(false)
-  handcrafted    Boolean  @default(true)
-  shippingDays   Int      @default(4) @map("shipping_days")
+  price           Decimal
+  compareAtPrice  Decimal?    @map("compare_at_price")
 
-  categoryId     String?  @map("category_id") @db.Uuid
-  category       Category? @relation(fields: [categoryId], references: [id])
-  orderItems     OrderItem[]
-  reviews        Review[]
-  wishlistItems  Wishlist[]
+  stock           Int         @default(0)
 
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  featured        Boolean     @default(false)
+
+  media           Json        @default("[]")
+
+  // Luxury specifications
+  material        String?
+  plating         String?
+  gemstone        String?
+  antiTarnish     Boolean     @default(false) @map("anti_tarnish")
+  waterproof      Boolean     @default(false)
+  hypoallergenic  Boolean     @default(false)
+  handcrafted     Boolean     @default(true)
+  shippingDays    Int         @default(4) @map("shipping_days")
+
+  categoryId      String      @map("category_id")
+  category        Category    @relation(fields: [categoryId], references: [id])
+  orderItems      OrderItem[]
+  reviews         Review[]
+  wishlistItems   Wishlist[]
+
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
 
   @@map("products")
 }
 
 model Review {
-  id          String   @id @default(uuid()) @db.Uuid
+  id          String   @id @default(uuid())
   rating      Int
   comment     String
   customer    String
   verified    Boolean  @default(true)
-  images      Json?    @db.JsonB
-  productId   String   @map("product_id") @db.Uuid
+  images      Json?
+  productId   String   @map("product_id")
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("reviews")
 }
 
 model Wishlist {
-  id          String   @id @default(uuid()) @db.Uuid
+  id          String   @id @default(uuid())
   sessionId   String   @map("session_id")
-  productId   String   @map("product_id") @db.Uuid
+  productId   String   @map("product_id")
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("wishlist")
 }
 
 model Order {
-  id         String     @id @default(uuid()) @db.Uuid
-  userId     String     @map("user_id") @db.Uuid
+  id         String     @id @default(uuid())
+  userId     String     @map("user_id")
   user       User       @relation(fields: [userId], references: [id])
   status     String     @default("pending")
-  total      Decimal    @db.Decimal(10,2)
-  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  total      Decimal
+  createdAt  DateTime   @default(now()) @map("created_at")
   items      OrderItem[]
   payments   Payment[]
   shipments  Shipment[]
@@ -103,20 +106,20 @@ model Order {
 }
 
 model OrderItem {
-  id         String   @id @default(uuid()) @db.Uuid
-  orderId    String   @map("order_id") @db.Uuid
+  id         String   @id @default(uuid())
+  orderId    String   @map("order_id")
   order      Order    @relation(fields: [orderId], references: [id])
-  productId  String   @map("product_id") @db.Uuid
+  productId  String   @map("product_id")
   product    Product  @relation(fields: [productId], references: [id])
   quantity   Int
-  price      Decimal  @db.Decimal(10,2)
+  price      Decimal
 
   @@map("order_items")
 }
 
 model Address {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id])
   name      String
   phone     String
@@ -132,28 +135,28 @@ model Address {
 }
 
 model Payment {
-  id               String   @id @default(uuid()) @db.Uuid
-  orderId          String   @map("order_id") @db.Uuid
+  id               String   @id @default(uuid())
+  orderId          String   @map("order_id")
   order            Order    @relation(fields: [orderId], references: [id])
   provider         String
   providerOrderId  String?  @map("provider_order_id")
   providerPaymentId String? @map("provider_payment_id")
-  amount           Decimal  @db.Decimal(10,2)
+  amount           Decimal
   status           String   @default("pending")
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt        DateTime @default(now()) @map("created_at")
 
   @@map("payments")
 }
 
 model Shipment {
-  id               String   @id @default(uuid()) @db.Uuid
-  orderId          String   @map("order_id") @db.Uuid
+  id               String   @id @default(uuid())
+  orderId          String   @map("order_id")
   order            Order    @relation(fields: [orderId], references: [id])
   trackingNumber   String?  @map("tracking_number")
   carrier          String?
   status           String?
-  estimatedDelivery DateTime? @map("estimated_delivery") @db.Timestamptz
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  estimatedDelivery DateTime? @map("estimated_delivery")
+  createdAt        DateTime @default(now()) @map("created_at")
 
   @@map("shipments")
 }

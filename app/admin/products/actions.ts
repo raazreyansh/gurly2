@@ -41,16 +41,22 @@ export async function createProduct(data: {
   shippingDays?: number
 }) {
   try {
-    await prisma.product.create({
+    console.log("SERVER ACTION: Received categoryId =", data.categoryId)
+
+    if (!data.categoryId || data.categoryId.trim() === "") {
+      throw new Error("Validation Error: Category selection is required and cannot be empty.")
+    }
+
+    const createdProduct = await prisma.product.create({
       data: {
-        title: data.title,
-        slug: data.slug || data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        description: data.description || '',
-        price: data.price,
-        compareAtPrice: data.compareAtPrice || null,
-        stock: data.stock,
-        featured: data.featured,
-        categoryId: data.categoryId,
+        title: String(data.title),
+        slug: String(data.slug || data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')),
+        description: String(data.description || ''),
+        price: Number(data.price),
+        compareAtPrice: data.compareAtPrice ? Number(data.compareAtPrice) : null,
+        stock: Number(data.stock),
+        featured: Boolean(data.featured),
+        categoryId: String(data.categoryId),
         media: data.media.length > 0 ? data.media : [{ type: 'image', url: '/images/models/community_2.png' }],
         material: data.material || '18k Gold Plated',
         plating: data.plating || '24k Gold Overlay',
@@ -63,13 +69,18 @@ export async function createProduct(data: {
       }
     })
 
+    console.log("SERVER ACTION: Product created successfully:", createdProduct.id)
+
     revalidatePath('/admin/products')
     revalidatePath('/shop')
     revalidatePath('/')
 
     return { success: true }
-  } catch (err) {
-    console.error("Create product action error:", err)
-    return { success: false, error: "Failed to create product entry" }
+  } catch (err: any) {
+    console.error("CREATE PRODUCT SERVER ERROR DETECTED:", err)
+    return { 
+      success: false, 
+      error: err instanceof Error ? err.message : "Prisma Database Write Failure" 
+    }
   }
 }

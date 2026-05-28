@@ -8,6 +8,18 @@ export default async function NewProductPage() {
 
   try {
     categories = await prisma.category.findMany()
+    if (categories.length === 0) {
+      console.log("Empty database detected. Seeding categories in-flight...")
+      await prisma.category.createMany({
+        data: [
+          { name: 'Earrings', slug: 'earrings', imageUrl: '/images/models/community_1.png' },
+          { name: 'Necklaces', slug: 'necklaces', imageUrl: '/images/models/community_2.png' },
+          { name: 'Rings', slug: 'rings', imageUrl: '/images/models/community_3.png' },
+          { name: 'Bracelets', slug: 'bracelets', imageUrl: '/images/models/community_4.png' },
+        ]
+      })
+      categories = await prisma.category.findMany()
+    }
   } catch (error) {
     console.error("New product fetch category error:", error)
   }
