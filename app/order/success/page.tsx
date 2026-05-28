@@ -1,40 +1,47 @@
-import { Navbar } from "@/components/layout/Navbar"
-import { Footer } from "@/components/layout/Footer"
-import Link from "next/link"
-import { CheckCircle2, Package, ArrowRight } from "lucide-react"
+"use client"
 
-export const metadata = { title: "Order Placed!" }
+import { StorefrontLayout } from '@/components/layout/StorefrontLayout'
+import Link from 'next/link'
+import { CheckCircle2, ArrowRight, Package } from 'lucide-react'
 
 export default function OrderSuccessPage() {
   return (
-    <>
-      <Navbar />
-      <main style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ textAlign: "center", padding: "60px 24px", maxWidth: "480px" }}>
-          <div style={{
-            width: "80px", height: "80px", borderRadius: "50%",
-            background: "#E8F5E9", display: "flex", alignItems: "center",
-            justifyContent: "center", margin: "0 auto 24px",
-          }}>
-            <CheckCircle2 size={40} color="#2E7D32" />
+    <StorefrontLayout>
+      <main className="bg-white min-h-screen py-28 flex items-center justify-center">
+        <div className="max-w-md mx-auto px-6 text-center">
+          
+          <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center text-green-600 mx-auto mb-8 animate-fade-in">
+            <CheckCircle2 size={40} />
           </div>
-          <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "32px", fontWeight: "500", marginBottom: "12px" }}>
-            Order Placed!
-          </h1>
-          <p style={{ fontSize: "15px", color: "var(--charcoal-light)", lineHeight: "1.7", marginBottom: "32px" }}>
-            Thank you for shopping with GURLY. You&apos;ll receive a confirmation email shortly with your order details.
+
+          <h1 className="font-serif text-4xl text-black mb-6">Order Placed!</h1>
+          
+          <p className="text-neutral-500 text-sm leading-relaxed mb-8">
+            Thank you for shopping with GURLY. We have received your order, and you will receive a confirmation email shortly. Your items will be carefully prepared and dispatched soon.
           </p>
-          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/account/orders" className="btn btn-primary" style={{ gap: "8px" }}>
-              <Package size={15} /> Track Orders
+
+          <div className="rounded-md border border-neutral-100 p-6 bg-neutral-50 inline-block mb-10">
+            <p className="text-xs text-neutral-400 uppercase tracking-widest font-semibold">Order Reference</p>
+            <p className="font-mono text-sm mt-2 font-medium">#GURLY-{Math.floor(Math.random() * 900000 + 100000)}</p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link 
+              href="/shop" 
+              className="w-full sm:w-auto bg-black text-white px-8 py-3 text-xs uppercase tracking-widest font-semibold hover:opacity-80 transition"
+            >
+              Continue Shopping
             </Link>
-            <Link href="/shop" className="btn btn-outline" style={{ gap: "8px" }}>
-              Continue Shopping <ArrowRight size={14} />
+            <Link 
+              href="/account/orders" 
+              className="w-full sm:w-auto border border-neutral-200 text-neutral-600 hover:border-black hover:text-black px-8 py-3 text-xs uppercase tracking-widest font-semibold transition flex items-center justify-center gap-2"
+            >
+              <Package size={14} /> Track Orders
             </Link>
           </div>
+
         </div>
       </main>
-      <Footer />
-    </>
+    </StorefrontLayout>
   )
 }

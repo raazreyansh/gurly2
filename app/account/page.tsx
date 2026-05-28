@@ -1,7 +1,6 @@
 "use client"
 
-import { Navbar } from "@/components/layout/Navbar"
-import { Footer } from "@/components/layout/Footer"
+import { StorefrontLayout } from '@/components/layout/StorefrontLayout'
 import Link from "next/link"
 import { Package, Bell, User, ChevronRight } from "lucide-react"
 
@@ -13,51 +12,43 @@ export default function AccountPage() {
   ]
 
   return (
-    <>
-      <Navbar />
-      <main>
-        <div style={{ background: "var(--white)", borderBottom: "1px solid var(--border)", padding: "40px 0" }}>
-          <div className="container">
-            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <div style={{
-                width: "60px", height: "60px", borderRadius: "50%",
-                background: "var(--rose-light)", display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <User size={24} color="var(--rose-dark)" />
-              </div>
-              <div>
-                <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "24px", fontWeight: "500" }}>My Account</h1>
-                <p style={{ fontSize: "13px", color: "var(--muted)", marginTop: "2px" }}>Manage your GURLY experience</p>
-              </div>
+    <StorefrontLayout>
+      <main className="bg-white min-h-screen py-20">
+        <div className="max-w-xl mx-auto px-6">
+          
+          <div className="flex items-center gap-4 mb-12 pb-8 border-b border-neutral-100">
+            <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center text-black">
+              <User size={24} />
+            </div>
+            <div>
+              <h1 className="font-serif text-3xl text-black">My Account</h1>
+              <p className="text-xs text-neutral-400 mt-1">Manage your GURLY experience</p>
             </div>
           </div>
-        </div>
 
-        <div className="container" style={{ padding: "40px 24px 80px" }}>
-          <div style={{ maxWidth: "600px", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div className="space-y-4">
             {menu.map(({ href, label, desc, Icon }) => (
-              <Link key={href} href={href} style={{
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-                background: "var(--white)", border: "1px solid var(--border)", borderRadius: "8px", padding: "20px 24px",
-                transition: "all 0.2s",
-              }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--rose)"; e.currentTarget.style.boxShadow = "var(--shadow-sm)" }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.boxShadow = "none" }}
+              <Link 
+                key={href} 
+                href={href} 
+                className="flex justify-between items-center bg-white border border-neutral-200 p-6 hover:border-black transition duration-200"
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "var(--cream)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Icon size={18} color="var(--rose)" />
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-neutral-50 flex items-center justify-center text-black">
+                    <Icon size={18} />
                   </div>
                   <div>
-                    <p style={{ fontSize: "15px", fontWeight: "500", color: "var(--charcoal)" }}>{label}</p>
-                    <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>{desc}</p>
+                    <p className="text-sm font-medium text-black">{label}</p>
+                    <p className="text-xs text-neutral-400 mt-0.5">{desc}</p>
                   </div>
                 </div>
-                <ChevronRight size={16} color="var(--muted)" />
+                <ChevronRight size={16} className="text-neutral-400" />
               </Link>
             ))}
 
-            <button className="btn btn-outline" id="signout-btn" style={{ marginTop: "12px", color: "#EF4444", borderColor: "#EF4444" }}
+            <button 
+              id="signout-btn" 
+              className="w-full mt-6 border border-red-200 text-red-500 hover:bg-red-50 py-3 text-xs uppercase tracking-widest font-semibold transition"
               onClick={async () => {
                 localStorage.removeItem("gurly_customer_user")
                 const { supabase } = await import("@/lib/supabase/client")
@@ -69,9 +60,9 @@ export default function AccountPage() {
               Sign Out
             </button>
           </div>
+
         </div>
       </main>
-      <Footer />
-    </>
+    </StorefrontLayout>
   )
 }

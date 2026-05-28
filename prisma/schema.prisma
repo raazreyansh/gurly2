@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid()) @db.Uuid
+  email      String?  @unique
+  fullName   String?  @map("full_name")
+  avatarUrl  String?  @map("avatar_url")
+  phone      String?
+  role       String   @default("customer")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  addresses  Address[]
+  orders     Order[]
+
+  @@map("profiles")
+}
+
+model Category {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String?  @unique
+  imageUrl  String?  @map("image_url")
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id             String   @id @default(uuid()) @db.Uuid
+  title          String
+  slug           String?  @unique
+  description    String?
+  price          Decimal  @db.Decimal(10,2)
+  compareAtPrice Decimal? @map("compare_at_price") @db.Decimal(10,2)
+  stock          Int      @default(0)
+  images         Json     @default("[]") @db.JsonB
+  featured       Boolean  @default(false)
+  categoryId     String?  @map("category_id") @db.Uuid
+  category       Category? @relation(fields: [categoryId], references: [id])
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  orderItems     OrderItem[]
+
+  @@map("products")
+}
+
+model Order {
+  id         String     @id @default(uuid()) @db.Uuid
+  userId     String     @map("user_id") @db.Uuid
+  user       User       @relation(fields: [userId], references: [id])
+  status     String     @default("pending")
+  total      Decimal    @db.Decimal(10,2)
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  items      OrderItem[]
+  payments   Payment[]
+  shipments  Shipment[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String   @id @default(uuid()) @db.Uuid
+  orderId    String   @map("order_id") @db.Uuid
+  order      Order    @relation(fields: [orderId], references: [id])
+  productId  String   @map("product_id") @db.Uuid
+  product    Product  @relation(fields: [productId], references: [id])
+  quantity   Int
+  price      Decimal  @db.Decimal(10,2)
+
+  @@map("order_items")
+}
+
+model Address {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  phone     String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  country   String
+  isDefault Boolean  @default(false) @map("is_default")
+
+  @@map("addresses")
+}
+
+model Payment {
+  id               String   @id @default(uuid()) @db.Uuid
+  orderId          String   @map("order_id") @db.Uuid
+  order            Order    @relation(fields: [orderId], references: [id])
+  provider         String
+  providerOrderId  String?  @map("provider_order_id")
+  providerPaymentId String? @map("provider_payment_id")
+  amount           Decimal  @db.Decimal(10,2)
+  status           String   @default("pending")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("payments")
+}
+
+model Shipment {
+  id               String   @id @default(uuid()) @db.Uuid
+  orderId          String   @map("order_id") @db.Uuid
+  order            Order    @relation(fields: [orderId], references: [id])
+  trackingNumber   String?  @map("tracking_number")
+  carrier          String?
+  status           String?
+  estimatedDelivery DateTime? @map("estimated_delivery") @db.Timestamptz
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("shipments")
+}
