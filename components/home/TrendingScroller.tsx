@@ -39,7 +39,13 @@ export default async function TrendingScroller() {
       <div className="flex gap-6 overflow-x-auto px-8 lg:px-20 pb-8 scrollbar-hide snap-x snap-mandatory">
         {list.map((product) => {
           const imgArray = Array.isArray(product.images) ? product.images : []
-          const firstImage = (imgArray[0] as string) || '/images/models/community_2.png'
+          const parseImageField = (val: any): string => {
+            if (!val) return '/images/models/community_2.png'
+            if (typeof val === 'string') return val
+            if (typeof val === 'object' && val.url) return val.url
+            return '/images/models/community_2.png'
+          }
+          const firstImage = parseImageField(imgArray[0])
 
           return (
             <Link

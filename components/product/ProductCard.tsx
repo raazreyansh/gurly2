@@ -25,13 +25,21 @@ export default function ProductCard({
 
   // Safe extraction of the first image
   let imageSrc = '/images/models/community_2.png'
+  
+  const parseImageField = (val: any): string => {
+    if (!val) return '/images/models/community_2.png'
+    if (typeof val === 'string') return val
+    if (typeof val === 'object' && val.url) return val.url
+    return '/images/models/community_2.png'
+  }
+
   if (Array.isArray(product.images) && product.images.length > 0) {
-    imageSrc = product.images[0]
+    imageSrc = parseImageField(product.images[0])
   } else if (typeof product.images === 'string') {
     try {
       const parsed = JSON.parse(product.images)
       if (Array.isArray(parsed) && parsed.length > 0) {
-        imageSrc = parsed[0]
+        imageSrc = parseImageField(parsed[0])
       }
     } catch {
       imageSrc = product.images
@@ -51,7 +59,7 @@ export default function ProductCard({
 
   return (
     <div className="group block bg-white">
-      <Link href={`/shop`} className="block">
+      <Link href={`/product/${product.slug || ''}`} className="block">
         <div className="aspect-[3/4] overflow-hidden bg-neutral-50 relative border border-neutral-100">
           <motion.img
             whileHover={{ scale: 1.03 }}

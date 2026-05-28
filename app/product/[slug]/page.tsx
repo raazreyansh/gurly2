@@ -23,7 +23,13 @@ export async function generateMetadata({ params }: Props) {
   if (!product) return {}
 
   const imageArray = Array.isArray(product.images) ? product.images : []
-  const firstImage = (imageArray[0] as string) || '/images/models/community_2.png'
+  const parseImageField = (val: any): string => {
+    if (!val) return '/images/models/community_2.png'
+    if (typeof val === 'string') return val
+    if (typeof val === 'object' && val.url) return val.url
+    return '/images/models/community_2.png'
+  }
+  const firstImage = parseImageField(imageArray[0])
   const domain = 'https://gurly.luxury'
 
   return {
@@ -69,7 +75,13 @@ export default async function ProductPage({
   }
 
   const imageArray = Array.isArray(product.images) ? product.images : []
-  const firstImage = (imageArray[0] as string) || '/images/models/community_2.png'
+  const parseImageField = (val: any): string => {
+    if (!val) return '/images/models/community_2.png'
+    if (typeof val === 'string') return val
+    if (typeof val === 'object' && val.url) return val.url
+    return '/images/models/community_2.png'
+  }
+  const firstImage = parseImageField(imageArray[0])
 
   // 13. Rich JSON-LD Product Schema
   const jsonLdSchema = {

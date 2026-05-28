@@ -61,8 +61,14 @@ export default async function AdminProductsPage() {
               <tbody className="divide-y divide-neutral-100 text-xs text-black">
                 {products.map((product) => {
                   let imageSrc = '/images/models/community_2.png'
+                  const parseImageField = (val: any): string => {
+                    if (!val) return '/images/models/community_2.png'
+                    if (typeof val === 'string') return val
+                    if (typeof val === 'object' && val.url) return val.url
+                    return '/images/models/community_2.png'
+                  }
                   if (Array.isArray(product.images) && product.images.length > 0) {
-                    imageSrc = product.images[0]
+                    imageSrc = parseImageField(product.images[0])
                   }
 
                   return (
