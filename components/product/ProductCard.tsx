@@ -11,7 +11,8 @@ export interface SimpleProduct {
   slug: string
   price: string | number
   compareAtPrice?: string | number | null
-  images: any
+  images?: any
+  media?: any
 }
 
 interface ProductCardProps {
@@ -33,16 +34,24 @@ export default function ProductCard({
     return '/images/models/community_2.png'
   }
 
-  if (Array.isArray(product.images) && product.images.length > 0) {
-    imageSrc = parseImageField(product.images[0])
-  } else if (typeof product.images === 'string') {
+  const rawImages = Array.isArray(product.media) 
+    ? product.media 
+    : Array.isArray(product.images) 
+    ? product.images 
+    : typeof product.images === 'string' 
+    ? product.images 
+    : []
+
+  if (Array.isArray(rawImages) && rawImages.length > 0) {
+    imageSrc = parseImageField(rawImages[0])
+  } else if (typeof rawImages === 'string') {
     try {
-      const parsed = JSON.parse(product.images)
+      const parsed = JSON.parse(rawImages)
       if (Array.isArray(parsed) && parsed.length > 0) {
         imageSrc = parseImageField(parsed[0])
       }
     } catch {
-      imageSrc = product.images
+      imageSrc = rawImages
     }
   }
 

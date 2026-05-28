@@ -146,8 +146,19 @@ export default function SearchDrawer() {
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {results.products.map((product) => {
-                          const imageArray = Array.isArray(product.images) ? product.images : []
-                          const firstImage = imageArray[0] || '/images/models/community_2.png'
+                          const mediaArray = Array.isArray(product.media) 
+                            ? product.media 
+                            : Array.isArray(product.images) 
+                            ? product.images 
+                            : []
+                          
+                          const parseImageField = (val: any): string => {
+                            if (!val) return '/images/models/community_2.png'
+                            if (typeof val === 'string') return val
+                            if (typeof val === 'object' && val.url) return val.url
+                            return '/images/models/community_2.png'
+                          }
+                          const firstImage = parseImageField(mediaArray[0])
 
                           return (
                             <button

@@ -13,11 +13,16 @@ export default function ProductGallery({
 }: {
   product: {
     title: string
-    images: any
+    images?: any
+    media?: any
   }
 }) {
   // Parse images securely allowing backward compatibility for strings
-  const rawImages = Array.isArray(product.images) ? product.images : []
+  const rawImages = Array.isArray(product.media) 
+    ? product.media 
+    : Array.isArray(product.images) 
+    ? product.images 
+    : []
   const mediaItems: MediaItem[] = rawImages.map((item: any) => {
     if (typeof item === 'string') {
       return { type: 'image', url: item }

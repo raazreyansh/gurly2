@@ -127,7 +127,8 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
       // Upload file arrays directly to Supabase storage 'products' bucket
       if (files.length > 0) {
         for (const file of files) {
-          const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
+          const fileExt = file.name.split('.').pop()
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
           
           let fileType = 'image'
           if (file.type.startsWith('video/')) {
@@ -171,7 +172,7 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
         stock: Number(formData.stock),
         featured: formData.featured,
         categoryId: formData.categoryId,
-        images: uploadedMedia, // dynamic structured media catalog objects!
+        media: uploadedMedia, // dynamic structured media catalog objects!
         material: formData.material,
         plating: formData.plating,
         gemstone: formData.gemstone,

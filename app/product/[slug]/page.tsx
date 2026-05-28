@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props) {
 
   if (!product) return {}
 
-  const imageArray = Array.isArray(product.images) ? product.images : []
+  const imageArray = Array.isArray(product.media) ? (product.media as any) : []
   const parseImageField = (val: any): string => {
     if (!val) return '/images/models/community_2.png'
     if (typeof val === 'string') return val
@@ -74,7 +74,7 @@ export default async function ProductPage({
     notFound()
   }
 
-  const imageArray = Array.isArray(product.images) ? product.images : []
+  const imageArray = Array.isArray(product.media) ? (product.media as any) : []
   const parseImageField = (val: any): string => {
     if (!val) return '/images/models/community_2.png'
     if (typeof val === 'string') return val

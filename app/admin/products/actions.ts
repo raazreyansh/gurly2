@@ -29,7 +29,7 @@ export async function createProduct(data: {
   stock: number
   featured: boolean
   categoryId: string
-  images: any[]
+  media: any[]
   // Support luxury specifications as well
   material?: string
   plating?: string
@@ -51,7 +51,7 @@ export async function createProduct(data: {
         stock: data.stock,
         featured: data.featured,
         categoryId: data.categoryId,
-        images: data.images.length > 0 ? data.images : [{ type: 'image', url: '/images/models/community_2.png' }],
+        media: data.media.length > 0 ? data.media : [{ type: 'image', url: '/images/models/community_2.png' }],
         material: data.material || '18k Gold Plated',
         plating: data.plating || '24k Gold Overlay',
         gemstone: data.gemstone || 'None',

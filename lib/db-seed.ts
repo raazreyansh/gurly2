@@ -2,45 +2,44 @@ import { prisma } from './prisma'
 
 export async function autoSeedDatabase() {
   try {
-    const categoryCount = await prisma.category.count()
-    if (categoryCount > 0) return
+    const existingCount = await prisma.product.count()
+    if (existingCount > 0) {
+      console.log("Database catalog already seeded with live products. Skipping auto seed.")
+      return
+    }
 
-    console.log("Seeding live Supabase database with premium collections...")
+    console.log("Empty database catalog detected. Commencing live luxury seeding...")
 
-    // 1. Create categories
-    const earrings = await prisma.category.create({
-      data: {
-        name: "Earrings",
-        slug: "earrings",
-        imageUrl: "/images/models/community_1.png"
-      }
-    })
+    // 1. Create or resolve Category items
+    let earrings = await prisma.category.findFirst({ where: { name: 'Earrings' } })
+    if (!earrings) {
+      earrings = await prisma.category.create({
+        data: { name: 'Earrings', slug: 'earrings', imageUrl: '/images/models/community_1.png' }
+      })
+    }
 
-    const necklaces = await prisma.category.create({
-      data: {
-        name: "Necklaces",
-        slug: "necklaces",
-        imageUrl: "/images/models/community_2.png"
-      }
-    })
+    let necklaces = await prisma.category.findFirst({ where: { name: 'Necklaces' } })
+    if (!necklaces) {
+      necklaces = await prisma.category.create({
+        data: { name: 'Necklaces', slug: 'necklaces', imageUrl: '/images/models/community_2.png' }
+      })
+    }
 
-    const rings = await prisma.category.create({
-      data: {
-        name: "Rings",
-        slug: "rings",
-        imageUrl: "/images/models/community_3.png"
-      }
-    })
+    let rings = await prisma.category.findFirst({ where: { name: 'Rings' } })
+    if (!rings) {
+      rings = await prisma.category.create({
+        data: { name: 'Rings', slug: 'rings', imageUrl: '/images/models/community_3.png' }
+      })
+    }
 
-    const bracelets = await prisma.category.create({
-      data: {
-        name: "Bracelets",
-        slug: "bracelets",
-        imageUrl: "/images/models/community_4.png"
-      }
-    })
+    let bracelets = await prisma.category.findFirst({ where: { name: 'Bracelets' } })
+    if (!bracelets) {
+      bracelets = await prisma.category.create({
+        data: { name: 'Bracelets', slug: 'bracelets', imageUrl: '/images/models/community_4.png' }
+      })
+    }
 
-    // 2. Create products
+    // 2. Insert luxury catalog items with rich media JSON objects
     await prisma.product.createMany({
       data: [
         {
@@ -52,7 +51,7 @@ export async function autoSeedDatabase() {
           stock: 12,
           featured: true,
           categoryId: earrings.id,
-          images: ["/images/models/community_1.png"],
+          media: [{ type: "image", url: "/images/models/community_1.png" }],
           material: "18k Solid Gold",
           plating: "24k Gold Plated",
           gemstone: "Cubic Zirconia",
@@ -71,7 +70,7 @@ export async function autoSeedDatabase() {
           stock: 8,
           featured: true,
           categoryId: necklaces.id,
-          images: ["/images/models/community_2.png"],
+          media: [{ type: "image", url: "/images/models/community_2.png" }],
           material: "18k Solid Gold",
           plating: "24k Gold Plated",
           gemstone: "Diamond Cut Crystal",
@@ -90,7 +89,7 @@ export async function autoSeedDatabase() {
           stock: 15,
           featured: true,
           categoryId: rings.id,
-          images: ["/images/models/community_3.png"],
+          media: [{ type: "image", url: "/images/models/community_3.png" }],
           material: "925 Sterling Silver",
           plating: "18k Gold Plated",
           gemstone: "AAAAA Solitaire Moissanite",
@@ -109,7 +108,7 @@ export async function autoSeedDatabase() {
           stock: 5,
           featured: true,
           categoryId: necklaces.id,
-          images: ["/images/models/community_4.png"],
+          media: [{ type: "image", url: "/images/models/community_4.png" }],
           material: "Brass Base",
           plating: "24k Gold Overlay",
           gemstone: "None",
@@ -128,7 +127,7 @@ export async function autoSeedDatabase() {
           stock: 20,
           featured: false,
           categoryId: earrings.id,
-          images: ["/images/models/community_1.png"],
+          media: [{ type: "image", url: "/images/models/community_1.png" }],
           material: "Recycled Stainless Steel",
           plating: "18k Gold PVD Plated",
           gemstone: "None",
@@ -147,7 +146,7 @@ export async function autoSeedDatabase() {
           stock: 10,
           featured: false,
           categoryId: bracelets.id,
-          images: ["/images/models/community_4.png"],
+          media: [{ type: "image", url: "/images/models/community_4.png" }],
           material: "Recycled Stainless Steel",
           plating: "18k Gold PVD Plated",
           gemstone: "None",
