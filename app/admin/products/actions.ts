@@ -29,7 +29,16 @@ export async function createProduct(data: {
   stock: number
   featured: boolean
   categoryId: string
-  imageUrl: string
+  images: string[]
+  // Support luxury specifications as well
+  material?: string
+  plating?: string
+  gemstone?: string
+  antiTarnish?: boolean
+  waterproof?: boolean
+  hypoallergenic?: boolean
+  handcrafted?: boolean
+  shippingDays?: number
 }) {
   try {
     await prisma.product.create({
@@ -42,7 +51,15 @@ export async function createProduct(data: {
         stock: data.stock,
         featured: data.featured,
         categoryId: data.categoryId,
-        images: [data.imageUrl || '/images/models/community_2.png']
+        images: data.images.length > 0 ? data.images : ['/images/models/community_2.png'],
+        material: data.material || '18k Gold Plated',
+        plating: data.plating || '24k Gold Overlay',
+        gemstone: data.gemstone || 'None',
+        antiTarnish: data.antiTarnish ?? true,
+        waterproof: data.waterproof ?? true,
+        hypoallergenic: data.hypoallergenic ?? true,
+        handcrafted: data.handcrafted ?? true,
+        shippingDays: data.shippingDays || 3
       }
     })
 
