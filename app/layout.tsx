@@ -1,20 +1,21 @@
-import "./globals.css"
-import type { Metadata } from "next"
+import './globals.css'
+import { playfair, inter } from '@/lib/fonts'
+import StorefrontLayout from '@/components/layout/StorefrontLayout'
 
-export const metadata: Metadata = {
-  title: "GURLY",
-  description: "A clean database-connected starter template",
+export const metadata = {
+  title: 'GURLY. — Premium Jewellery & Luxury Accessories',
+  description: 'Unapologetic. Feminine. In Every Detail. Handcrafted luxury items for modern elegance.',
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en">
-      <body className="antialiased">
-        {children}
+      <body className={`${playfair.variable} ${inter.variable} antialiased`}>
+        <StorefrontLayout>{children}</StorefrontLayout>
       </body>
     </html>
   )
