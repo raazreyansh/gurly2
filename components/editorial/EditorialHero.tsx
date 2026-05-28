@@ -75,7 +75,7 @@ export default function EditorialHero() {
             className="absolute inset-0"
           >
             <Image
-              src="/images/models/hero_try_on.png"
+              src="/images/models/hero_campaign.png"
               alt="GURLY Fashion Editorial"
               fill
               priority
