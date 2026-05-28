@@ -1,8 +1,8 @@
 'use client'
 
-import { Heart, ShieldCheck, ShieldAlert } from 'lucide-react'
+import { Heart, ShieldCheck } from 'lucide-react'
 import { useCartStore } from '@/store/useCartStore'
-import { useState } from 'react'
+import { useWishlistStore } from '@/store/useWishlistStore'
 
 export default function ProductInfo({
   product,
@@ -10,6 +10,7 @@ export default function ProductInfo({
   product: {
     id: string
     title: string
+    slug: string | null
     price: any
     compareAtPrice: any
     description: string | null
@@ -27,10 +28,29 @@ export default function ProductInfo({
 }) {
   const addItem = useCartStore((s) => s.addItem)
   const openCart = useCartStore((s) => s.openCart)
-  const [wishlisted, setWishlisted] = useState(false)
+
+  const hasItem = useWishlistStore((s) => s.hasItem)
+  const addWishItem = useWishlistStore((s) => s.addItem)
+  const removeWishItem = useWishlistStore((s) => s.removeItem)
+
+  const wishlisted = hasItem(product.id)
 
   const imageArray = Array.isArray(product.images) ? product.images : []
-  const firstImage = imageArray[0] || '/images/models/community_2.png'
+  const firstImage = (imageArray[0] as string) || '/images/models/community_2.png'
+
+  const toggleWishlist = () => {
+    if (wishlisted) {
+      removeWishItem(product.id)
+    } else {
+      addWishItem({
+        id: product.id,
+        title: product.title,
+        slug: product.slug || '',
+        price: Number(product.price),
+        image: firstImage,
+      })
+    }
+  }
 
   const addToBag = () => {
     if (product.stock === 0) return
@@ -155,7 +175,7 @@ export default function ProductInfo({
         )}
 
         <button 
-          onClick={() => setWishlisted(!wishlisted)}
+          onClick={toggleWishlist}
           className={`grid h-15 w-15 place-items-center border transition ${
             wishlisted 
               ? 'bg-black border-black text-white' 
