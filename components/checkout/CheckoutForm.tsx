@@ -132,9 +132,11 @@ export default function CheckoutForm() {
               router.push('/order/success')
             } else {
               alert("Payment captured but failed to save order record. Please reach out to customer support.")
+              setLoading(false)
             }
           } else {
             alert("Payment signature verification failed. Secure refund initiated.")
+            setLoading(false)
           }
         },
         prefill: {
@@ -152,34 +154,18 @@ export default function CheckoutForm() {
       }
 
       const razorpayInstance = new (window as any).Razorpay(options)
+      
+      razorpayInstance.on('payment.failed', function (response: any) {
+        alert("Payment failed: " + response.error.description)
+        setLoading(false)
+      })
+
       razorpayInstance.open()
       
     } catch (error) {
       console.error("Checkout transaction error:", error)
-      alert("Checkout session encountered an issue. Standard Cash On Delivery (COD) processing fallback triggered.")
-      
-      // Fallback direct placement to prevent purchase frustration
-      try {
-        const fallbackRes = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            total: grandTotal,
-            items: items.map(item => ({
-              productId: item.id,
-              quantity: item.quantity,
-              price: item.price
-            }))
-          })
-        })
-
-        if (fallbackRes.ok) {
-          clearCart()
-          router.push('/order/success')
-        }
-      } catch {
-        setLoading(false)
-      }
+      alert("Checkout session encountered an issue. Please choose Cash On Delivery (COD) or try again.")
+      setLoading(false)
     }
   }
 
