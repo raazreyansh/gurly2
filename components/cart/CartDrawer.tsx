@@ -38,13 +38,13 @@ export default function CartDrawer() {
               duration: 0.45,
               ease: [0.22, 1, 0.36, 1],
             }}
-            className="fixed right-0 top-0 bottom-0 z-50 flex h-screen w-full max-w-md flex-col bg-white border-l border-neutral-200 shadow-2xl"
+            className="fixed right-0 top-0 z-50 flex h-screen w-full max-w-md flex-col bg-white border-l border-neutral-200 shadow-2xl"
           >
             {/* Drawer Header */}
-            <div className="flex h-20 items-center justify-between border-b border-neutral-200 p-6 bg-white flex-shrink-0">
-              <span className="text-xs tracking-[0.3em] font-semibold text-black uppercase">
-                YOUR BAG ({items.reduce((acc, item) => acc + item.quantity, 0)})
-              </span>
+            <div className="flex items-center justify-between border-b border-neutral-200 p-6 bg-white">
+              <h2 className="text-xs tracking-[0.3em] font-semibold text-black uppercase">
+                YOUR BAG
+              </h2>
 
               <button 
                 onClick={closeCart}
@@ -72,7 +72,7 @@ export default function CartDrawer() {
                     key={item.id}
                     className="flex gap-4 border-b border-neutral-100 pb-6 last:border-0"
                   >
-                    <div className="relative h-28 w-20 overflow-hidden border border-neutral-200 flex-shrink-0 bg-[#F5F5F3]">
+                    <div className="relative h-28 w-24 overflow-hidden border border-neutral-200 flex-shrink-0 bg-[#F5F5F3]">
                       <Image
                         src={item.image}
                         alt={item.title}
@@ -122,7 +122,7 @@ export default function CartDrawer() {
 
             {/* Footer triggers */}
             {items.length > 0 && (
-              <div className="border-t border-neutral-200 p-6 bg-neutral-50 space-y-4 flex-shrink-0">
+              <div className="border-t border-neutral-200 p-6 bg-neutral-50 space-y-4">
                 <div className="flex justify-between items-center text-xs tracking-wider font-semibold">
                   <span className="text-neutral-400 uppercase">Estimated Subtotal</span>
                   <span className="font-mono text-black text-sm font-bold">₹{subtotal.toLocaleString()}</span>
@@ -131,7 +131,7 @@ export default function CartDrawer() {
                 <Link
                   href="/checkout"
                   onClick={closeCart}
-                  className="w-full bg-black py-5 text-center text-xs tracking-[0.3em] font-semibold text-white uppercase hover:opacity-85 transition flex items-center justify-center"
+                  className="w-full bg-black py-5 text-xs tracking-[0.3em] font-semibold text-white uppercase hover:opacity-85 transition flex items-center justify-center"
                 >
                   CHECKOUT
                 </Link>

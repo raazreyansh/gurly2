@@ -40,13 +40,52 @@ model Product {
   compareAtPrice Decimal? @map("compare_at_price") @db.Decimal(10,2)
   stock          Int      @default(0)
   images         Json     @default("[]") @db.JsonB
+  videos         Json?    @db.JsonB
   featured       Boolean  @default(false)
+
+  // Luxury Commerce Specifications
+  material       String?
+  plating        String?
+  gemstone       String?
+  antiTarnish    Boolean  @default(false) @map("anti_tarnish")
+  waterproof     Boolean  @default(false)
+  hypoallergenic Boolean  @default(false)
+  handcrafted    Boolean  @default(true)
+  shippingDays   Int      @default(4) @map("shipping_days")
+
   categoryId     String?  @map("category_id") @db.Uuid
   category       Category? @relation(fields: [categoryId], references: [id])
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
   orderItems     OrderItem[]
+  reviews        Review[]
+  wishlistItems  Wishlist[]
+
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("products")
+}
+
+model Review {
+  id          String   @id @default(uuid()) @db.Uuid
+  rating      Int
+  comment     String
+  customer    String
+  verified    Boolean  @default(true)
+  images      Json?    @db.JsonB
+  productId   String   @map("product_id") @db.Uuid
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("reviews")
+}
+
+model Wishlist {
+  id          String   @id @default(uuid()) @db.Uuid
+  sessionId   String   @map("session_id")
+  productId   String   @map("product_id") @db.Uuid
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("wishlist")
 }
 
 model Order {
