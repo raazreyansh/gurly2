@@ -10,7 +10,10 @@ const bootstrapSchema = z.object({
 })
 
 function normalizeSecret(value: string) {
-  return value.replace(/^\uFEFF/, '').trim()
+  return value
+    .replace(/\uFEFF/g, '')
+    .replace(/\\r|\\n/g, '')
+    .trim()
 }
 
 export async function POST(req: Request) {
