@@ -43,6 +43,7 @@ check(
 check('Product admin actions require admin auth', contains('app/admin/products/actions.ts', /assertAdminUser\(\)/))
 check('Category admin actions require admin auth', contains('app/admin/categories/actions.ts', /assertAdminUser\(\)/))
 check('Order admin actions require admin auth', contains('app/admin/orders/actions.ts', /assertAdminUser\(\)/))
+check('Admin bootstrap requires secret', contains('app/api/admin/bootstrap/route.ts', /ADMIN_BOOTSTRAP_SECRET/))
 check('Order API requires customer auth', contains('app/api/orders/route.ts', /getCurrentUser\(\)/))
 check('Payment create API requires customer auth', contains('app/api/payment/create/route.ts', /getCurrentUser\(\)/))
 check('Payment verify API requires customer auth', contains('app/api/payment/verify/route.ts', /getCurrentUser\(\)/))

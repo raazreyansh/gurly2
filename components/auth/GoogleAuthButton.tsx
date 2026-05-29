@@ -26,7 +26,7 @@ export default function GoogleAuthButton({ nextPath }: GoogleAuthButtonProps) {
     if (!statusResponse.ok || !statusPayload?.enabled) {
       setError(
         statusPayload?.error ||
-          'Google sign in is not enabled yet. Please continue with email for now.',
+          'Google sign in is not enabled in Supabase yet. Use email login for now.',
       )
       setLoading(false)
       return
@@ -44,7 +44,7 @@ export default function GoogleAuthButton({ nextPath }: GoogleAuthButtonProps) {
     })
 
     if (signInError) {
-      setError(signInError.message)
+      setError(`${signInError.message}. Use email login for now.`)
       setLoading(false)
     }
   }
@@ -64,8 +64,8 @@ export default function GoogleAuthButton({ nextPath }: GoogleAuthButtonProps) {
       </button>
 
       {error ? (
-        <p className="rounded-full bg-red-50 px-5 py-3 text-xs font-semibold text-red-700">
-          {error}
+        <p className="rounded-2xl bg-amber-50 px-5 py-4 text-xs font-semibold leading-5 text-amber-800">
+          Google login is not active yet. {error}
         </p>
       ) : null}
     </div>

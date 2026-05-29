@@ -35,6 +35,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <p className="mt-6 max-w-xl text-sm leading-7 text-neutral-600">
             Continue with your email to protect checkout, attach orders to your account, and keep your GURLY bag ready for payment.
           </p>
+          {nextPath.startsWith('/admin') ? (
+            <p className="mt-5 rounded-2xl bg-amber-50 px-5 py-4 text-xs font-semibold leading-6 text-amber-800">
+              Admin is protected. Sign in with an account whose role is set to admin. Normal customer accounts will not enter the dashboard.
+            </p>
+          ) : null}
 
           <GoogleAuthButton nextPath={nextPath} />
 

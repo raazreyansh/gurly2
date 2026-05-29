@@ -15,6 +15,8 @@ This file is the required checklist after every meaningful update. Do not treat 
   - `app/api/orders/route.ts`
   - `app/api/payment/create/route.ts`
   - `app/api/payment/verify/route.ts`
+- Admin bootstrap must require `ADMIN_BOOTSTRAP_SECRET` and must never be usable without the secret:
+  - `app/api/admin/bootstrap/route.ts`
 
 ## Customer Flow
 
