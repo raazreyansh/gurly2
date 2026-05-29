@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import type { User } from '@prisma/client'
@@ -66,10 +67,8 @@ export function verifySessionToken(token?: string) {
   return session
 }
 
-export async function getCurrentUser() {
-  const cookieStore = await cookies()
-  const session = verifySessionToken(cookieStore.get(SESSION_COOKIE)?.value)
-
+const getUserForSessionToken = cache(async (token?: string) => {
+  const session = verifySessionToken(token)
   if (!session) return null
 
   return prisma.user.findUnique({
@@ -77,6 +76,11 @@ export async function getCurrentUser() {
       id: session.userId,
     },
   })
+})
+
+export async function getCurrentUser() {
+  const cookieStore = await cookies()
+  return getUserForSessionToken(cookieStore.get(SESSION_COOKIE)?.value)
 }
 
 export async function getCurrentAdminUser() {

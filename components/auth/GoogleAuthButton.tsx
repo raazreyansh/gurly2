@@ -18,6 +18,20 @@ export default function GoogleAuthButton({ nextPath }: GoogleAuthButtonProps) {
     const origin = window.location.origin
     const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
 
+    const statusResponse = await fetch('/api/auth/google-status', {
+      cache: 'no-store',
+    })
+    const statusPayload = await statusResponse.json().catch(() => null)
+
+    if (!statusResponse.ok || !statusPayload?.enabled) {
+      setError(
+        statusPayload?.error ||
+          'Google sign in is not enabled yet. Please continue with email for now.',
+      )
+      setLoading(false)
+      return
+    }
+
     const { error: signInError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
