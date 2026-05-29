@@ -2,9 +2,12 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { assertAdminUser } from '@/lib/auth'
 
 export async function updateOrderStatus(orderId: string, status: string) {
   try {
+    await assertAdminUser()
+
     await prisma.order.update({
       where: { id: orderId },
       data: { status }

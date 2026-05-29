@@ -1,19 +1,64 @@
 import { prisma } from '@/lib/prisma'
 import StatusSelect from './StatusSelect'
+import type { Prisma } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminOrdersPage() {
-  let orders: any[] = []
-  try {
-    orders = await prisma.order.findMany({
-      include: {
-        user: true,
-        items: {
-          include: {
-            product: true
+type AdminOrder = Prisma.OrderGetPayload<{
+  select: {
+    id: true
+    total: true
+    status: true
+    createdAt: true
+    user: {
+      select: {
+        fullName: true
+        email: true
+      }
+    }
+    items: {
+      select: {
+        id: true
+        quantity: true
+        product: {
+          select: {
+            title: true
           }
         }
+      }
+    }
+  }
+}>
+
+export default async function AdminOrdersPage() {
+  let orders: AdminOrder[] = []
+  let loadError = ''
+
+  try {
+    orders = await prisma.order.findMany({
+      take: 50,
+      select: {
+        id: true,
+        total: true,
+        status: true,
+        createdAt: true,
+        user: {
+          select: {
+            fullName: true,
+            email: true,
+          },
+        },
+        items: {
+          select: {
+            id: true,
+            quantity: true,
+            product: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc'
@@ -21,6 +66,7 @@ export default async function AdminOrdersPage() {
     })
   } catch (error) {
     console.error("Orders logs admin error:", error)
+    loadError = error instanceof Error ? error.message : 'Unable to load order logs.'
   }
 
   return (
@@ -36,7 +82,12 @@ export default async function AdminOrdersPage() {
       {/* Tables list */}
       <div className="border border-neutral-200">
         <div className="overflow-x-auto">
-          {orders.length === 0 ? (
+          {loadError ? (
+            <div className="space-y-3 bg-red-50 p-10 text-xs font-semibold uppercase tracking-wider text-red-700">
+              <p>ORDER LOG LOAD FAILED</p>
+              <p className="font-mono text-[10px] normal-case tracking-normal text-red-500">{loadError}</p>
+            </div>
+          ) : orders.length === 0 ? (
             <div className="p-16 text-center text-xs text-neutral-400 font-semibold tracking-wider bg-white">
               NO TRANSACTION RECEIPTS LOGGED YET
             </div>
@@ -56,7 +107,7 @@ export default async function AdminOrdersPage() {
                 {orders.map((order) => (
                   <tr key={order.id} className="hover:bg-neutral-50/30 transition">
                     <td className="px-6 py-4 font-mono font-semibold text-black uppercase">
-                      #GURLY-{order.id.slice(0, 8)}
+                      #GURLY-{String(order.id).slice(0, 8)}
                     </td>
                     <td className="px-6 py-4">
                       <p className="font-semibold uppercase tracking-wider text-black">
@@ -67,7 +118,7 @@ export default async function AdminOrdersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 font-medium text-neutral-600 max-w-xs">
-                      {order.items?.map((item: any) => (
+                      {order.items?.map((item) => (
                         <div key={item.id} className="text-[11px] py-0.5">
                           <span className="font-semibold text-black">
                             {item.product?.title || 'Boutique jewel'}
@@ -82,7 +133,7 @@ export default async function AdminOrdersPage() {
                       ₹{Number(order.total).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 font-mono text-neutral-400">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {new Date(order.createdAt).toISOString().split('T')[0]}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <StatusSelect id={order.id} currentStatus={order.status} />

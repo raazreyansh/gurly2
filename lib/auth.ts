@@ -1,9 +1,10 @@
 import crypto from 'crypto'
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import type { User } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 
-const SESSION_COOKIE = 'gurly_session'
+export const SESSION_COOKIE = 'gurly_session'
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30
 
 type SessionPayload = {
@@ -76,6 +77,38 @@ export async function getCurrentUser() {
       id: session.userId,
     },
   })
+}
+
+export async function getCurrentAdminUser() {
+  const user = await getCurrentUser()
+
+  if (!user || user.role !== 'admin') return null
+
+  return user
+}
+
+export async function requireAdminUser(nextPath = '/admin') {
+  const user = await getCurrentUser()
+
+  if (!user) {
+    redirect(`/login?next=${encodeURIComponent(nextPath)}`)
+  }
+
+  if (user.role !== 'admin') {
+    redirect('/account')
+  }
+
+  return user
+}
+
+export async function assertAdminUser() {
+  const user = await getCurrentAdminUser()
+
+  if (!user) {
+    throw new Error('Admin authentication required')
+  }
+
+  return user
 }
 
 export async function setAuthCookie(user: Pick<User, 'id' | 'email'>) {

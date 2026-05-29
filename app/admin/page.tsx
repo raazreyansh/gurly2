@@ -1,49 +1,110 @@
 import { prisma } from '@/lib/prisma'
-import { Landmark, ShoppingBag, Users, Calendar } from 'lucide-react'
+import { Landmark, ShoppingBag, Users } from 'lucide-react'
 import Link from 'next/link'
+import type { Prisma } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminDashboardPage() {
-  let productCount = 0
-  let profileCount = 0
-  let totalRevenue = 0
-  let recentOrders: any[] = []
+type RecentOrder = Prisma.OrderGetPayload<{
+  select: {
+    id: true
+    total: true
+    status: true
+    createdAt: true
+    user: {
+      select: {
+        fullName: true
+      }
+    }
+  }
+}>
 
-  try {
-    productCount = await prisma.product.count()
-    profileCount = await prisma.user.count()
+type DashboardData = {
+  productCount: number
+  profileCount: number
+  totalRevenue: number
+  recentOrders: RecentOrder[]
+}
 
-    const revenueSum = await prisma.order.aggregate({
+async function getDashboardData(): Promise<DashboardData> {
+  const [productCount, profileCount, revenueSum, recentOrders] = await Promise.all([
+    prisma.product.count(),
+    prisma.user.count({
+      where: {
+        role: 'customer',
+      },
+    }),
+    prisma.order.aggregate({
       _sum: {
         total: true,
       },
-    })
-    totalRevenue = Number(revenueSum._sum.total || 0)
-
-    recentOrders = await prisma.order.findMany({
+    }),
+    prisma.order.findMany({
       take: 5,
       orderBy: {
         createdAt: 'desc',
       },
-      include: {
-        user: true,
+      select: {
+        id: true,
+        total: true,
+        status: true,
+        createdAt: true,
+        user: {
+          select: {
+            fullName: true,
+          },
+        },
       },
-    })
-  } catch (error) {
-    console.error("Dashboard database fetch error:", error)
+    }),
+  ])
+
+  return {
+    productCount,
+    profileCount,
+    totalRevenue: Number(revenueSum._sum.total || 0),
+    recentOrders,
+  }
+}
+
+function getStatusStyles(status: string) {
+  const normalizedStatus = status.toLowerCase()
+
+  if (normalizedStatus === 'completed' || normalizedStatus === 'delivered') {
+    return 'bg-green-50 text-green-700 border-green-200'
   }
 
+  if (normalizedStatus === 'failed' || normalizedStatus === 'cancelled') {
+    return 'bg-red-50 text-red-700 border-red-200'
+  }
+
+  return 'bg-yellow-50 text-yellow-700 border-yellow-200'
+}
+
+export default async function AdminDashboardPage() {
+  let dashboardData: DashboardData
+
+  try {
+    dashboardData = await getDashboardData()
+  } catch (error) {
+    console.error('Dashboard database fetch error:', error)
+
+    return (
+      <div className="p-12 border border-red-200 bg-red-50 text-center">
+        <h2 className="text-red-800 font-serif text-2xl">Analytics Unavailable</h2>
+        <p className="text-red-600 text-xs mt-2 font-mono">CRITICAL_DATABASE_CONNECTION_ERROR</p>
+      </div>
+    )
+  }
+
+  const { productCount, profileCount, totalRevenue, recentOrders } = dashboardData
   const metrics = [
-    { label: 'GROSS REVENUE', value: `₹${totalRevenue.toLocaleString()}`, icon: Landmark },
+    { label: 'GROSS REVENUE', value: `₹${totalRevenue.toLocaleString('en-IN')}`, icon: Landmark },
     { label: 'INVENTORY ITEMS', value: String(productCount), icon: ShoppingBag },
     { label: 'CUSTOMER ACCOUNTS', value: String(profileCount), icon: Users },
   ]
 
   return (
     <div className="space-y-12">
-      
-      {/* Title */}
       <div className="border-b border-neutral-100 pb-6">
         <h1 className="font-serif text-5xl text-black">Office Dashboard</h1>
         <p className="text-neutral-500 text-xs mt-2 uppercase tracking-widest font-semibold">
@@ -51,7 +112,6 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
 
-      {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {metrics.map((metric) => {
           const Icon = metric.icon
@@ -67,7 +127,6 @@ export default async function AdminDashboardPage() {
         })}
       </div>
 
-      {/* Recent Activity Log */}
       <div className="border border-neutral-200">
         <div className="border-b border-neutral-200 bg-neutral-50 px-6 py-4 flex justify-between items-center">
           <span className="text-[10px] tracking-[0.25em] font-semibold text-black uppercase">Recent Transactions Log</span>
@@ -96,21 +155,21 @@ export default async function AdminDashboardPage() {
                 {recentOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-neutral-50/40 transition">
                     <td className="px-6 py-4 font-mono font-semibold text-black uppercase">
-                      #GURLY-{order.id.slice(0, 8)}
+                      #GURLY-{String(order.id).slice(0, 8)}
                     </td>
                     <td className="px-6 py-4 text-neutral-600 font-semibold uppercase tracking-wider">
                       {order.user?.fullName || 'Guest Customer'}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-1 text-[9px] tracking-widest font-bold uppercase bg-yellow-50 text-yellow-600 border border-yellow-100">
+                      <span className={`px-2 py-1 text-[9px] tracking-widest font-bold uppercase border ${getStatusStyles(order.status)}`}>
                         {order.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 font-mono font-bold text-black">
-                      ₹{Number(order.total).toLocaleString()}
+                      ₹{Number(order.total).toLocaleString('en-IN')}
                     </td>
                     <td className="px-6 py-4 text-right text-neutral-400 font-mono">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {new Date(order.createdAt).toISOString().split('T')[0]}
                     </td>
                   </tr>
                 ))}
@@ -119,7 +178,6 @@ export default async function AdminDashboardPage() {
           )}
         </div>
       </div>
-
     </div>
   )
 }

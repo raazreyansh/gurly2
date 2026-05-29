@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { assertAdminUser } from '@/lib/auth'
 
 function slugify(value: string) {
   return value
@@ -20,6 +21,8 @@ function revalidateCatalogue() {
 
 export async function createCategory(name: string) {
   try {
+    await assertAdminUser()
+
     const slug = slugify(name)
     if (!name.trim() || !slug) {
       return { success: false, error: 'Category name is required.' }
@@ -43,6 +46,8 @@ export async function createCategory(name: string) {
 
 export async function updateCategory(categoryId: string, rawName: string, rawSlug?: string) {
   try {
+    await assertAdminUser()
+
     const name = rawName.trim()
     const slug = slugify(rawSlug || rawName)
 
@@ -68,6 +73,8 @@ export async function updateCategory(categoryId: string, rawName: string, rawSlu
 
 export async function deleteCategory(categoryId: string) {
   try {
+    await assertAdminUser()
+
     if (!categoryId) {
       return { success: false, error: 'Category ID is required.' }
     }

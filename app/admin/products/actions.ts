@@ -2,13 +2,20 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { productSchema } from '@/lib/validations/product'
+import { type ProductInput, productSchema } from '@/lib/validations/product'
 import { normalizeProductMedia } from '@/lib/product-media'
+import { assertAdminUser } from '@/lib/auth'
 
-export interface ActionResponse<T = any> {
+export interface ActionResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
+}
+
+type RawProductInput = Partial<ProductInput> & {
+  title?: unknown
+  slug?: unknown
+  media?: unknown
 }
 
 function revalidateAll() {
@@ -27,7 +34,11 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, '')
 }
 
-function prepareProductInput(rawData: any) {
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback
+}
+
+function prepareProductInput(rawData: RawProductInput) {
   return {
     ...rawData,
     title: typeof rawData?.title === 'string' ? rawData.title.trim() : rawData?.title,
@@ -38,6 +49,8 @@ function prepareProductInput(rawData: any) {
 
 export async function deleteProduct(productId: string): Promise<ActionResponse> {
   try {
+    await assertAdminUser()
+
     if (!productId || typeof productId !== 'string') {
       return { success: false, error: 'Product ID is required and must be a string.' }
     }
@@ -48,14 +61,16 @@ export async function deleteProduct(productId: string): Promise<ActionResponse> 
 
     revalidateAll()
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Delete product action error:", err)
-    return { success: false, error: err.message || "Failed to delete product" }
+    return { success: false, error: getErrorMessage(err, "Failed to delete product") }
   }
 }
 
-export async function createProduct(rawData: any): Promise<ActionResponse> {
+export async function createProduct(rawData: RawProductInput): Promise<ActionResponse<{ id: string }>> {
   try {
+    await assertAdminUser()
+
     // 1. Strict input validation using centralized Zod schema
     const parsed = productSchema.safeParse(prepareProductInput(rawData))
     if (!parsed.success) {
@@ -78,14 +93,16 @@ export async function createProduct(rawData: any): Promise<ActionResponse> {
 
     revalidateAll()
     return { success: true, data: { id: product.id } }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("CREATE PRODUCT SERVER ERROR:", err)
-    return { success: false, error: err.message || "Prisma Database Write Failure" }
+    return { success: false, error: getErrorMessage(err, "Prisma Database Write Failure") }
   }
 }
 
-export async function updateProduct(productId: string, rawData: any): Promise<ActionResponse> {
+export async function updateProduct(productId: string, rawData: RawProductInput): Promise<ActionResponse> {
   try {
+    await assertAdminUser()
+
     if (!productId || typeof productId !== 'string') {
       return { success: false, error: 'Product ID is required for editing.' }
     }
@@ -114,22 +131,24 @@ export async function updateProduct(productId: string, rawData: any): Promise<Ac
     revalidateAll()
     revalidatePath(`/product/${parsed.data.slug}`)
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("UPDATE PRODUCT SERVER ERROR:", err)
-    return { success: false, error: err.message || "Prisma Database Update Failure" }
+    return { success: false, error: getErrorMessage(err, "Prisma Database Update Failure") }
   }
 }
 
 export async function toggleFeatured(productId: string, featured: boolean): Promise<ActionResponse> {
   try {
+    await assertAdminUser()
+
     await prisma.product.update({
       where: { id: productId },
       data: { featured: Boolean(featured) }
     })
     revalidateAll()
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Toggle featured error:", err)
-    return { success: false, error: err.message || "Failed to toggle featured status" }
+    return { success: false, error: getErrorMessage(err, "Failed to toggle featured status") }
   }
 }

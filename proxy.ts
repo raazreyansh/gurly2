@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+const SESSION_COOKIE = "gurly_session"
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Admin protection — redirect to login if not authenticated
-  // Full auth check requires server-side Supabase session validation
+  // Optimistic admin protection. The server layout performs the authoritative
+  // role check against the database before rendering admin data.
   if (pathname.startsWith("/admin")) {
-    // In production: validate session cookie here
-    // const session = await getServerSession(request)
-    // if (!session || session.user.role !== 'admin') {
-    //   return NextResponse.redirect(new URL('/login', request.url))
-    // }
+    const sessionCookie = request.cookies.get(SESSION_COOKIE)?.value
+    if (!sessionCookie) {
+      const loginUrl = new URL("/login", request.url)
+      loginUrl.searchParams.set("next", pathname)
+      return NextResponse.redirect(loginUrl)
+    }
   }
 
   // Security headers
