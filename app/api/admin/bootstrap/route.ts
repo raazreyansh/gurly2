@@ -9,6 +9,10 @@ const bootstrapSchema = z.object({
   secret: z.string().min(8),
 })
 
+function normalizeSecret(value: string) {
+  return value.replace(/^\uFEFF/, '').trim()
+}
+
 export async function POST(req: Request) {
   const adminSecret = process.env.ADMIN_BOOTSTRAP_SECRET
 
@@ -23,7 +27,7 @@ export async function POST(req: Request) {
 
   const parsed = bootstrapSchema.safeParse(await req.json().catch(() => null))
 
-  if (!parsed.success || parsed.data.secret !== adminSecret) {
+  if (!parsed.success || normalizeSecret(parsed.data.secret) !== normalizeSecret(adminSecret)) {
     return NextResponse.json(
       {
         error: 'Invalid admin bootstrap request.',
