@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { loginCustomer } from './actions'
 import { getCurrentUser, getSafeRedirectPath } from '@/lib/auth'
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton'
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -35,7 +36,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Continue with your email to protect checkout, attach orders to your account, and keep your GURLY bag ready for payment.
           </p>
 
-          <form action={loginCustomer} className="mt-10 space-y-4">
+          <GoogleAuthButton nextPath={nextPath} />
+
+          <div className="my-8 flex items-center gap-4">
+            <div className="h-px flex-1 bg-[#ead7df]" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-neutral-400">
+              Or use email
+            </span>
+            <div className="h-px flex-1 bg-[#ead7df]" />
+          </div>
+
+          <form action={loginCustomer} className="space-y-4">
             <input type="hidden" name="next" value={nextPath} />
 
             <label className="block">
