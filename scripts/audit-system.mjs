@@ -35,7 +35,11 @@ function listRuntimeFiles(dir) {
 check('Next 16 proxy exists', exists('proxy.ts'))
 check('Proxy matches admin routes', contains('proxy.ts', /\/admin\/:path\*/))
 check('Proxy redirects anonymous admin users', contains('proxy.ts', /loginUrl\.searchParams\.set\("next"/))
-check('Admin layout requires server-side admin role', contains('app/admin/layout.tsx', /requireAdminUser\(/))
+check(
+  'Admin layout blocks non-admin users server-side',
+  contains('app/admin/layout.tsx', /getCurrentUser\(\)/) &&
+    contains('app/admin/layout.tsx', /user\.role !== 'admin'/),
+)
 check('Product admin actions require admin auth', contains('app/admin/products/actions.ts', /assertAdminUser\(\)/))
 check('Category admin actions require admin auth', contains('app/admin/categories/actions.ts', /assertAdminUser\(\)/))
 check('Order admin actions require admin auth', contains('app/admin/orders/actions.ts', /assertAdminUser\(\)/))

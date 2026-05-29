@@ -6,7 +6,7 @@ This file is the required checklist after every meaningful update. Do not treat 
 
 - Admin routes must be protected twice:
   - Optimistic redirect in `proxy.ts` for `/admin/:path*`.
-  - Authoritative role check in `app/admin/layout.tsx` through `requireAdminUser()`.
+  - Authoritative role check in `app/admin/layout.tsx`; non-admin users must see a safe access-denied screen and must not render admin children.
 - Admin mutations must call `assertAdminUser()` before writing:
   - `app/admin/products/actions.ts`
   - `app/admin/categories/actions.ts`
@@ -64,4 +64,3 @@ Run focused browser smoke checks after deploy:
 - Supabase Google provider is currently external configuration. If `/api/auth/google-status` returns `enabled: false`, enable Google in Supabase Authentication Providers and allow-list:
   - `https://gurly2.vercel.app/auth/callback`
   - Local callback URL used during development.
-
