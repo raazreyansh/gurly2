@@ -10,7 +10,7 @@ export default function OrderSummary() {
     0,
   )
 
-  const shipping = subtotal === 0 || subtotal > 999 ? 0 : 99
+  const shipping = 0
   const tax = subtotal * 0.18
   const total = subtotal + shipping + tax
 
@@ -61,7 +61,7 @@ export default function OrderSummary() {
         <div className="flex justify-between">
           <span>Shipping</span>
           <span className="font-mono text-black">
-            {shipping === 0 ? 'FREE' : `₹${shipping.toLocaleString()}`}
+            FREE
           </span>
         </div>
 

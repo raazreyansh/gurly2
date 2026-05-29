@@ -42,7 +42,7 @@ export default function CheckoutForm() {
 
     const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0)
     const tax = subtotal * 0.18
-    const shipping = subtotal > 999 ? 0 : 99
+    const shipping = 0
     const grandTotal = subtotal + tax + shipping
 
     const orderPayload = {

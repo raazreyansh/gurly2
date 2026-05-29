@@ -21,8 +21,7 @@ const orderRequestSchema = z.object({
 })
 
 const TAX_RATE = 0.18
-const SHIPPING_FEE = 99
-const FREE_SHIPPING_MINIMUM = 999
+const SHIPPING_FEE = 0
 
 export async function POST(req: Request) {
   try {
@@ -76,7 +75,7 @@ export async function POST(req: Request) {
         const product = productById.get(item.productId)!
         return sum + Number(product.price) * item.quantity
       }, 0)
-      const shipping = subtotal > FREE_SHIPPING_MINIMUM ? 0 : SHIPPING_FEE
+      const shipping = SHIPPING_FEE
       const tax = Number((subtotal * TAX_RATE).toFixed(2))
       const total = Number((subtotal + shipping + tax).toFixed(2))
 

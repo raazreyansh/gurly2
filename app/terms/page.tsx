@@ -8,12 +8,12 @@ export default function TermsPage() {
         <h1 className="font-serif text-5xl">Terms of Service</h1>
         <p className="text-sm leading-8 text-neutral-600">
           Orders placed through GURLY are subject to stock availability, payment
-          confirmation, and shipping service coverage. Product imagery and pricing
-          may be updated as the catalogue changes.
+          confirmation, and courier service coverage. Product imagery and pricing
+          may be updated as the catalogue changes. Shipping is free on every order.
         </p>
         <p className="text-sm leading-8 text-neutral-600">
-          For order support, returns, and fulfilment questions, contact
-          care@gurly.com with your order reference.
+          For order support, returns, and fulfilment questions, review the Shipping
+          & Returns page or contact care@gurly.com with your order reference.
         </p>
       </section>
     </main>

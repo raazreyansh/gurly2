@@ -151,12 +151,12 @@ export default function ProductInfo({
         {(product as any).shippingDays ? (
           <div className="flex items-center gap-2 text-neutral-400 font-medium">
             <ShieldCheck className="h-4 w-4 text-neutral-400 flex-shrink-0" />
-            <span>Ships in {(product as any).shippingDays} working days</span>
+            <span>Free shipping in {(product as any).shippingDays} working days</span>
           </div>
         ) : (
           <div className="flex items-center gap-2 text-neutral-400 font-medium">
             <ShieldCheck className="h-4 w-4 text-neutral-400 flex-shrink-0" />
-            <span>Ships in 3-4 working days</span>
+            <span>Free shipping in 3-4 working days</span>
           </div>
         )}
       </div>

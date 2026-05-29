@@ -30,6 +30,7 @@ export default function Footer() {
           <h3 className="text-xs tracking-[0.2em] font-semibold text-neutral-400 uppercase">Information</h3>
           <ul className="space-y-2 text-xs">
             <li><Link href="/about" className="text-neutral-600 hover:text-black transition">About Our House</Link></li>
+            <li><Link href="/returns" className="text-neutral-600 hover:text-black transition">Shipping & Returns</Link></li>
             <li><Link href="/privacy" className="text-neutral-600 hover:text-black transition">Privacy Policy</Link></li>
             <li><Link href="/terms" className="text-neutral-600 hover:text-black transition">Terms of Service</Link></li>
           </ul>
@@ -40,6 +41,7 @@ export default function Footer() {
           <h3 className="text-xs tracking-[0.2em] font-semibold text-neutral-400 uppercase">Customer Care</h3>
           <ul className="space-y-2 text-xs text-neutral-600">
             <li>Email: care@gurly.com</li>
+            <li>Free shipping on every order</li>
             <li>Hours: Mon - Fri | 10AM - 6PM</li>
           </ul>
         </div>
