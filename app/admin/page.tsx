@@ -27,7 +27,7 @@ type DashboardData = {
 }
 
 async function getDashboardData(): Promise<DashboardData> {
-  const [productCount, profileCount, revenueSum, recentOrders] = await Promise.all([
+  const [productCount, profileCount, revenueSum, recentOrders] = await prisma.$transaction([
     prisma.product.count(),
     prisma.user.count({
       where: {

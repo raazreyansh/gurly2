@@ -30,6 +30,7 @@ This file is the required checklist after every meaningful update. Do not treat 
 - Anonymous `/admin` redirects to `/login?next=/admin`.
 - Customer role redirects away from admin to `/account`.
 - Admin dashboard selects only safe columns, not full user objects.
+- Admin dashboard batches read queries in `prisma.$transaction([...])` instead of opening several concurrent database connections.
 - Dashboard errors show an explicit failure state, not fake zero metrics.
 - Admin tables must be bounded or paginated.
 - Admin forms must validate input with Zod/server-side validation.
@@ -42,6 +43,8 @@ This file is the required checklist after every meaningful update. Do not treat 
 - If Google provider is disabled, login must show an in-app error and must not send users to raw Supabase JSON output.
 
 ## Deployment Flow
+
+- Prisma must keep a serverless-safe connection limit in `lib/prisma.ts` because Supabase session pooling can hit `EMAXCONNSESSION` under burst traffic.
 
 Run these checks before pushing or deploying:
 
