@@ -1,6 +1,27 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/auth'
+import { logoutCustomer } from '@/app/login/actions'
 
-export default function AccountAddressesPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function AccountAddressesPage() {
+  const user = await getCurrentUser()
+
+  if (!user) {
+    redirect('/login?next=/account/addresses')
+  }
+
+  const address = await prisma.address.findFirst({
+    where: {
+      userId: user.id,
+    },
+    orderBy: {
+      isDefault: 'desc',
+    },
+  })
+
   return (
     <div className="min-h-screen bg-white px-6 py-24 lg:px-20 text-black">
       <div className="mx-auto max-w-[1600px]">
@@ -35,6 +56,12 @@ export default function AccountAddressesPage() {
               <Link href="/wishlist" className="block hover:text-black transition">
                 WISHLIST
               </Link>
+
+              <form action={logoutCustomer}>
+                <button type="submit" className="text-left hover:text-black transition">
+                  LOGOUT
+                </button>
+              </form>
             </div>
           </aside>
 
@@ -49,15 +76,24 @@ export default function AccountAddressesPage() {
               </div>
             </div>
 
-            <div className="bg-white border border-neutral-200 p-8 space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-black font-serif">Satyam Kumar</h3>
-              <div className="text-xs text-neutral-500 space-y-1.5 font-medium uppercase tracking-wide leading-relaxed">
-                <p>Suite 202, Luxury Residency</p>
-                <p>New Delhi, Delhi — 110001</p>
-                <p>India</p>
-                <p className="mt-4 text-black font-bold">Phone: +91 98765 43210</p>
+            {address ? (
+              <div className="bg-white border border-neutral-200 p-8 space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-black font-serif">{address.name}</h3>
+                <div className="text-xs text-neutral-500 space-y-1.5 font-medium uppercase tracking-wide leading-relaxed">
+                  <p>{address.line1}</p>
+                  {address.line2 ? <p>{address.line2}</p> : null}
+                  <p>{address.city}, {address.state} - {address.pincode}</p>
+                  <p>{address.country}</p>
+                  <p className="mt-4 text-black font-bold">Phone: {address.phone}</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-white border border-neutral-200 p-8 text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">
+                  No saved address yet. Your checkout address will be attached to future order handling.
+                </p>
+              </div>
+            )}
           </section>
         </div>
       </div>

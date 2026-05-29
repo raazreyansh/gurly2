@@ -5,15 +5,64 @@ import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/store/useCartStore'
 import { ArrowRight, CreditCard, Landmark, Truck } from 'lucide-react'
 
-export default function CheckoutForm() {
+type CheckoutFormProps = {
+  customer?: {
+    name: string
+    email: string
+    phone: string
+  }
+}
+
+type RazorpayPaymentResponse = {
+  razorpay_order_id: string
+  razorpay_payment_id: string
+  razorpay_signature: string
+}
+
+type RazorpayFailureResponse = {
+  error: {
+    description?: string
+  }
+}
+
+type RazorpayOptions = {
+  key: string
+  amount: number
+  currency: string
+  name: string
+  description: string
+  order_id: string
+  handler: (response: RazorpayPaymentResponse) => Promise<void>
+  prefill: {
+    name: string
+    contact: string
+  }
+  theme: {
+    color: string
+  }
+  modal: {
+    ondismiss: () => void
+  }
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: RazorpayOptions) => {
+      on: (event: 'payment.failed', handler: (response: RazorpayFailureResponse) => void) => void
+      open: () => void
+    }
+  }
+}
+
+export default function CheckoutForm({ customer }: CheckoutFormProps) {
   const router = useRouter()
   const { items, clearCart } = useCartStore()
   const [loading, setLoading] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('card')
 
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
+    name: customer?.name || '',
+    phone: customer?.phone || '',
     address: '',
     city: '',
     pin: '',
@@ -49,6 +98,7 @@ export default function CheckoutForm() {
       customer: {
         name: formData.name,
         phone: formData.phone,
+        email: customer?.email || undefined,
       },
       paymentMethod,
       items: items.map((item) => ({
@@ -65,6 +115,11 @@ export default function CheckoutForm() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderPayload),
         })
+
+        if (res.status === 401) {
+          router.push('/login?next=/checkout')
+          return
+        }
 
         if (res.ok) {
           clearCart()
@@ -92,6 +147,10 @@ export default function CheckoutForm() {
       })
 
       if (!createOrderRes.ok) {
+        if (createOrderRes.status === 401) {
+          router.push('/login?next=/checkout')
+          return
+        }
         throw new Error("Payment Gateway Order Creation Failed")
       }
 
@@ -104,7 +163,7 @@ export default function CheckoutForm() {
         name: 'GURLY.',
         description: 'Exquisite Luxury Accessories',
         order_id: rzpOrder.id,
-        handler: async function (response: any) {
+        handler: async function (response: RazorpayPaymentResponse) {
           // Cryptographically verify signatures on server
           const verifyRes = await fetch('/api/payment/verify', {
             method: 'POST',
@@ -115,6 +174,11 @@ export default function CheckoutForm() {
               razorpay_signature: response.razorpay_signature
             })
           })
+
+          if (verifyRes.status === 401) {
+            router.push('/login?next=/checkout')
+            return
+          }
 
           const verifyData = await verifyRes.json()
 
@@ -128,6 +192,11 @@ export default function CheckoutForm() {
                 paymentMethod: 'razorpay',
               }),
             })
+
+            if (finalRes.status === 401) {
+              router.push('/login?next=/checkout')
+              return
+            }
 
             if (finalRes.ok) {
               clearCart()
@@ -155,10 +224,14 @@ export default function CheckoutForm() {
         }
       }
 
-      const razorpayInstance = new (window as any).Razorpay(options)
+      if (!window.Razorpay) {
+        throw new Error('Razorpay SDK unavailable')
+      }
+
+      const razorpayInstance = new window.Razorpay(options)
       
-      razorpayInstance.on('payment.failed', function (response: any) {
-        alert("Payment failed: " + response.error.description)
+      razorpayInstance.on('payment.failed', function (response: RazorpayFailureResponse) {
+        alert("Payment failed: " + (response.error.description || 'Please try again.'))
         setLoading(false)
       })
 
@@ -205,6 +278,15 @@ export default function CheckoutForm() {
               onChange={handleChange}
               className="border border-neutral-200 p-4 text-xs font-semibold uppercase tracking-widest text-black focus:border-black focus:outline-none bg-neutral-50"
             />
+            {customer?.email ? (
+              <input
+                readOnly
+                type="email"
+                value={customer.email}
+                aria-label="Signed in email"
+                className="border border-neutral-200 p-4 text-xs font-semibold uppercase tracking-widest text-neutral-500 focus:outline-none bg-neutral-100"
+              />
+            ) : null}
             <input 
               required
               type="text"

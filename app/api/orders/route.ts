@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { getCurrentUser } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -25,6 +26,15 @@ const SHIPPING_FEE = 0
 
 export async function POST(req: Request) {
   try {
+    const currentUser = await getCurrentUser()
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: 'Login required before checkout' },
+        { status: 401 },
+      )
+    }
+
     const body = await req.json()
     const parsed = orderRequestSchema.safeParse(body)
 
@@ -79,18 +89,11 @@ export async function POST(req: Request) {
       const tax = Number((subtotal * TAX_RATE).toFixed(2))
       const total = Number((subtotal + shipping + tax).toFixed(2))
 
-      const guestEmail = parsed.data.customer?.email || 'guest@gurly.com'
-      const user = await tx.user.upsert({
+      const user = await tx.user.update({
         where: {
-          email: guestEmail,
+          id: currentUser.id,
         },
-        create: {
-          email: guestEmail,
-          fullName: parsed.data.customer?.name || 'Guest Customer',
-          phone: parsed.data.customer?.phone,
-          role: 'customer',
-        },
-        update: {
+        data: {
           fullName: parsed.data.customer?.name || undefined,
           phone: parsed.data.customer?.phone || undefined,
         },

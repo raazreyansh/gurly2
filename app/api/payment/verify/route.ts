@@ -1,8 +1,18 @@
 import crypto from 'crypto'
 import { NextResponse } from 'next/server'
+import { getCurrentUser } from '@/lib/auth'
 
 export async function POST(req: Request) {
   try {
+    const currentUser = await getCurrentUser()
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: 'Login required before payment verification' },
+        { status: 401 },
+      )
+    }
+
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json()
 
     const secret = process.env.RAZORPAY_SECRET || ''

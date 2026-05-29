@@ -1,13 +1,25 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { logoutCustomer } from '@/app/login/actions'
+import type { Order } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AccountOrdersPage() {
-  let orders: any[] = []
+  let orders: Order[] = []
+  const user = await getCurrentUser()
+
+  if (!user) {
+    redirect('/login?next=/account/orders')
+  }
 
   try {
     orders = await prisma.order.findMany({
+      where: {
+        userId: user.id,
+      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -50,6 +62,12 @@ export default async function AccountOrdersPage() {
               <Link href="/wishlist" className="block hover:text-black transition">
                 WISHLIST
               </Link>
+
+              <form action={logoutCustomer}>
+                <button type="submit" className="text-left hover:text-black transition">
+                  LOGOUT
+                </button>
+              </form>
             </div>
           </aside>
 

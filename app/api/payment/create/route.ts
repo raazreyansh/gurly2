@@ -1,5 +1,6 @@
 import Razorpay from 'razorpay'
 import { NextResponse } from 'next/server'
+import { getCurrentUser } from '@/lib/auth'
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || '',
@@ -8,6 +9,15 @@ const razorpay = new Razorpay({
 
 export async function POST(req: Request) {
   try {
+    const currentUser = await getCurrentUser()
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: 'Login required before payment' },
+        { status: 401 },
+      )
+    }
+
     const { amount } = await req.json()
 
     // Razorpay amounts are represented in paise (e.g. ₹100.00 = 10000 paise)
